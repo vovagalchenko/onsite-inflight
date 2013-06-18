@@ -1,0 +1,415 @@
+<HTML>
+	<HEAD>
+		<TITLE>Onsite Interviews</TITLE>
+		<META http-equiv="Content-type" value="text/html; charset=utf-8">
+        <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
+        <META name="apple-mobile-web-app-capable" content="yes">
+        <SCRIPT type="text/javascript">
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var focused_candidate_name;
+            var last_avatar_refresh_ts;
+            var min_date = new Date(1370502000000); // June 6th, 2013
+            var current_date = null;
+
+            window.onload = function()
+            {
+                go_to_hash(false);
+	            setInterval(function()
+	            {
+                    synchronize_with_server(false);
+	            }, 10000);
+                window.history.replaceState(date_to_hash(current_date), '');
+            }
+
+            window.onhashchange = function()
+            {
+                go_to_hash(true);
+            }
+
+            function score_string(score_float)
+            {
+                if (typeof score_float !== 'number')
+                    return score_float
+                var score_int = Math.round(score_float);
+                var modifier_string = '';
+                if ((score_float - score_int) > 0)
+                {
+                    modifier_string = '+';
+                }
+                else if ((score_float - score_int) < 0)
+                {
+                    modifier_string = '-';
+                }
+                return '' + score_int + modifier_string;
+            }
+
+            function build_content_from_template(script_id, data, target_container_id)
+            {
+                var templateSource = document.getElementById(script_id);
+                var template= Handlebars.compile(templateSource.innerHTML);
+                var built_html = template(data);
+                var final_html = built_html + templateSource.outerHTML;
+                document.getElementById(target_container_id).innerHTML = final_html;
+            }
+    
+            function button_is_active(button_class)
+            {
+                return (button_class.indexOf("inactive_button") === -1 &&
+                        button_class.indexOf("active_button") !== -1);
+            }
+
+            function rename_all_descendants(root_node, postfix)
+            {
+                root_node.setAttribute('id', root_node.id + postfix);
+                var children = root_node.children;
+                for (var i = 0; i < children.length; i++)
+                {
+                    rename_all_descendants(children[i], postfix);
+                }
+            }
+
+            function do_animate_increment_date(new_date)
+            {
+                flip_pages(document.getElementById('candidate_list_page'), 'from_right', function ()
+                {
+                    set_date(new_date);
+                });
+            }
+
+            function increment_date(clicked_button_class)
+            {
+                if (button_is_active(clicked_button_class))
+                {
+                    location.hash = date_to_hash(new Date(current_date.getFullYear(), current_date.getMonth(), current_date.getDate() + 1));
+                }
+            }
+
+            function do_animate_decrement_date(new_date)
+            {
+                flip_pages(document.getElementById('candidate_list_page'), 'from_left', function ()
+                {
+                    set_date(new_date);
+                });
+            }
+
+            function decrement_date(clicked_button_class)
+            {
+                if (button_is_active(clicked_button_class))
+                {
+                    location.hash = date_to_hash(new Date(current_date.getFullYear(), current_date.getMonth(), current_date.getDate() - 1));
+                }
+            }
+
+            function get_date_button_class(inactive_condition)
+            {
+                var result_class = 'non_selectable ';
+                if (inactive_condition)
+                {
+                    result_class += 'inactive_button';
+                }
+                else
+                {
+                    result_class += 'active_button';
+                }
+                return result_class;
+            }
+
+            function set_date(new_date)
+            {
+                if (!new_date)
+                {
+                    new_date = new Date();
+                    // Round to the nearest second
+                    new_date = new Date(Math.floor(new_date.getTime()/1000) * 1000);
+                }
+
+                document.getElementById('date').innerHTML = months[new_date.getMonth()] + " " + new_date.getDate();
+                var tableview = document.getElementById('candidate_list_tableview');
+                tableview.innerHTML = document.getElementById('candidates_handlebars').outerHTML;
+                current_date = new_date;
+                var day_after = new Date(new_date.getFullYear(), new_date.getMonth(), new_date.getDate() + 1);
+                document.getElementById('date_ff').className = get_date_button_class(day_after > new Date());
+
+                var day_before = new Date(new_date.getFullYear(), new_date.getMonth(), new_date.getDate() - 1);
+                document.getElementById('date_rw').className = get_date_button_class(day_before < min_date);
+                synchronize_with_server(false);
+            }
+
+            function check_authn(data)
+            {
+                if (data["error"] == "authn_needed")
+                {
+                    var authn_form = document.getElementById("authn_form");
+                    document.getElementById('saml_response_input').value = data["authn_request"];
+                    var current_url = document.URL;
+                    var regex = /^.*\/([^\/#]*?(#.*|$))/;
+                    var matches = regex.exec(current_url);
+                    if (matches != null && matches.length >= 3 && matches[1].length > 0)
+                        document.getElementById('saml_relay_state_input').value = matches[1];
+                    authn_form.submit();
+                    return true;
+                }
+                return false;
+            }
+
+            function update_candidate_list_ui(data)
+            {
+                var data = JSON.parse(data);
+                if (check_authn(data))
+                    return;
+                var result_date = new Date(data['date']*1000);
+                if (result_date.getTime() != current_date.getTime())
+                {
+                    // This result is for the wrong date
+                    return;
+                }
+
+                Handlebars.registerHelper('list', function(candidates, options)
+                {
+                    var out = "";
+                    var candidateHTML;
+                    for (var i = 0, length = candidates.length; i < length; i++)
+                    {
+                        candidate_dict = candidates[i];
+                        if (candidate_dict["status"] == "failure")
+                        {
+                            candidate_dict["status_symbol"] = new Handlebars.SafeString("&#9785;"); // Sad Face
+                        }
+                        else
+                        {
+                            candidate_dict["status_symbol"] = new Handlebars.SafeString("&#9786;"); // Happy Face
+                        }
+                        candidateHTML = options.fn(candidate_dict);
+                        out = out + candidateHTML;
+                    }
+                    return out;
+                });
+                build_content_from_template('candidates_handlebars', data, 'candidate_list_tableview');
+            }
+
+            function update_candidate_detail_ui(data)
+            {
+                if (typeof data == 'string')
+                {
+                    data = JSON.parse(data);
+                }
+                if (focused_candidate_name != data['candidate_name'])
+                {
+                    // this data is for the wrong candidate
+                    return;
+                }
+
+                if (!data['interviews'] || data['interviews'].length == 0)
+                {
+                    // Nothing to display for this homie.
+                    switch_to_candidate_list_page();
+                    return;
+                }
+                for (var i = 0; i < data['interviews'].length; i++)
+                {
+                    data['interviews'][i]['interviewer']['avatar_url'] += '?ts=' + last_avatar_refresh_ts;
+                }
+                var now = new Date();
+                var interviews_array = data['interviews'];
+                data['status'] = 'In Progress';
+                if (now < new Date(interviews_array[0]['start_time']))
+                {
+                    data['status'] = 'Starting Soon';
+                }
+                else if (now > new Date(interviews_array[interviews_array.length - 1]['end_time']))
+                {
+                    data['status'] = 'Finished';
+                }
+                build_content_from_template('candidate_info_handlebars', data, 'candidate_info');
+                Handlebars.registerHelper('list', function(interviews, options)
+                {
+                    var out = "";
+                    for (var i = 0, length = interviews.length; i < length; i++)
+                    {
+                        interview = interviews[i];
+                        // Abbreviate last names.
+                        interviewer_name = interview['interviewer']['name'];
+                        interview['interviewer']['name'] = interviewer_name.replace(/ ([A-Z])\S*$/, " $1.");
+
+                        if (!interview['cultural_score'])
+                        {
+                            interview['cultural_score'] = '-';
+                        }
+                        else if (interview['cultural_score'] <= 2)
+                        {
+                            interview['cult_failure'] = true;
+                        }
+
+                        if (interview['is_coffee_break'])
+                        {
+                            interview['technical_score'] = 'N/A';
+                        }
+                        else if (!interview['technical_score'])
+                        {
+                            interview['technical_score'] = '-';
+                        }
+                        else if (interview['technical_score'] <= 2) 
+                        {
+                            interview['tech_failure'] = true;
+                        }
+                        interview['technical_score'] = score_string(interview['technical_score']);
+                        interview['cultural_score'] = score_string(interview['cultural_score']);
+                        out = out + options.fn(interview);
+                    }
+                    return out;
+                });
+                build_content_from_template('interviews_handlebars', data, 'interviews_list_tableview');
+            }
+
+            function update_candidate_detail_ui_bypassing_image_cache(data)
+            {
+                last_avatar_refresh_ts = new Date().getTime();
+                update_candidate_detail_ui(data);
+            }
+
+            function handle_ajax_error(error_string)
+            {
+                alert(error_string);
+            }
+
+            function switch_to_candidate_list_page()
+            {
+                location.hash = date_to_hash(current_date);
+            }
+
+            function do_switch_to_candidate_list_page()
+            {
+                focused_candidate_name = null;
+                dismiss_modal_page();
+                synchronize_with_server(false);
+            }
+
+            function switch_to_candidate_detail_page(candidate_name)
+            {
+                location.hash = date_to_hash(current_date) + '/' + candidate_name;
+            }
+
+            function do_switch_to_candidate_detail_page(candidate_name)
+            {
+                focused_candidate_name = candidate_name;
+                build_content_from_template('candidate_info_handlebars', {'candidate_name' : focused_candidate_name}, 'candidate_info');
+                // Remove all of the stale information from last time we looked at the detail page.
+                var handlebars = document.getElementById('interviews_handlebars');
+                var interview_list_tableview = document.getElementById('interviews_list_tableview');
+                interview_list_tableview.innerHTML = '';
+                interview_list_tableview.appendChild(handlebars);
+                var transition_finished_callback = function()
+                {
+                    synchronize_with_server(true);
+                }
+                if (is_current_page_candidate_detail())
+                {
+                    transition_finished_callback();
+                }
+                else
+                {
+                    present_page_modally(document.getElementById('candidate_detail_page'), transition_finished_callback);
+                }
+            }
+
+            function synchronize_with_server(bypass_image_cache)
+            {
+                if (is_current_page_candidate_list())
+                {
+	                make_ajax_request("/api/candidate_list?date=" + Math.floor(current_date.getTime()/1000), update_candidate_list_ui, handle_ajax_error);
+                }
+                else if(focused_candidate_name != null)
+                {
+                    ui_update_callback = (bypass_image_cache)? update_candidate_detail_ui_bypassing_image_cache : update_candidate_detail_ui;
+                    make_ajax_request("/api/candidate_detail?candidate_name=" + encodeURIComponent(focused_candidate_name) + "&date=" + Math.floor(current_date.getTime()/1000), ui_update_callback, handle_ajax_error);
+                }
+            }
+
+        </SCRIPT>
+		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+        <SCRIPT type="text/javascript" src="js/handlebars.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/page_manager.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/hash_helper.js"></SCRIPT>
+	</HEAD>
+	<BODY>
+        <DIV id="app-container">
+        <DIV class="page current" id="candidate_list_page">
+			<DIV class="header-bar" id="candidate_list_header">
+                <P style="
+                    float:left;
+                    transform:rotate(90deg);
+                    -ms-transform:rotate(90deg); /* IE 9 */
+                    -webkit-transform:rotate(90deg); /* Safari and Chrome */
+                " id="date_rw" onclick="decrement_date(this.className);">&#9660;</P>
+                <P class="non_selectable" style="position:absolute;left:50;right:50;cursor:default;" id="date"></P>
+                <P style="
+                    float:right;
+                    transform:rotate(-90deg);
+                    -ms-transform:rotate(-90deg); /* IE 9 */
+                    -webkit-transform:rotate(-90deg); /* Safari and Chrome */
+                " id="date_ff" onclick="increment_date(this.className);">&#9660;</P></DIV>
+			<DIV class="tableview" id="candidate_list_tableview" style="top:44px;">
+		        <SCRIPT id="candidates_handlebars" type="text/x-handlebars">
+		            {{#list candidates}}
+		            <DIV class="tableview-cell non_selectable" onclick="switch_to_candidate_detail_page('{{candidate_name}}');">
+		                <DIV style="float:left;">{{candidate_name}}</DIV>
+		                <DIV class="{{status}} status" style="float:right;">
+		                    {{status_symbol}}
+		                </DIV>
+		            </DIV>
+		            {{/list}}
+		        </SCRIPT>
+			</DIV>
+	        <SCRIPT type="text/javascript">
+	            document.addEventListener('touchmove', function(event)
+	            {
+	                if(event.target.parentNode.className.indexOf('header-bar') != -1 
+	                    || event.target.className.indexOf('header-bar') != -1 )
+	                {
+	                    event.preventDefault();
+	                }
+	            }, false);
+
+	        </SCRIPT>
+        </DIV>
+        <DIV class="page pre_modal" id="candidate_detail_page">
+            <DIV class="header-bar" id="candidate_detail_header" style="height: 152px;">
+                <DIV id="candidate_info">
+                    <SCRIPT id="candidate_info_handlebars" type="text/x-handlebars">
+                        <DIV class="status-bar">
+                            <DIV style="float:left; font-size: 35; color: #FFFFFF; cursor: pointer;" onclick="switch_to_candidate_list_page()">&times;</DIV>
+                            <P>{{status}}</P>
+                        </DIV>
+                        <DIV id="candidate_detailed_info">
+                            <P style="font-weight: bold; font-size: 19; height: 60%;">{{candidate_name}}</P>
+                            <P style="font-weight: lighter; font-size: 15; height: 40%;">{{position}}</P>
+                        </DIV>
+                    </SCRIPT>
+                </DIV>
+                <DIV style="width: 100%; height: 20px; position: absolute; bottom: 0; left: 0; right: 0; border-top: 1px solid #EEEEEE;">
+                    <DIV class="column right minor_heading">Cultural</DIV>
+                    <DIV class="column left minor_heading">Technical</DIV>
+                </DIV>
+            </DIV>
+            <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
+                <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
+                    {{#list interviews}}
+                    <DIV class="tableview-cell non_selectable" style="cursor:default;">
+                        <DIV class="interviewer_avatar" style="background-image:url('{{interviewer/avatar_url}}');"></DIV>
+                        <DIV class="interviewer_name">{{interviewer/name}}</DIV>
+                        <DIV class="column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
+                        <DIV class="column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
+                    </DIV>
+                    {{/list}}
+                </SCRIPT>
+            </DIV>
+        </DIV>
+        </DIV>
+        <FORM id="authn_form" method="POST" action="https://box.okta.com/app/template_saml_2_0/k5jimobgREMCSHKGRLVB/sso/saml">
+            <INPUT type="hidden" id="saml_response_input" name="SAMLResponse" value=""/>
+            <INPUT type="hidden" id="saml_relay_state_input" name="RelayState" value="dashboard"/>
+            <INPUT type="submit" value="Submit"/>
+        </FORM>
+	</BODY>
+</HTML>
