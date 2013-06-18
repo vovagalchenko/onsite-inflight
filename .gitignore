@@ -36,3 +36,5 @@ nosetests.xml
 
 # Ignore static avatar images from webapp/avatars
 webapp/avatars/
+# Ignore interviewers' personal info
+scripts/interviewers.dat
