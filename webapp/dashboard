@@ -14,7 +14,7 @@
             window.onload = function()
             {
                 go_to_hash(false);
-	            setInterval(function()
+                setInterval(function()
 	            {
                     synchronize_with_server(false);
 	            }, 10000);
@@ -398,8 +398,10 @@
                     <DIV class="tableview-cell non_selectable" style="cursor:default;">
                         <DIV class="interviewer_avatar" style="background-image:url('{{interviewer/avatar_url}}');"></DIV>
                         <DIV class="interviewer_name">{{interviewer/name}}</DIV>
-                        <DIV class="column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
-                        <DIV class="column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
+                        <DIV class="score_whiteout_bg">
+                            <DIV class="column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
+                            <DIV class="column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
+                        </DIV>
                     </DIV>
                     {{/list}}
                 </SCRIPT>
