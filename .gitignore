@@ -38,3 +38,6 @@ nosetests.xml
 webapp/avatars/
 # Ignore interviewers' personal info
 scripts/interviewers.dat
+# Ignore the Google Calendar auth credentials and client secrets
+lib/gcal_sdk/auth_credentials.dat
+lib/gcal_sdk/client_secrets.json

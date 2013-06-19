@@ -35,10 +35,9 @@ CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '../lib/gcal_sdk/client
 
 # Helpful message to display if the CLIENT_SECRETS file is missing.
 MISSING_CLIENT_SECRETS_MESSAGE = """
-WARNING: Please configure OAuth 2.0
+WARNING: Please configure OAuth 2.0 for Google Calendar
 
-To make this sample run you will need to download the client_secrets.json file
-and save it at:
+This cronjob expects Google Calendar client secrets at
 
    %s
 
