@@ -1,4 +1,4 @@
-from interview import Interview
+from model.interview import Interview
 from twilio.rest import TwilioRestClient
 from logger import log_outgoing_sms
  

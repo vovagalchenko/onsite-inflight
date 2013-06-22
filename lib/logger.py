@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from db_session import DB_Session_Factory
-from log_event import Log
+from model.db_session import DB_Session_Factory
+from model.log_event import Log
 
 def log(event_name, phone_number, data):
     if len(phone_number) > 10:

@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 import sys
+from lib.conf import CFG
+
+root_path = CFG.get_instance().get('installation', 'root')
+sys.path.insert(1, root_path + "/code/lib/gcal_sdk")
+
 import gflags
 import httplib2
 import os
@@ -8,12 +13,11 @@ import pprint
 import re
 import logging
 from copy import copy
-from interviewer import Interviewer
-import interviewer
-from interview import Interview
-from candidate import Candidate
+from model.interviewer import Interviewer
+from model.interview import Interview
+from model.candidate import Candidate
+from model.db_session import DB_Session_Factory
 from pytz import timezone
-from db_session import DB_Session_Factory
 from datetime import datetime, timedelta
 
 from apiclient.discovery import build

@@ -2,11 +2,10 @@ from http_response_builder import HTTP_Response_Builder
 from param_definition.parameter import Parameter, Date_Time_Parameter_Type
 from datetime import datetime
 
-from db_session import DB_Session_Factory
-from interview import Interview
+from model.db_session import DB_Session_Factory
+from model.interview import Interview
 from sqlalchemy import func
 import json
-
 
 class Candidate_List_HTTP_Response_Builder(HTTP_Response_Builder):
     date = Parameter('date', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)

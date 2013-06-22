@@ -1,9 +1,9 @@
 from http_response_builder import HTTP_Response_Builder
 from param_definition.parameter import Parameter, Base_64_Encoded_XML_Parameter_Type
-from user_model import User
-from logger import log_incoming_sms, log_outgoing_sms
-from db_session import DB_Session_Factory
-from interviewer import Interviewer
+from model.user_model import User
+from lib.logger import log_incoming_sms, log_outgoing_sms
+from model.db_session import DB_Session_Factory
+from model.interviewer import Interviewer
 import json
 import re
 import twilio.twiml

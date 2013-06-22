@@ -3,9 +3,10 @@ from cgi import FieldStorage
 import Cookie
 import base64
 import os
-from user_model import User
+from model.user_model import User
 import uuid
 from datetime import datetime
+from lib.conf import CFG
 
 class HTTP_Response_Builder():
     requires_authn = False
@@ -23,7 +24,7 @@ class HTTP_Response_Builder():
             setattr(self, param_name, param_value)
 
     def check_auth(self):
-        if not self.requires_authn:
+        if not self.requires_authn or not CFG.get_instance().is_live():
             return None
 
         try:

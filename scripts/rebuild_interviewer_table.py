@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 
 import sys
-from db_session import DB_Session_Factory
-from interview import Interview
-from interviewer import Interviewer
+from model.db_session import DB_Session_Factory
+from model.interview import Interview
+from model.interviewer import Interviewer
 from urllib import urlretrieve
 from os import listdir, remove, path
+from lib.conf import CFG
 import re
 
-ROOT = '/var/onsite-inflight/code/webapp'
+ROOT = CFG.get_instance().get('installation', 'root') + '/code/webapp'
 
 def main(argv):
     db_session = DB_Session_Factory.get_db_session()
     deletion_sql = Interviewer.__table__.delete('1')
     db_session.execute(deletion_sql)
     
-    with open("interviewers.dat", "r") as interviewer_file:
+    with open("scripts/interviewers.dat", "r") as interviewer_file:
         for interviewer_info in interviewer_file:
             interviewer_info = interviewer_info.strip(' \t\n\r')
             if not interviewer_info:

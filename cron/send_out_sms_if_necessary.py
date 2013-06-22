@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from db_session import DB_Session_Factory
-from interview import Interview
+from model.db_session import DB_Session_Factory
+from model.interview import Interview
 from datetime import datetime
-from send_sms import send_initial_request_for_scores
+from lib.send_sms import send_initial_request_for_scores
 
 MAX_NUMBER_OF_PINGS = 3
 

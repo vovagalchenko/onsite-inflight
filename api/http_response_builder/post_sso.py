@@ -1,6 +1,6 @@
 from http_response_builder import HTTP_Response_Builder
 from param_definition.parameter import Parameter, Base_64_Encoded_XML_Parameter_Type
-from user_model import User
+from model.user_model import User
 
 class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
     requires_authn = False
