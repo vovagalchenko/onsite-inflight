@@ -207,7 +207,13 @@
                 }
                 for (var i = 0; i < data['interviews'].length; i++)
                 {
-                    data['interviews'][i]['interviewer']['avatar_url'] += '?ts=' + last_avatar_refresh_ts;
+                    interview = data['interviews'][i];
+                    var use_avatar = interview['interviewer']['avatar_url'] != null;
+                    interview['interviewer']['use_avatar'] = use_avatar;
+                    if (use_avatar)
+                    {
+                        data['interviews'][i]['interviewer']['avatar_url'] += '?ts=' + last_avatar_refresh_ts;
+                    }
                 }
                 var now = new Date();
                 var interviews_array = data['interviews'];
@@ -230,6 +236,7 @@
                         // Abbreviate last names.
                         interviewer_name = interview['interviewer']['name'];
                         interview['interviewer']['name'] = interviewer_name.replace(/ ([A-Z])\S*$/, " $1.");
+                        interview['interviewer']['initials'] = (interviewer_name.charAt(0) + interviewer_name.split(/\s/).pop().charAt(0)).toUpperCase();
 
                         if (!interview['cultural_score'])
                         {
@@ -396,7 +403,13 @@
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
                     <DIV class="tableview-cell non_selectable" style="cursor:default;">
-                        <DIV class="interviewer_avatar" style="background-image:url('{{interviewer/avatar_url}}');"></DIV>
+                        <DIV class="interviewer_avatar_frame">
+                            {{#if interviewer/use_avatar}}
+                                <DIV style="background-image:url('{{interviewer/avatar_url}}');"></DIV>
+                            {{else}}
+                                <DIV style="background-color:rgb(72, 195, 252); color:rgb(255,255,255); text-align:center; line-height:35px;">{{interviewer/initials}}</DIV>
+                            {{/if}}
+                        </DIV>
                         <DIV class="interviewer_name">{{interviewer/name}}</DIV>
                         <DIV class="score_whiteout_bg">
                             <DIV class="column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>

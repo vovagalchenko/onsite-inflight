@@ -43,15 +43,16 @@ class Interview(Base):
         return "%s%+03d:%02d" % (ts.isoformat(), hh, mm)
 
     def dict_representation(self):
+        interviewer = {
+            'name' : self.interviewer.name,
+            'email' : self.interviewer.email,
+            'phone_number' : self.interviewer.phone_number,
+        }
+        if self.interviewer.avatar_url is not None:
+            interviewer['avatar_url'] = self.interviewer.avatar_url
         return {
             'id' : self.id,
-            'interviewer' :
-            {
-                'name' : self.interviewer.name,
-                'email' : self.interviewer.email,
-                'phone_number' : self.interviewer.phone_number,
-                'avatar_url' : self.interviewer.avatar_url,
-            },
+            'interviewer' : interviewer,
             'start_time' : Interview.datetime_to_string(self.start_time),
             'end_time' : Interview.datetime_to_string(self.end_time),
             'candidate_name' : self.candidate_name,
