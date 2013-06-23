@@ -187,6 +187,15 @@
                 build_content_from_template('candidates_handlebars', data, 'candidate_list_tableview');
             }
 
+            function get_interview_progress(interview)
+            {
+                var now = new Date().getTime();
+                var start_time = new Date(interview['start_time']).getTime();
+                var end_time = new Date(interview['end_time']).getTime();
+                var result = (now - start_time)/(end_time - start_time);
+                return Math.max(0, Math.min(1, result));
+            }
+
             function update_candidate_detail_ui(data)
             {
                 if (typeof data == 'string')
@@ -233,6 +242,16 @@
                     for (var i = 0, length = interviews.length; i < length; i++)
                     {
                         interview = interviews[i];
+
+                        var interview_progress = get_interview_progress(interview);
+                        if (interview_progress < 1)
+                        {
+                            interview['progress'] = (interview_progress*100).toString() + "%";
+                        }
+                        else
+                        {
+                            interview['progress'] = "0%";
+                        }
                         // Abbreviate last names.
                         interviewer_name = interview['interviewer']['name'];
                         interview['interviewer']['name'] = interviewer_name.replace(/ ([A-Z])\S*$/, " $1.");
@@ -403,6 +422,7 @@
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
                     <DIV class="tableview-cell non_selectable" style="cursor:default;">
+                        <DIV class="progress-indicator" style="width:{{progress}};"></DIV>
                         <DIV class="interviewer_avatar_frame">
                             {{#if interviewer/use_avatar}}
                                 <DIV style="background-image:url('{{interviewer/avatar_url}}');"></DIV>
@@ -410,11 +430,10 @@
                                 <DIV style="background-color:rgb(72, 195, 252); color:rgb(255,255,255); text-align:center; line-height:35px;">{{interviewer/initials}}</DIV>
                             {{/if}}
                         </DIV>
-                        <DIV class="interviewer_name">{{interviewer/name}}</DIV>
-                        <DIV class="score_whiteout_bg">
-                            <DIV class="column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
-                            <DIV class="column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
-                        </DIV>
+                        <DIV class="key-text interviewer_name" style="position:relative;">{{interviewer/name}}</DIV>
+                        <DIV class="score_whiteout_bg"></DIV>
+                        <DIV class="key-text column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
+                        <DIV class="key-text column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                     </DIV>
                     {{/list}}
                 </SCRIPT>
