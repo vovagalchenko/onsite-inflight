@@ -244,13 +244,9 @@
                         interview = interviews[i];
 
                         var interview_progress = get_interview_progress(interview);
-                        if (interview_progress < 1)
+                        if (interview_progress != 1 && interview_progress != 0)
                         {
                             interview['progress'] = (interview_progress*100).toString() + "%";
-                        }
-                        else
-                        {
-                            interview['progress'] = "0%";
                         }
                         // Abbreviate last names.
                         interviewer_name = interview['interviewer']['name'];
@@ -422,18 +418,18 @@
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
                     <DIV class="tableview-cell non_selectable" style="cursor:default;">
-                        <DIV class="progress-indicator" style="width:{{progress}};"></DIV>
-                        <DIV class="interviewer_avatar_frame">
+                        <DIV class="progress-indicator" {{#if progress}}style="width:{{progress}};"{{else}}hidden=true{{/if}}></DIV>
+                        <DIV class="above-progress interviewer_avatar_frame" style="position:relative;">
                             {{#if interviewer/use_avatar}}
                                 <DIV style="background-image:url('{{interviewer/avatar_url}}');"></DIV>
                             {{else}}
                                 <DIV style="background-color:rgb(72, 195, 252); color:rgb(255,255,255); text-align:center; line-height:35px;">{{interviewer/initials}}</DIV>
                             {{/if}}
                         </DIV>
-                        <DIV class="key-text interviewer_name" style="position:relative;">{{interviewer/name}}</DIV>
+                        <DIV class="above-progress interviewer_name" style="position:relative;">{{interviewer/name}}</DIV>
                         <DIV class="score_whiteout_bg"></DIV>
-                        <DIV class="key-text column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
-                        <DIV class="key-text column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
+                        <DIV class="above-progress column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
+                        <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                     </DIV>
                     {{/list}}
                 </SCRIPT>
