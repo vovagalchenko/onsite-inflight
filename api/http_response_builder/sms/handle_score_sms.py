@@ -29,7 +29,7 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
             result = number + modifier
         return result
 
-    def print_body(self):
+    def process_sms(self):
         self.phone_number = self.phone_number[2:]
         db_session = DB_Session_Factory.get_db_session()
         interviewer = Interviewer.get_interviewer_by_phone_number(self.phone_number)
@@ -50,5 +50,4 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
             else:
                 interview.cultural_score = score
         db_session.commit()
-        
-        self.print_response_message_body(response_msg)
+        return response_msg

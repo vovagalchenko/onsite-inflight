@@ -20,3 +20,9 @@ class Handle_SMS_HTTP_Response_Builder(HTTP_Response_Builder):
         resp.sms(response_msg)
         print str(resp)
         log_outgoing_sms(self.phone_number, response_msg)
+
+    def process_sms(self):
+        raise NotImplementedError, "You must implement process_sms in your Handle_SMS_HTTP_Response_Builder subclass"
+
+    def print_body(self):
+        self.print_response_message_body(self.process_sms())
