@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from http_response_builder import *
+from http_response_builder.sms import *
 from os import environ
 from urlparse import parse_qs
 import re
@@ -12,7 +13,7 @@ end_points = {
     'candidate_list' : candidate_list.Candidate_List_HTTP_Response_Builder,
     'candidate_detail' : candidate_detail.Candidate_Detail_HTTP_Response_Builder,
     'post-sso' : post_sso.Post_SSO_HTTP_Response_Builder,
-    'handle_sms' : handle_sms.Handle_SMS_HTTP_Response_Builder
+    'handle_score_sms' : handle_score_sms.Handle_Score_SMS_HTTP_Response_Builder
 }
 
 request_uri = environ.get('REQUEST_URI', '')

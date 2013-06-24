@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime
 from lib.conf import CFG
 
-class HTTP_Response_Builder():
+class HTTP_Response_Builder(object):
     requires_authn = False
     content_type = 'application/json'
     params_dump = {}
@@ -16,7 +16,7 @@ class HTTP_Response_Builder():
     def __init__(self, params_storage):
         for key in params_storage.keys():
             self.params_dump[key] = params_storage[key].value
-        for param_name in self.__class__.__dict__.keys():
+        for param_name in dir(self):
             param_definition = getattr(self, param_name)
             if not isinstance(param_definition, Parameter):
                 continue
