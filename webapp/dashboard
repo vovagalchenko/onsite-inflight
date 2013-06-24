@@ -251,7 +251,7 @@
 
                         if (!interview['cultural_score'])
                         {
-                            interview['cultural_score'] = '-';
+                            interview['cultural_score'] = '';
                         }
                         else if (interview['cultural_score'] <= 2)
                         {
@@ -264,7 +264,7 @@
                         }
                         else if (!interview['technical_score'])
                         {
-                            interview['technical_score'] = '-';
+                            interview['technical_score'] = '';
                         }
                         else if (interview['technical_score'] <= 2) 
                         {
