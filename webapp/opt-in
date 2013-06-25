@@ -1,0 +1,251 @@
+<HTML>
+	<HEAD>
+		<TITLE>Opt In</TITLE>
+		<META http-equiv="Content-type" value="text/html; charset=utf-8">
+        <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
+        <META name="apple-mobile-web-app-capable" content="yes">
+		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+		<LINK href="css/opt-in.css" type="text/css" rel="stylesheet">
+        <SCRIPT type="text/javascript">
+            var last_received_opt_in_timestamp = null;
+            var known_opt_ins = {};
+
+            window.onload = function()
+            {
+                synchronize_with_server();
+                setInterval(function()
+                {
+                    synchronize_with_server();
+                }, 5000);
+            }
+
+            function handle_ajax_error(error_string)
+            {
+                alert(error_string);
+            }
+
+            function configure_table_cell(opt_in)
+            {
+                var cell = opt_in['table_cell']
+                cell.className = "chosen_" + ((Math.floor(Math.random()*100)%4) + 1);
+                cell.innerHTML = opt_in['nickname'];
+            }
+
+            function get_table_cell_for_row_and_column(row, column)
+            {
+                return document.getElementsByTagName("tr")[row].getElementsByTagName("td")[column];
+            }
+
+            function get_table_cell(phone_number)
+            {
+                var num_rows = document.getElementsByTagName("tr").length;
+                var num_columns = document.getElementsByTagName("tr")[0].getElementsByTagName("td").length;
+                var start_row = parseInt(phone_number.slice(0, 5))%num_rows;
+                var start_column = parseInt(phone_number.slice(5))%num_columns;
+        
+                var row = start_row;
+                var column = start_column;
+                var cell = null;
+                do
+                {
+                    cell = get_table_cell_for_row_and_column(row, column)
+                    if (column === (num_columns - 1))
+                    {
+                        row = (row + 1)%num_rows;
+                    }
+                    column = (column + 1)%num_columns;
+                }
+                while (cell.className.indexOf("chosen_") === 0 &&
+                       (row != start_row || column != start_column));
+                return cell;
+            }
+
+            function update_opt_in_table(data)
+            {
+                data = JSON.parse(data);
+                if (!data || data.length == 0)
+                    return;
+                
+                var last_ts = last_received_opt_in_timestamp;
+                for (var i = 0; i < data.length; i++)
+                {
+                    var opt_in = data[i];
+                    var phone_number = opt_in['phone_number'];
+                    var known_opt_in = known_opt_ins[phone_number];
+                    if (!known_opt_in)
+                    {
+                        known_opt_in = {};
+                        known_opt_in['table_cell'] = get_table_cell(phone_number);
+                    }
+                    for (var key in opt_in)
+                    {
+                        known_opt_in[key] = opt_in[key];
+                    }
+                    configure_table_cell(known_opt_in);
+                    known_opt_ins[phone_number] = known_opt_in;
+                    last_ts = opt_in['updated'];
+                }
+                last_received_opt_in_timestamp = last_ts;
+            }
+
+            function synchronize_with_server()
+            {
+                var opt_in_list_url = '/api/opt_in_list';
+                if (last_received_opt_in_timestamp != null)
+                {
+                    opt_in_list_url += '?date=' + last_received_opt_in_timestamp;
+                }
+                make_ajax_request(opt_in_list_url, update_opt_in_table, handle_ajax_error);
+            }
+        </SCRIPT>
+        <SCRIPT type="text/javascript" src="js/handlebars.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
+	</HEAD>
+	<BODY>
+        <DIV class="header-bar" style="display: table-cell; height: 152px; font-weight: lighter; vertical-align: middle;">
+                <P class="light-title" style="margin-top: 21px;">408 824 7338</P>
+                <P class="light-title">name:email</P>
+                <P class="light-subtitle" style="margin-bottom: 21px;">Vova Galchenko:vova@box.com</P>
+        </DIV>
+        <DIV class="opt-in-body">
+        <TABLE id="opt_in_table">
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+            <TR>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+                <TD nowrap="nowrap"></TD>
+            </TR>
+        </TABLE>
+        </DIV>
+	</BODY>
+</HTML>

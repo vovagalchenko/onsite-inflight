@@ -21,20 +21,20 @@ class Opt_In(Base):
     @staticmethod
     def get_opt_ins_after_date(min_date):
         if min_date is None:
-            min_date = datetime.fromtimestamp(0)
+            min_date = datetime.fromtimestamp(28800)
         db_session = DB_Session_Factory.get_db_session()
-        return db_session.query(Opt_In).filter(Opt_In.created > min_date)
+        return db_session.query(Opt_In).filter(Opt_In.updated > min_date).order_by(Opt_In.updated.asc())
 
     def nickname(self):
-        return self.name.split()[0] + self.name.split()[-1] + '.'
+        return self.name.split()[0] + " " + self.name.split()[-1][0] + '.'
 
-    def json_representation(self):
+    def dict_representation(self):
         return {
             'email' : self.email,
             'name' : self.name,
             'phone_number' : self.phone_number,
             'nickname' : self.nickname(),
-            'updated' : self.updated,
+            'updated' : self.updated.strftime("%s")
         }
 
     def __repr__(self):
