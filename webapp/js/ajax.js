@@ -18,7 +18,7 @@ function make_ajax_request(url, results_process_callback, error_handling_callbac
     {
         if (request.readyState == 4)
         { 
-            if (request.status == 200 || window.locationhref.indexOf("http") == -1)
+            if (request.status == 200 || window.location.href.indexOf("http") == -1)
             {
                 var parsed_data = JSON.parse(request.responseText);
                 if (!need_to_authenticate(parsed_data))
