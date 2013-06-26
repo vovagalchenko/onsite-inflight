@@ -46,7 +46,7 @@ function go_to_hash(animate_date_switch)
 
             if (path_components.length == 2 && path_components[1].length > 0)
             {
-                candidate_name = path_components[1];
+                candidate_name = decodeURIComponent(path_components[1]);
             }
             else if (path_components.length > 2)
             {

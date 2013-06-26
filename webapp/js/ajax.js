@@ -1,3 +1,16 @@
+function need_to_authenticate(data)
+{
+    if (data["error"] == "authn_needed")
+    {   
+        var authn_form = document.getElementById("authn_form");
+        document.getElementById('saml_response_input').value = data["authn_request"];
+        document.getElementById('saml_relay_state_input').value = (window.location.hash == null || window.location.hash.length == 0)? "dashboard" : window.location.hash;
+        authn_form.submit();
+        return true;
+    }   
+    return false;
+}
+
 function make_ajax_request(url, results_process_callback, error_handling_callback)
 {
     var request = ajax_request();
@@ -7,7 +20,11 @@ function make_ajax_request(url, results_process_callback, error_handling_callbac
         { 
             if (request.status == 200 || window.locationhref.indexOf("http") == -1)
             {
-                results_process_callback(request.responseText);
+                var parsed_data = JSON.parse(request.responseText);
+                if (!need_to_authenticate(parsed_data))
+                {
+                    results_process_callback(parsed_data);
+                }
             }
             else
             {
@@ -18,6 +35,7 @@ function make_ajax_request(url, results_process_callback, error_handling_callbac
     request.open("GET", url, true);
     request.send(null);
 }
+
 function ajax_request()
 {
     var activexmodes=["Msxml2.XMLHTTP", "Microsoft.XMLHTTP"] //activeX versions to check for in IE

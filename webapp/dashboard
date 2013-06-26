@@ -150,9 +150,10 @@
 
             function update_candidate_list_ui(data)
             {
-                var data = JSON.parse(data);
-                if (check_authn(data))
-                    return;
+                if (typeof data == 'string')
+                {
+                    data = JSON.parse(data);
+                }
                 var result_date = new Date(data['date']*1000);
                 if (result_date.getTime() != current_date.getTime())
                 {
