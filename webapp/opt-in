@@ -62,7 +62,6 @@
 
             function update_opt_in_table(data)
             {
-                data = JSON.parse(data);
                 if (!data || data.length == 0)
                     return;
                 
