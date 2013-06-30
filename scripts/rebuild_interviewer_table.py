@@ -4,6 +4,7 @@ import sys
 from model.db_session import DB_Session_Factory
 from model.interview import Interview
 from model.interviewer import Interviewer
+from model.optin import Opt_In
 from urllib import urlretrieve
 from os import listdir, remove, path
 from lib.conf import CFG
@@ -15,6 +16,7 @@ def main(argv):
     db_session = DB_Session_Factory.get_db_session()
     deletion_sql = Interviewer.__table__.delete('1')
     db_session.execute(deletion_sql)
+    interviewers = {}
     
     with open("scripts/interviewers.dat", "r") as interviewer_file:
         for interviewer_info in interviewer_file:
@@ -35,7 +37,14 @@ def main(argv):
                     print 'Downloading image for ' + final_url
                     urlretrieve(interviewer_data[3], local_path)
                 interviewer.avatar_url = final_url
+            interviewers[interviewer_data[1]] = interviewer
             db_session.add(interviewer)
+
+    print "Adding opt-ins now..."
+    for optin in db_session.query(Opt_In):
+        if interviewers.get(optin.email, None) is None:
+            print optin.name + "\t" + optin.email + "\t" + optin.phone_number;
+            db_session.add(Interviewer(optin.email, optin.name, optin.phone_number))
     db_session.commit()
 
 if __name__ == '__main__':
