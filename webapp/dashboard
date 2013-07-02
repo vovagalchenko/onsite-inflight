@@ -10,6 +10,7 @@
             var last_avatar_refresh_ts;
             var min_date = new Date(1370502000000); // June 6th, 2013
             var current_date = null;
+            var expanded_interviews = {};
 
             window.onload = function()
             {
@@ -24,6 +25,20 @@
             window.onhashchange = function()
             {
                 go_to_hash(true);
+            }
+
+            function handle_interview_click(tableviewcell_element, interview_id)
+            {
+                if (expanded_interviews[interview_id] == null)
+                {
+                    tableviewcell_element.className += " expanded";
+                    expanded_interviews[interview_id] = true;
+                }
+                else
+                {
+                    tableviewcell_element.className = tableviewcell_element.className.replace(/\s*?expanded/g, "");
+                    delete expanded_interviews[interview_id];
+                }
             }
 
             function score_string(score_float)
@@ -192,6 +207,59 @@
                 var result = (now - start_time)/(end_time - start_time);
                 return Math.max(0, Math.min(1, result));
             }
+        
+            function get_time_string_for_date(date)
+            {
+                var hours = date.getHours();
+                var am_or_pm = "AM";
+                if (hours > 12)
+                {
+                    hours -= 12;
+                    am_or_pm = "PM";
+                }
+                var minutes = date.getMinutes();
+                if (minutes < 10)
+                {
+                    minutes = "0" + minutes.toString();
+                }
+                return hours.toString() + ":" + minutes.toString() + am_or_pm;
+            }
+
+            function number_to_adj(number)
+            {
+                var adj = "";
+                switch (number)
+                {
+                    case "1":
+                        adj = "1st";
+                        break;
+                    case "2":
+                        adj = "2nd";
+                        break;
+                    case "3":
+                        adj = "3rd";
+                        break;
+                    default:
+                        adj = "";
+                        break;
+                }
+                return adj;
+            }
+
+            function get_room_string_for_code(room_code)
+            {
+                var match = room_code.match(/^([123])- (.*)$/, room_code);
+                var room_string = "";
+                if (match && match.length >= 3)
+                {
+                    room_string = "<strong>" + match[2] + "</strong> (" + number_to_adj(match[1]) + " floor)";
+                }
+                else
+                {
+                    room_string = room_code;
+                }
+                return new Handlebars.SafeString(room_string);
+            }
 
             function update_candidate_detail_ui(data)
             {
@@ -240,11 +308,20 @@
                     {
                         interview = interviews[i];
 
+                        if (expanded_interviews[interview['id']] == true)
+                        {
+                            interview['expanded'] = true;
+                        }
+
                         var interview_progress = get_interview_progress(interview);
                         if (interview_progress != 1 && interview_progress != 0)
                         {
                             interview['progress'] = (interview_progress*100).toString() + "%";
                         }
+                        interview['start_time'] = get_time_string_for_date(new Date(interview['start_time']));
+                        interview['end_time'] = get_time_string_for_date(new Date(interview['end_time']));
+                        interview['room'] = get_room_string_for_code(interview['room']);
+        
                         // Abbreviate last names.
                         interviewer_name = interview['interviewer']['name'];
                         interview['interviewer']['name'] = interviewer_name.replace(/ ([A-Z])\S*$/, " $1.");
@@ -414,7 +491,7 @@
             <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
-                    <DIV class="tableview-cell non_selectable" style="cursor:default;">
+                    <DIV class="tableview-cell non_selectable transition{{#if expanded}} expanded{{/if}}" onclick="handle_interview_click(this, {{id}})">
                         <DIV class="progress-indicator" {{#if progress}}style="width:{{progress}};"{{else}}hidden=true{{/if}}></DIV>
                         <DIV class="above-progress interviewer_avatar_frame" style="position:relative;">
                             {{#if interviewer/use_avatar}}
@@ -427,6 +504,12 @@
                         <DIV class="score_whiteout_bg"></DIV>
                         <DIV class="above-progress column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
                         <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
+                        </BR>
+                        <DIV class="interview-detail above-progress" style="position:relative;">
+                            <DIV><IMG style="float:left" src="img/time_icon.png"/><P class="detail-text" style="margin-left:10px"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
+                            </BR>
+                            <DIV><IMG style="float:left; margin-left:1.5px;" src="img/place_icon.png"/><P class="detail-text" style="float:left; margin-left:11.5px">{{room}}</P></DIV>
+                        </DIV>
                     </DIV>
                     {{/list}}
                 </SCRIPT>

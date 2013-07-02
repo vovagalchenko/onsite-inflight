@@ -63,7 +63,7 @@ function go_to_hash(animate_date_switch)
     {
         if (!date_to_set || !current_date || (date_to_set.getTime() != current_date.getTime()))
         {
-            if (animate_date_switch)
+            if (animate_date_switch && !candidate_name)
             {
                 if ((current_date - date_to_set) > 0)
                     do_animate_decrement_date(date_to_set);

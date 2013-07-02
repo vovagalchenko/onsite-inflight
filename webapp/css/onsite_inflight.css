@@ -61,6 +61,12 @@ body, body *
     transition-duration: .5s;
 }
 
+.tableview-cell.transition
+{
+    -webkit-transition-duration: .2s;
+    transition-duration: .2s;
+}
+
 .header-bar
 {
     position: fixed;
@@ -153,6 +159,7 @@ body, body *
     border-bottom: 1px solid #CECECE;
     cursor: pointer;
     background: rgb(250, 250, 250);
+    overflow: hidden;
 }
 
 .tableview-cell>heading
@@ -343,4 +350,28 @@ p
 {
     margin-right: -10px;
     margin-left: -10px;
+}
+
+.interview-detail
+{
+    line-height: 24px;
+    margin-left: 48px;
+}
+
+.tableview-cell.expanded
+{
+    height: 96px;
+}
+
+.detail-text
+{
+    font-weight: 100;
+    color: rgb(140, 140, 140);
+    float: left;
+}
+
+strong
+{
+    font-weight: 500;
+    color: rgb(60, 60, 60);
 }
