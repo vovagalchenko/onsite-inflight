@@ -1,7 +1,7 @@
 body, body *
 {
     font-family: helvetica;
-    font-size: 15px;
+    font-size: 15;
     color: #333333;
     z-index: 0;
 }
@@ -354,24 +354,66 @@ p
 
 .interview-detail
 {
-    line-height: 24px;
-    margin-left: 48px;
+    line-height: 16px;
 }
 
 .tableview-cell.expanded
 {
-    height: 96px;
+    height: 80px;
 }
 
 .detail-text
 {
+    font-size: 12;
     font-weight: 100;
     color: rgb(140, 140, 140);
     float: left;
 }
 
-strong
+.detail-text strong
 {
+    font-size: 12;
     font-weight: 500;
     color: rgb(60, 60, 60);
+}
+
+.sprite
+{
+    background-image: url('/img/sprite.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 16px;
+    height: 16px;
+    float: left;
+    margin-right: 5px;
+}
+
+.place
+{
+    background-position: -16px 0px;
+}
+
+.time
+{
+    background-position: 0px 0px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-resolution: 240dpi)
+{
+    .sprite
+    {
+        background-image: url('/img/sprite@2x.png');
+        background-size: 32px;
+    }
+    .place
+    {
+        background-position: -16px 0px;
+    }
+
+    .time
+    {
+        background-position: 0px 0px;
+    }
 }

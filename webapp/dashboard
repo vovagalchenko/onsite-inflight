@@ -506,9 +506,9 @@
                         <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                         </BR>
                         <DIV class="interview-detail above-progress" style="position:relative;">
-                            <DIV><IMG style="float:left" src="img/time_icon.png"/><P class="detail-text" style="margin-left:10px"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
+                            <DIV><IMG class="sprite time" width="1" height="1" src="img/spacer.gif"/><P class="detail-text"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
                             </BR>
-                            <DIV><IMG style="float:left; margin-left:1.5px;" src="img/place_icon.png"/><P class="detail-text" style="float:left; margin-left:11.5px">{{room}}</P></DIV>
+                            <DIV><IMG class="sprite place" width="1" height="1" src="img/spacer.gif"/><P class="detail-text">{{room}}</P></DIV>
                         </DIV>
                     </DIV>
                     {{/list}}
