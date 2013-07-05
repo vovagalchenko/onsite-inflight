@@ -548,7 +548,9 @@
                         </BR>
                         <DIV class="interview-detail">
                             <DIV class="detail-text above-progress" style="position:relative; margin-bottom:5px;">{{notes}}</DIV>
+                            {{#if notes}}
                             </BR>
+                            {{/if}}
                             <DIV class="above-progress" style="position:relative; display:inline-block;"><IMG class="sprite time" width="1" height="1" src="img/spacer.gif"/><P class="detail-text"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
                             </BR>
                             <DIV class="above-progress" style="position:relative; display:inline-block;"><IMG class="sprite place" width="1" height="1" src="img/spacer.gif"/><P class="detail-text">{{room}}</P></DIV>
