@@ -33,6 +33,7 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
         self.phone_number = self.phone_number[2:]
         db_session = DB_Session_Factory.get_db_session()
         interviewer = Interviewer.get_interviewer_by_phone_number(self.phone_number)
+        interview = None
         response_msg = "Thanks for your feedback"
         if interviewer is None:
             response_msg = "I don't know who you are or what you want from me."
