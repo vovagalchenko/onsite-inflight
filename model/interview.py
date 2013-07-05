@@ -2,6 +2,7 @@ from interviewer import *
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects import mysql
+from sqlalchemy.schema import FetchedValue
 import json
 import datetime
 import calendar
@@ -22,9 +23,9 @@ class Interview(Base):
     number_of_pings = Column(mysql.TINYINT, nullable = False, default = 0)
     # The following timestamp columns are only updated by triggers. They are effectively readonly for the model code.
     # An update to these columns will be caught by a MySQL trigger and will not be performed.
-    technical_score_ts = Column(mysql.TIMESTAMP, nullable = False)
-    cultural_score_ts = Column(mysql.TIMESTAMP, nullable = False)
-    notes_ts = Column(mysql.TIMESTAMP, nullable = False)
+    technical_score_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
+    cultural_score_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
+    notes_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
 
     def __init__(self, email, start_time, end_time, candidate_name, room):
         self.interviewer_email = email
