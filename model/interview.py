@@ -18,7 +18,13 @@ class Interview(Base):
     room = Column(String(50), nullable = False)
     technical_score = Column(mysql.FLOAT(), nullable = True)
     cultural_score = Column(mysql.FLOAT(), nullable = True)
+    notes = Column(mysql.TEXT, nullable = True)
     number_of_pings = Column(mysql.TINYINT, nullable = False, default = 0)
+    # The following timestamp columns are only updated by triggers. They are effectively readonly for the model code.
+    # An update to these columns will be caught by a MySQL trigger and will not be performed.
+    technical_score_ts = Column(mysql.TIMESTAMP, nullable = False)
+    cultural_score_ts = Column(mysql.TIMESTAMP, nullable = False)
+    notes_ts = Column(mysql.TIMESTAMP, nullable = False)
 
     def __init__(self, email, start_time, end_time, candidate_name, room):
         self.interviewer_email = email
@@ -61,4 +67,5 @@ class Interview(Base):
             'cultural_score' : self.cultural_score,
             'number_of_pings' : self.number_of_pings,
             'is_coffee_break' : self.is_coffee_break(),
+            'notes' : self.notes
         };

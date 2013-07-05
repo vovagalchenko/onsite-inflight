@@ -33,21 +33,35 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
         self.phone_number = self.phone_number[2:]
         db_session = DB_Session_Factory.get_db_session()
         interviewer = Interviewer.get_interviewer_by_phone_number(self.phone_number)
-        interview = interviewer.get_most_recently_completed_interview()
+        response_msg = "Thanks for your feedback"
+        if interviewer is None:
+            response_msg = "I don't know who you are or what you want from me."
+        else:
+            interview = interviewer.get_most_recently_completed_interview()
+            if interview is None:
+                response_msg = "You haven't done an interview recently so we have nothing to talk about."
 
-        response_msg = "Thanks for your feedback!"
-        if interview.technical_score is None and not interview.is_coffee_break():
+        if interview is not None and interview.technical_score is None and not interview.is_coffee_break():
+            # The user should be trying to send in the technical score.
             score = Handle_Score_SMS_HTTP_Response_Builder.parse_score(self.sms_body)
             if score is None:
                 response_msg = "Invalid technical score. Valid input is 1, 2, 3, 4 or one, two, three, four. You can also use +/-. Please try again."
             else:
                 interview.technical_score = score
                 response_msg = "What's the cultural score?"
-        elif interview.cultural_score is None:
+        elif interview is not None and interview.cultural_score is None:
+            # The user should be trying to send in the cultural score.
             score = Handle_Score_SMS_HTTP_Response_Builder.parse_score(self.sms_body)
             if score is None:
                 response_msg = "Invalid cultural score. Valid input is 1, 2, 3, 4 or one, two, three, four. You can also use +/-. Please try again."
             else:
                 interview.cultural_score = score
+                response_msg = "Thanks. Feel free to send in any notes you have about " + interview.candidate_name + " in subsequent texts."
+        elif interview is not None:
+            # The user should be trying to send in notes for the interview.
+            if interview.notes is None:
+                interview.notes = ""
+            interview.notes = interview.notes + self.sms_body
+            response_msg = "Thanks. Your feedback was added to " + interview.candidate_name + "'s file."
         db_session.commit()
         return response_msg

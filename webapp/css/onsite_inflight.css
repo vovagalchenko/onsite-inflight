@@ -65,6 +65,9 @@ body, body *
 {
     -webkit-transition-duration: .2s;
     transition-duration: .2s;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
 }
 
 .header-bar
@@ -152,6 +155,7 @@ body, body *
     position: relative;
     right: 0;
     left: 0;
+    min-height: 44px;
     height: 44px;
     line-height: 44px;
     padding-left: 10px;
@@ -355,11 +359,14 @@ p
 .interview-detail
 {
     line-height: 16px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    display: inline-block;
 }
 
 .tableview-cell.expanded
 {
-    height: 80px;
+    height: auto;
 }
 
 .detail-text
@@ -368,6 +375,7 @@ p
     font-weight: 100;
     color: rgb(140, 140, 140);
     float: left;
+    line-height: 16px;
 }
 
 .detail-text strong

@@ -27,8 +27,46 @@
                 go_to_hash(true);
             }
 
+            function has_class(element, cls)
+            {
+                return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+            }
+
+            function handle_interview_session_size_change(tableviewcell_element, initial_height)
+            {
+                var content_element = tableviewcell_element.children[0];
+                var content_height = content_element.clientHeight;
+
+                setTimeout(function()
+                {
+                    if (!has_class(tableviewcell_element, 'transition'))
+                    {
+                        tableviewcell_element.className += " transition";
+                    }
+                    tableviewcell_element.style.height = has_class(tableviewcell_element, 'expanded')? content_height : tableviewcell_element.style.minHeight;
+                }, 10);
+                var transition_finished_events = [ 
+                    'transitionend',
+                    'webkitTransitionEnd',
+                    'msTransitionEnd',
+                    'oTransitionEnd',
+                ];  
+                for (var i = 0; i < transition_finished_events.length; i++)
+                {   
+                    tableviewcell_element.addEventListener(transition_finished_events[i], function()
+                    {
+                        if (has_class(tableviewcell_element, 'expanded'))
+                        {
+                            tableviewcell_element.className = tableviewcell_element.className.replace(/\s*?transition/g, "");
+                            tableviewcell_element.style.height = 'auto';
+                        }
+                    });
+                }   
+            }
+
             function handle_interview_click(tableviewcell_element, interview_id)
             {
+                var tableviewcell_height = tableviewcell_element.clientHeight;
                 if (expanded_interviews[interview_id] == null)
                 {
                     tableviewcell_element.className += " expanded";
@@ -39,6 +77,8 @@
                     tableviewcell_element.className = tableviewcell_element.className.replace(/\s*?expanded/g, "");
                     delete expanded_interviews[interview_id];
                 }
+                tableviewcell_element.style.height = tableviewcell_height;
+                handle_interview_session_size_change(tableviewcell_element, tableviewcell_height);
             }
 
             function score_string(score_float)
@@ -491,7 +531,8 @@
             <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
-                    <DIV class="tableview-cell non_selectable transition{{#if expanded}} expanded{{/if}}" onclick="handle_interview_click(this, {{id}})">
+                    <DIV class="tableview-cell non_selectable {{#if expanded}} expanded{{/if}}" onclick="handle_interview_click(this, {{id}})">
+                        <DIV>
                         <DIV class="progress-indicator" {{#if progress}}style="width:{{progress}};"{{else}}hidden=true{{/if}}></DIV>
                         <DIV class="above-progress interviewer_avatar_frame" style="position:relative;">
                             {{#if interviewer/use_avatar}}
@@ -505,10 +546,13 @@
                         <DIV class="above-progress column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
                         <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                         </BR>
-                        <DIV class="interview-detail above-progress" style="position:relative;">
-                            <DIV><IMG class="sprite time" width="1" height="1" src="img/spacer.gif"/><P class="detail-text"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
+                        <DIV class="interview-detail">
+                            <DIV class="detail-text above-progress" style="position:relative; margin-bottom:5px;">{{notes}}</DIV>
                             </BR>
-                            <DIV><IMG class="sprite place" width="1" height="1" src="img/spacer.gif"/><P class="detail-text">{{room}}</P></DIV>
+                            <DIV class="above-progress" style="position:relative; display:inline-block;"><IMG class="sprite time" width="1" height="1" src="img/spacer.gif"/><P class="detail-text"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
+                            </BR>
+                            <DIV class="above-progress" style="position:relative; display:inline-block;"><IMG class="sprite place" width="1" height="1" src="img/spacer.gif"/><P class="detail-text">{{room}}</P></DIV>
+                        </DIV>
                         </DIV>
                     </DIV>
                     {{/list}}
