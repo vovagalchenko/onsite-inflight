@@ -38,7 +38,7 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
         if interviewer is None:
             response_msg = "I don't know who you are or what you want from me."
         else:
-            interview = interviewer.get_most_recently_completed_interview()
+            interview = interviewer.get_most_recently_completed_interview(for_update = True)
             if interview is None:
                 response_msg = "You haven't done an interview recently so we have nothing to talk about."
 

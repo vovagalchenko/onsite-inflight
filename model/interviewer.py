@@ -1,9 +1,10 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, UniqueConstraint
+from sqlalchemy import Column, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import relationship, backref
 from db_session import DB_Session_Factory
 from datetime import datetime, timedelta
 from base import Base
+import interview
 
 class Interviewer(Base):
     __tablename__ = 'interviewer'
@@ -39,15 +40,13 @@ class Interviewer(Base):
         session = DB_Session_Factory.get_db_session()
         return session.query(Interviewer).filter(Interviewer.phone_number == phone_number).first()
 
-    def get_most_recently_completed_interview(self):
+    def get_most_recently_completed_interview(self, for_update = False):
         last_interview = None
-        now = datetime.now()
-        for interview in self.interviews:
-            if last_interview is not None and interview.end_time > now:
-                break
-            else:
-                last_interview = interview
-        return last_interview
+        db_session = DB_Session_Factory.get_db_session()
+        query = db_session.query(interview.Interview).filter(interview.Interview.interviewer_email==self.email, func.date(interview.Interview.start_time) == func.date(func.now()), interview.Interview.end_time < func.now()).order_by(interview.Interview.end_time.desc())
+        if for_update is True:
+            query = query.with_lockmode('update')
+        return query.first()
 
     def nickname(self):
         return self.name.split()[0]
