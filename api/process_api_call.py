@@ -15,7 +15,8 @@ end_points = {
     'post-sso' : post_sso.Post_SSO_HTTP_Response_Builder,
     'handle_score_sms' : handle_score_sms.Handle_Score_SMS_HTTP_Response_Builder,
     'handle_opt_in_sms' : handle_optin_sms.Handle_Opt_In_SMS_HTTP_Response_Builder,
-    'opt_in_list' : opt_in_list.Opt_In_List_HTTP_Response_Builder
+    'opt_in_list' : opt_in_list.Opt_In_List_HTTP_Response_Builder,
+    'time_to_respond_stats' : time_to_respond_stats.Time_To_Respond_Stats_HTTP_Response_Builder
 }
 
 request_uri = environ.get('REQUEST_URI', '')
