@@ -21,7 +21,7 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
     @staticmethod
     def parse_score(message):
         message = strip(lower(message))
-        match = re.match('^([1-4]|one|two|three|four)\s*(\+|\-|$)', message)
+        match = re.match('^([1-4]|one|two|three|four)\s*(\+|\-)?$', message)
         result = None
         if match is not None:
             number = int(Handle_Score_SMS_HTTP_Response_Builder.number_map.get(match.group(1), match.group(1)))
