@@ -43,6 +43,8 @@ class Interview(Base):
 
     @staticmethod
     def datetime_to_string(ts):
+        if ts is None:
+            return None
         dtnow = datetime.datetime.now()
         dtutcnow = datetime.datetime.utcnow()
         delta = dtnow - dtutcnow
@@ -68,5 +70,8 @@ class Interview(Base):
             'cultural_score' : self.cultural_score,
             'number_of_pings' : self.number_of_pings,
             'is_coffee_break' : self.is_coffee_break(),
-            'notes' : self.notes
+            'notes' : self.notes,
+            'technical_score_ts' : Interview.datetime_to_string(self.technical_score_ts),
+            'cultural_score_ts' : Interview.datetime_to_string(self.cultural_score_ts),
+            'notes_ts' : Interview.datetime_to_string(self.notes_ts)
         };

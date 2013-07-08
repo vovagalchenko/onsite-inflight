@@ -1,0 +1,129 @@
+<HTML>
+	<HEAD>
+		<TITLE>Onsite Interviews</TITLE>
+		<META http-equiv="Content-type" value="text/html; charset=utf-8">
+        <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
+        <META name="apple-mobile-web-app-capable" content="yes">
+		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+        <SCRIPT type="text/javascript">
+            var labels_height = 20;
+            var horizontal_padding_proportion = .1;
+            var totals_data = null;
+            window.onload = function()
+            {
+                make_ajax_request("/api/time_to_respond_stats", update_totals_data, null);
+            }
+
+            window.onresize = function()
+            {
+                update_chart(totals_data);
+            };
+
+            function update_totals_data(data)
+            {
+                totals_data = data;
+                update_chart(totals_data);
+            }
+
+            function get_total_num_interviews_in_bucket(bucket)
+            {
+                var total_in_bucket = 0;
+                for (var interviewer_email in bucket['interviews'])
+                {
+                    total_in_bucket += bucket['interviews'][interviewer_email].length;
+                }
+                return total_in_bucket;
+            }
+
+            function apply_chart_transforms(object_to_transform, data_to_reflect)
+            {
+                var chart_selection= d3.selectAll('#bar-chart');
+                var total_chart_height = chart_selection[0][0].clientHeight - labels_height;
+                var total_chart_width = chart_selection[0][0].clientWidth;
+                var num_bars = data_to_reflect.length;
+                var width_space_per_bar = total_chart_width/num_bars;
+                var max_y_value = -1;
+                for (var i = 0; i < num_bars; i++)
+                {
+                    var total_in_bucket = get_total_num_interviews_in_bucket(data_to_reflect[i]);
+                    if (max_y_value < total_in_bucket)
+                        max_y_value = total_in_bucket;
+                }
+                var bucket_height_callback = function(bucket)
+                {
+                    return total_chart_height*(get_total_num_interviews_in_bucket(bucket)/max_y_value);
+                }
+                return object_to_transform.
+                    attr('x', function (data, index)
+                    {
+                        return (index + (horizontal_padding_proportion/2)) * width_space_per_bar;
+                    }).
+                    attr('y', function (data)
+                    {
+                        return total_chart_height - bucket_height_callback(data);
+                    }).
+                    attr('width', (1 - horizontal_padding_proportion)*width_space_per_bar).
+                    attr('height', function (data, index)
+                    {
+                        return bucket_height_callback(data) + "px";
+                    });
+            }
+
+            function apply_chart_labels_transforms(object_to_transform, data_to_reflect)
+            {
+                var chart_selection = d3.selectAll('#bar-chart');
+                var total_chart_height = chart_selection[0][0].clientHeight;
+                var total_chart_width = chart_selection[0][0].clientWidth;
+                var num_bars = data_to_reflect.length;
+                var width_space_per_bar = total_chart_width/num_bars;
+                return object_to_transform.
+                    attr('x', function (data, index)
+                    {
+                        return (index+0.5) * width_space_per_bar;
+                    }).
+                    attr('y', total_chart_height).
+                    style('opacity', 1.0).
+                    text(function (d)
+                    {
+                        if (d['range'] == 'other')
+                            return 'other';
+                        return d['range'][0] + "-" + d['range'][1];
+                    });
+            }
+
+            function update_chart(data_to_reflect)
+            {
+                var chart_selection= d3.selectAll('#bar-chart');
+                var total_chart_height = chart_selection[0][0].clientHeight;
+                var rect = chart_selection.selectAll('rect').data(data_to_reflect);
+                var enter_transition_duration = 1000;
+                var delay_function = function (data, index)
+                {
+                    return index * 40;
+                };
+                apply_chart_transforms(rect.transition(), data_to_reflect)
+                    .delay(delay_function);
+                apply_chart_transforms(
+                    rect.enter().append('rect').
+                        attr('y', total_chart_height - labels_height).
+                        attr('height', "0px").
+                        transition(), data_to_reflect).
+                    duration(enter_transition_duration);
+                rect.exit().remove();
+
+                var labels = chart_selection.selectAll('text').data(data_to_reflect);
+                apply_chart_labels_transforms(labels.transition(), data_to_reflect).delay(delay_function);
+                apply_chart_labels_transforms(labels.enter().append('text').style('opacity', 0.0).transition(), data_to_reflect).duration(enter_transition_duration);
+                labels.exit().remove();
+            }
+        </SCRIPT>
+        <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
+        <SCRIPT src="http://d3js.org/d3.v3.min.js" charset="utf-8"></SCRIPT>
+        <LINK rel="stylesheet" media="all" href="/css/stats.css"></LINK>
+	</HEAD>
+	<BODY>
+        <DIV class="main-chart">
+            <SVG id="bar-chart"></SVG>
+        </DIV>
+	</BODY>
+</HTML>
