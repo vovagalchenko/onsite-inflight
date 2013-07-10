@@ -1,15 +1,61 @@
-.main-chart
+body
 {
-    position: relative;
-    width: 100%;
+    min-height: 600px;
+    min-width: 800px;
+    margin: 8px;
+}
+
+#left-pane
+{
+    float: left;
+    width: 592px;
     height: 100%;
 }
 
-.main-chart>svg
+#interviewer-talbeview div
 {
+    text-color: rgba(0, 0, 0, 1);
+}
+
+#interviewer-tableview div:hover
+{
+    background-color: rgba(0, 0, 0, .2);
+}
+
+#interviewer-tableview div.selected
+{
+    background-color: rgba(0, 0, 0, .4);
+    color: rgba(255, 255, 255, 1);
+}
+
+
+#bar-chart
+{
+    float: left;
+    height: 492px;
+    width: 100%;
+}
+
+#interviewer-container
+{
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    min-width: 200px;
 }
 
 text
 {
     text-anchor: middle;
+}
+
+rect.base
+{
+    opacity:0.5;
+}
+
+rect.overlay
+{
+    opacity:1.0;
+    z-index: 1000;
 }

@@ -40,6 +40,9 @@ class Interviewer(Base):
         session = DB_Session_Factory.get_db_session()
         return session.query(Interviewer).filter(Interviewer.phone_number == phone_number).first()
 
+    def dict_representation(self):
+        return {'name' : self.name, 'avatar_url' : self.avatar_url}
+
     def get_most_recently_completed_interview(self, for_update = False):
         last_interview = None
         db_session = DB_Session_Factory.get_db_session()

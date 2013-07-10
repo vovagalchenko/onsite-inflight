@@ -26,7 +26,7 @@ function make_ajax_request(url, results_process_callback, error_handling_callbac
                     results_process_callback(parsed_data);
                 }
             }
-            else
+            else if(error_handling_callback != null)
             {
                 error_handling_callback();
             }

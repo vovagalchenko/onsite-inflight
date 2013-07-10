@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from model.db_session import DB_Session_Factory
 from model.interview import Interview
+from model.interviewer import Interviewer
 from sqlalchemy import func
 import json
 
@@ -70,8 +71,13 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def print_body(self):
         db_session = DB_Session_Factory.get_db_session()
-        interviewees = []
+        interviewers = {}
         for interview in db_session.query(Interview).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts).yield_per(5):
+            if interviewers.get(interview.interviewer_email, None) is None:
+                interviewers[interview.interviewer_email] = db_session.query(Interviewer).get(interview.interviewer_email).dict_representation()
+                interviewers[interview.interviewer_email]['num_interviews'] = 0
+            else:
+                interviewers[interview.interviewer_email]['num_interviews'] += 1
             if interview.cultural_score_ts is None or interview.end_time is None:
                 seconds_to_respond = -1;
             else:
@@ -85,4 +91,25 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
                     break
                 else:
                     continue
-        print json.dumps(self.buckets)
+        interviewers_array = []
+        max_num_interviews = -1
+        for email, info_dict in interviewers.iteritems():
+            info_dict['email'] = email
+            interviewers_array.append(info_dict)
+            if info_dict['num_interviews'] > max_num_interviews:
+                max_num_interviews = info_dict['num_interviews']
+        for interviewer_info in interviewers_array:
+            num_good = 0
+            num_bad = 0
+            for bucket in self.buckets:
+                num_interviews = len(bucket['interviews'].get(interviewer_info['email'], []))
+                if bucket['range'] != 'other' and bucket['range'][1] <= 30:
+                    num_good += num_interviews
+                else:
+                    num_bad += num_interviews
+            fudge = (max_num_interviews - interviewer_info['num_interviews'])/2.0
+            num_good += fudge
+            num_bad += fudge
+            interviewer_info['score'] = num_good/num_bad
+        interviewers_array.sort(key=lambda interviewer_info: interviewer_info['score'], reverse=True)
+        print json.dumps({'interviewers' : interviewers_array, 'buckets' : self.buckets})
