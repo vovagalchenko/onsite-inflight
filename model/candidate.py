@@ -6,7 +6,7 @@ class Candidate(Base):
     __tablename__ = 'candidate'
 
     candidate_name = Column(String(50), primary_key = True)
-    position = Column(String(50), nullable = False)
+    position = Column(String(100), nullable = False)
     hiring_manager = Column(String(50), ForeignKey('interviewer.email'))
     interviews = relationship("Interview", backref = backref('candidate'), order_by = 'Interview.end_time', cascade = 'all, delete-orphan');
 
