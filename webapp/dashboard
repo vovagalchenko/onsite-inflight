@@ -348,7 +348,7 @@
                     {
                         interview = interviews[i];
 
-                        if (expanded_interviews[interview['id']] == true)
+                        if (expanded_interviews[interview['id']] === true)
                         {
                             interview['expanded'] = true;
                         }
@@ -397,9 +397,16 @@
                 build_content_from_template('interviews_handlebars', data, 'interviews_list_tableview');
             }
 
-            function update_candidate_detail_ui_bypassing_image_cache(data)
+            function update_candidate_detail_ui_initially(data)
             {
                 last_avatar_refresh_ts = new Date().getTime();
+                for (var i = 0; i < data['interviews'].length; i++)
+                {
+                    if (data['interviews'][i]['notes'] != null)
+                    {
+                        expanded_interviews[data['interviews'][i]['id']] = true;
+                    }
+                }
                 update_candidate_detail_ui(data);
             }
 
@@ -448,7 +455,7 @@
                 }
             }
 
-            function synchronize_with_server(bypass_image_cache)
+            function synchronize_with_server(initial)
             {
                 if (is_current_page_candidate_list())
                 {
@@ -456,7 +463,7 @@
                 }
                 else if(focused_candidate_name != null)
                 {
-                    ui_update_callback = (bypass_image_cache)? update_candidate_detail_ui_bypassing_image_cache : update_candidate_detail_ui;
+                    ui_update_callback = (initial)? update_candidate_detail_ui_initially: update_candidate_detail_ui;
                     make_ajax_request("/api/candidate_detail?candidate_name=" + encodeURIComponent(focused_candidate_name) + "&date=" + Math.floor(current_date.getTime()/1000), ui_update_callback, handle_ajax_error);
                 }
             }
