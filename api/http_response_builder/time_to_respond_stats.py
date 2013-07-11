@@ -110,6 +110,6 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
             fudge = (max_num_interviews - interviewer_info['num_interviews'])/2.0
             num_good += fudge
             num_bad += fudge
-            interviewer_info['score'] = num_good/num_bad
+            interviewer_info['score'] = num_good/(num_bad + num_good)
         interviewers_array.sort(key=lambda interviewer_info: interviewer_info['score'], reverse=True)
         print json.dumps({'interviewers' : interviewers_array, 'buckets' : self.buckets})
