@@ -28,6 +28,18 @@ class Date_Time_Parameter_Type(Parameter_Type):
     def get_value_from_raw(cls, raw_value):
         return datetime.fromtimestamp(float(raw_value))
 
+class Boolean_Parameter_Type(object):
+    @classmethod
+    def get_value_from_raw(cls, raw_value):
+        ret_value = None
+        if raw_value == 'true':
+            ret_value = True
+        elif raw_value == 'false':
+            ret_value = False
+        else:
+            raise ValueError, "Only \"true\" and \"false\" are acceptable values for a boolean. You passed in " + raw_value
+        return ret_value
+
 class Parameter(object):
     name = None
     default = None
