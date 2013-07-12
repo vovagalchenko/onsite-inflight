@@ -133,13 +133,15 @@ def main(argv):
                             existing_interview.start_time = start_time
                             existing_interview.end_time = end_time
                             existing_interview.candidate = candidate
-                            interviews_to_delete.remove(existing_interview)
+                            if existing_interview in interviews_to_delete:
+                                interviews_to_delete.remove(existing_interview)
                             interview_exists = True
                             break
                     if interview_exists is False:
                         new_interview = Interview(interviewer.email, start_time, end_time, candidate_name, room)
                         new_interview.candidate = candidate
                         db_session.add(new_interview)
+                        existing_interviews.append(new_interview)
             events_request = service.events().list_next(events_request, response)
         for interview_to_delete in interviews_to_delete:
             print "Deleting interview with " + interview_to_delete.candidate_name
