@@ -25,11 +25,12 @@ class Scores_By_Time_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def print_body(self):
         stats = []
-        for stats_for_hour in DB_Session_Factory.get_db_session().query(func.dayofweek(Interview.end_time), func.hour(Interview.end_time), func.avg(Interview.technical_score), func.avg(Interview.cultural_score)).group_by(func.dayofweek(Interview.end_time), func.hour(Interview.end_time)).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts):
+        for stats_for_hour in DB_Session_Factory.get_db_session().query(func.dayofweek(Interview.end_time), func.hour(Interview.end_time), func.avg(Interview.technical_score), func.avg(Interview.cultural_score), func.count(1)).group_by(func.dayofweek(Interview.end_time), func.hour(Interview.end_time)).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts):
             stats.append({
                 'Day' : self.days[stats_for_hour[0]],
                 'Hour' : stats_for_hour[1],
                 'Avg_Technical_Score' : stats_for_hour[2],
                 'Avg_Cultural_Score' : stats_for_hour[3],
+                'Sample_Size' : stats_for_hour[4],
             })
         print json.dumps(stats)
