@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+        <script type="text/javascript" src="js/ajax.js"></script>
+		<style type="text/css">
+		.axis path,
+    .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+    }
+
+    .axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+    }
+
+
+		</style>
+
+    </head>
+    <body>
+
+        <script type="text/javascript">
+        window.onload = function()
+        {
+            make_ajax_request("api/scores_by_time_stats", update_ui, null);
+        }
+
+			var svg = d3.select("body").append("svg");
+			//Width and height
+			var w = 700;
+			var h = 500;
+			var padding = 30;  // <-- New!
+
+        var days_of_week = {
+            'Mon' : 0,
+            'Tue' : 1,
+            'Wed' : 2,
+            'Thu' : 3,
+            'Fri' : 4,
+            'Sat' : 5,
+            'Sun' : 6
+        }
+    
+        function parseIntOrLeaveString(stringValue)
+        {
+            var result = parseInt(stringValue);
+            if (isNaN(result))
+            {
+                result = stringValue;
+            }
+            return result;
+        }
+
+        function get_keys(dict)
+        {
+            var keys = [];
+            for(var k in dict) keys.push(parseIntOrLeaveString(k));
+            return keys;
+        }
+		
+        function update_ui(DayTimeMatrix)
+        {
+
+            var times_of_day_dict = {};
+            var days_of_week_dict = {};
+            var max_score = -1;
+            var min_score = Number.MAX_VALUE;
+            var score_of_interest = 'Avg_Cultural_Score';
+            for (var i = 0; i < DayTimeMatrix.length; i++)
+            {
+                times_of_day_dict[DayTimeMatrix[i].Hour] = true;
+                days_of_week_dict[DayTimeMatrix[i].Day] = true;
+                if (DayTimeMatrix[i][score_of_interest] === null)
+                    continue;
+                if (DayTimeMatrix[i][score_of_interest] < min_score)
+                {
+                    min_score = DayTimeMatrix[i][score_of_interest];
+                }
+                else if(DayTimeMatrix[i][score_of_interest] > max_score)
+                {
+                    max_score = DayTimeMatrix[i][score_of_interest];
+                }
+            }
+            TimeOfDay = get_keys(times_of_day_dict);
+            TimeOfDay.sort(function(a, b)
+            {
+                return a - b;
+            });
+            DayOfWeek = get_keys(days_of_week_dict);
+            DayOfWeek.sort(function(a, b)
+            {
+                return days_of_week[a] - days_of_week[b];
+            });
+ 				
+		 	var xScale = d3.scale.ordinal()
+                 .domain(d3.range(TimeOfDay.length))
+                 //.domain(DayTimeMatrix.map(function(d) { return d.Time; }))
+                 .rangeRoundBands([padding, w - padding * 2]);
+             
+      var yScale = d3.scale.ordinal()
+                 //.domain(DayTimeMatrix.map(function(d) { return d.Day; }))
+                 .domain(d3.range(DayOfWeek.length))
+                 .rangeRoundBands([padding, h - padding]);
+ 
+      var xTickScale =d3.scale.ordinal() 
+                      .domain(d3.range(TimeOfDay.length)) 
+                      .rangeRoundBands([padding, w - padding * 2]);
+ 
+     var yTickScale =d3.scale.ordinal() 
+                      .domain(d3.range(DayOfWeek.length)) 
+                      .rangeRoundBands([padding, h - padding]);
+             
+
+
+
+		 	svg.selectAll("rect")
+		 	   .data(DayTimeMatrix)
+		 	   .enter()
+		 	   .append("rect")
+		 	   .attr("x", function(d, i) {
+		 	      return xScale(TimeOfDay.indexOf(d.Hour));         
+		 	   })
+		 	   .attr("y", function(d, i) {
+ 	 			   return yScale(DayOfWeek.indexOf(d.Day));  
+		 			})			   
+		 	   .attr("width", 40)
+         .attr("height", 40)
+		 		//  .attr("x", function(d, i) {
+		 	 //    return yScale(i);  //Just the data value
+		 		// })
+        .style("fill", function(d) {
+            if (d[score_of_interest] === null)
+            {
+                return "rgba(0, 0, 0, 0)";
+            }
+            var color_offset = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
+        
+            var ret_value = "rgb(" + (0 + color_offset).toString()
+                          + ", 0, "
+                          + (255 - color_offset).toString()
+                          + ")";
+            return ret_value;
+        });
+				
+        var xAxis = d3.svg.axis()
+                          .scale(xTickScale)
+                          .orient("bottom")
+                          .tickFormat(function(d, i)
+        {
+            return TimeOfDay[i];
+        });
+
+
+        svg.append("g")
+          .attr("class", "axis")
+          .attr("transform", "translate(0," + (h - padding) + ")")
+          .call(xAxis);     
+ 
+       var yAxis = d3.svg.axis()
+                   .scale(yTickScale)
+                   .orient("left")
+                   .tickValues(DayOfWeek);
+
+      svg.append("g")
+       .attr("class", "axis")
+       .attr("transform", "translate(" + padding + ",0)")
+       .call(yAxis);                  
+        }
+
+
+
+        </script>
+    </body>
+</html>   

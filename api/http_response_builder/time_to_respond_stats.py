@@ -15,47 +15,19 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
     include_non_responders = Parameter('include_non_responders', required = False, default = False, parameter_type = Boolean_Parameter_Type)
 
     buckets = [{
-        'range' : [0, 5],
+        'range' : [0, 15],
         'interviews' : {},
     },
     {
-        'range' : [5, 10],
+        'range' : [15, 30],
         'interviews' : {},
     },
     {
-        'range' : [10, 15],
+        'range' : [30, 45],
         'interviews' : {},
     },
     {
-        'range' : [15, 20],
-        'interviews' : {},
-    },
-    {
-        'range' : [20, 25],
-        'interviews' : {},
-    },
-    {
-        'range' : [25, 30],
-        'interviews' : {},
-    },
-    {
-        'range' : [30, 35],
-        'interviews' : {},
-    },
-    {
-        'range' : [35, 45],
-        'interviews' : {},
-    },
-    {
-        'range' : [45, 50],
-        'interviews' : {},
-    },
-    {
-        'range' : [50, 55],
-        'interviews' : {},
-    },
-    {
-        'range' : [55, 60],
+        'range' : [45, 60],
         'interviews' : {},
     },
     {
