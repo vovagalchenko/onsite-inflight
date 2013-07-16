@@ -313,13 +313,10 @@ p
     color: rgb(155, 155, 155);
 }
 
-.score_whiteout_bg
+.whiteout_bg
 {
     position: absolute;
     height: 100%;
-    width: 134px;
-    float: right;
-    right: 0px;
 
     background: -moz-linear-gradient(left,  rgba(250,250,250,0) 0%, rgba(250,250,250,1) 19%, rgba(250,250,250,1) 100%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(250,250,250,0)), color-stop(19%,rgba(250,250,250,1)), color-stop(100%,rgba(250,250,250,1))); /* Chrome,Safari4+ */

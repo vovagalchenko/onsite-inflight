@@ -97,15 +97,6 @@
                 }
                 return '' + score_int + modifier_string;
             }
-
-            function build_content_from_template(script_id, data, target_container_id)
-            {
-                var templateSource = document.getElementById(script_id);
-                var template= Handlebars.compile(templateSource.innerHTML);
-                var built_html = template(data);
-                var final_html = built_html + templateSource.outerHTML;
-                document.getElementById(target_container_id).innerHTML = final_html;
-            }
     
             function button_is_active(button_class)
             {
@@ -549,7 +540,7 @@
                             {{/if}}
                         </DIV>
                         <DIV class="above-progress interviewer_name" style="position:relative;">{{interviewer/name}}</DIV>
-                        <DIV class="score_whiteout_bg"></DIV>
+                        <DIV class="whiteout_bg" style="width:134px;float:right;right:0px"></DIV>
                         <DIV class="above-progress column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
                         <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                         </BR>

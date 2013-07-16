@@ -1,0 +1,308 @@
+<HTML>
+	<HEAD>
+		<TITLE>Onsite Interviews</TITLE>
+		<META http-equiv="Content-type" value="text/html; charset=utf-8">
+        <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
+        <META name="apple-mobile-web-app-capable" content="yes">
+        <SCRIPT type="text/javascript">
+            var ranges = [
+                {
+                    'range' : [0, 20*60000],
+                    'color' : 'rgb(151, 215, 255)',
+                },
+                {
+                    'range' : [20*60000, 40*60000],
+                    'color' : 'rgb(1, 59, 102)',
+                },
+                {
+                    'range' : [40*60000, Number.MAX_VALUE],
+                    'color' : 'rgb(229, 19, 19)',
+                },
+            ];
+            var interview_dot_horizontal_padding = 10;
+            var interview_dot_vertical_padding;
+            var interview_dot_radius = 4;
+            var padding_between_dot_rows = 5;
+            var max_num_interview_dots_per_row = 15;
+            var num_interview_dots_per_row;
+            var num_interview_dot_rows;
+
+            window.onload = function()
+            {
+                make_ajax_request("/api/time_to_respond_stats", on_interviewer_data_receipt, null);
+            }
+
+            // In ms
+            function time_to_response(interview)
+            {
+                return new Date(interview['cultural_score_ts']).getTime() - (new Date(interview['end_time']).getTime() + 5*60000);
+            }
+
+            function clone(obj)
+            {   
+                return JSON.parse(JSON.stringify(obj));
+            } 
+
+            function get_score(interviewer, max_num_interviews)
+            {
+                var cutoff = 30*60000;
+                var num_interviews = interviewer.interviews.length;
+                var num_good = (max_num_interviews - num_interviews)/2
+                var num_bad = num_good;
+                for (var i = 0; i < num_interviews; i++)
+                {
+                    if (time_to_response(interviewer.interviews[i]) <= cutoff)
+                    {
+                        num_good += 1;
+                    }
+                    else
+                    {
+                        num_bad += 1;
+                    }
+                }
+                return num_good/(num_bad + num_good);
+            }
+
+            function get_buckets(interviewers)
+            {
+                var buckets = clone(ranges);
+                for (var i = 0; i < interviewers.length; i++)
+                {
+                    for (var j = 0; j < interviewers[i].interviews.length; j++)
+                    {
+                        var time_to_respond = time_to_response(interviewers[i].interviews[j]);
+                        for (var k = 0; k < buckets.length; k++)
+                        {
+                            if (!buckets[k].interviews)
+                            {
+                                buckets[k].interviews = [];
+                            }
+                            if (time_to_respond < buckets[k].range[1])
+                            {
+                                buckets[k].interviews.push(interviewers[i].interviews[j]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return buckets;
+            }
+
+            function percentage_to_coordinate(percentage, center, radius)
+            {
+                var angle = percentage*Math.PI*2;
+                return {
+                    'x' : center.x + Math.cos(angle)*radius,
+                    'y' : center.y + Math.sin(angle)*radius
+                };
+            }
+
+            function linear_distance(a, b)
+            {
+                return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+            }
+
+            function on_interviewer_data_receipt(interviewers_data)
+            {
+                var interviewer_array = [];
+                var max_num_interviews = -1;
+                var total_num_interviews = 0;
+                for (var interviewer_email in interviewers_data)
+                {
+                    var interviewer = interviewers_data[interviewer_email];
+                    if (max_num_interviews < interviewer.interviews.length)
+                    {
+                        max_num_interviews = interviewer.interviews.length;
+                    }
+                    var use_avatar = interviewer['avatar_url'] != null;
+                    var interviewer_name = interviewer['name'];
+                    interviewer['use_avatar'] = use_avatar;
+                    interviewer['initials'] = (interviewer_name.charAt(0) + interviewer_name.split(/\s/).pop().charAt(0)).toUpperCase();
+                    var total_interview_response_time = 0;
+                    var interview_index = interviewer.interviews.length;
+                    while(interview_index--)
+                    {
+                        if (interviewer.interviews[interview_index].cultural_score_ts)
+                        {
+                            total_interview_response_time += time_to_response(interviewer.interviews[interview_index]);
+                            total_num_interviews++;
+                        }
+                        else
+                        {
+                            interviewer.interviews.splice(interview_index, 1);
+                        }
+                    }
+                    interviewer['avg_response_time'] = parseInt((total_interview_response_time/interviewer['interviews'].length)/60000);
+                    interviewer['username'] = interviewer['email'].replace(/@box.com$/, '');
+                    interviewer_array.push(interviewer);
+                }
+                interviewer_array.sort(function (interviewer_a, interviewer_b)
+                {
+                    result = get_score(interviewer_b, max_num_interviews) - get_score(interviewer_a, max_num_interviews);
+                    if (result === 0)
+                    {
+                        result = interviewer_a.avg_response_time - interviewer_b.avg_response_time;
+                    }
+                    return result;
+                });
+                Handlebars.registerHelper('list', function(data_array, options)
+                {
+                    var out = '';
+                    var length;
+                    for (var i = 0; i < data_array.length; i++)
+                    {
+                        out += options.fn(data_array[i]);
+                    }
+                    return out;
+                });
+                build_content_from_template('interviews_handlebars', {'interviewers' : interviewer_array}, 'interviews_list_tableview');
+
+                num_interview_dots_per_row = Math.min(max_num_interview_dots_per_row, max_num_interviews);
+                num_interview_dot_rows = Math.ceil(max_num_interviews/num_interview_dots_per_row);
+                for (var i = 0; i < interviewer_array.length; i++)
+                {
+                    var interview_dots_svg = d3.select("#interview-dots-" + interviewer_array[i].username)
+                    var viewBox_width = interview_dots_svg.attr('viewBox').split(/\s+/)[2];
+                    var viewBox_height = interview_dots_svg.attr('viewBox').split(/\s+/)[3];
+                    interview_dot_vertical_padding = (viewBox_height - 2*interview_dot_radius*num_interview_dot_rows - (num_interview_dot_rows-1)*padding_between_dot_rows)/2;
+                    var right_padding_per_dot = ((viewBox_width - (interview_dot_horizontal_padding*2)) - (2*interview_dot_radius*num_interview_dots_per_row))/(num_interview_dots_per_row-1);
+                    interview_dots_svg.selectAll('circle').data(interviewer_array[i].interviews).enter().append('circle').
+                        attr('r', 0).
+                        attr('cx', function(data, i)
+                        {
+                            var column  = i%num_interview_dots_per_row;
+                            return interview_dot_horizontal_padding + column*right_padding_per_dot + (1 + 2*column)*interview_dot_radius;
+                        }).
+                        attr('cy', function(data, i)
+                        {
+                            var row = Math.floor(i/num_interview_dots_per_row);
+                            return interview_dot_vertical_padding + row*padding_between_dot_rows + (1 + 2*row)*interview_dot_radius;
+                        }).
+                        attr('fill', function(interview)
+                        {
+                            var time_it_took = time_to_response(interview);
+                            for (var j = 0; j < ranges.length; j++)
+                            {
+                                if (time_it_took < ranges[j].range[1])
+                                {
+                                    return ranges[j].color;
+                                }
+                            }
+                        }).
+                        transition().
+                        attr('r', interview_dot_radius).
+                        delay(function (data, i)
+                        {
+                            return i*100;
+                        }).
+                        duration(1000);
+                }
+                
+                var buckets = get_buckets(interviewer_array);
+                var slices_group = d3.select("#slices").selectAll("path").data(buckets);
+                var pie_chart = d3.select("#pie-chart");
+                var viewBox_width = pie_chart.attr('viewBox').split(/\s+/)[2];
+                var viewBox_height = pie_chart.attr('viewBox').split(/\s+/)[3];
+                var center = {};
+                center['x'] = viewBox_width/2;
+                center['y'] = viewBox_height/2;
+            
+                var radius = Math.min(center.x, center.y);
+                slices_group.enter().append('path').
+                    attr('fill', function(bucket)
+                    {
+                        return bucket.color;
+                    });
+                slices_group.transition().
+                    attrTween('d', function (data, i, start_value)
+                    {
+                        return function(progress)
+                        {
+                            var interviews_already_plotted = 0;
+                            for (var j = 0; j < i; j++)
+                            {
+                                interviews_already_plotted += buckets[j].interviews.length;
+                            }
+                            var start_coordinate = percentage_to_coordinate(progress * (interviews_already_plotted/total_num_interviews), center, radius);
+                            var end_coordinate = percentage_to_coordinate(progress * (interviews_already_plotted/total_num_interviews + data.interviews.length/total_num_interviews), center, radius);
+                            var arc_sweep_flags = "0 0";
+                            if (progress * (data.interviews.length/total_num_interviews) > .5)
+                            {
+                                arc_sweep_flags = "1 1";
+                            }
+                            return "M" + center.x + "," + center.y + " " + "L" + start_coordinate.x + ","  + start_coordinate.y + " " + "A" + radius + "," + radius + " " + arc_sweep_flags + " 1" + end_coordinate.x + "," + end_coordinate.y + " z";
+                        }
+                    }).
+                    duration(1000);
+                slices_group.attr('transform', "rotate(-90 " + center.x + " " + center.y + ")")
+                pie_chart.select("#pie-center").
+                    attr('fill', 'rgb(243, 243, 243)').
+                    attr('r', radius/2).
+                    attr('cx', center.x).
+                    attr('cy', center.y);
+                var total_interviews_label = d3.select('#total-interviews-label').
+                    attr('x', center.x - radius/4).
+                    attr('y', center.y - radius/4).
+                    attr('width', radius/2).
+                    attr('height', radius/2);
+                d3.select("#num-interviews-label").data([total_num_interviews]).
+                    text("0").
+                    transition().
+                    tween("text", function(d, i)
+                    {
+                        return function(progress)
+                        {
+                            this.textContent = Math.floor(progress*d).toString();
+                        }
+                    }).
+                    duration(1000);
+/*
+                total_interviews_label.
+                    append('tspan').
+                    style('font-size', '40px').
+                    text('145');
+                total_interviews_label.
+                    append('tspan').
+                    style('font-size', '10px').
+                    text('interviews');
+*/
+            }
+        </SCRIPT>
+		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+		<LINK href="css/time_stats.css" type="text/css" rel="stylesheet">
+        <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="http://d3js.org/d3.v3.min.js" charset="utf-8"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/handlebars.js" charset="utf-8"></SCRIPT>
+	</HEAD>
+	<BODY>
+        <DIV class="header-bar" style="height:360px;padding-top:20px;padding-bottom:20px;">
+            <SVG id="pie-chart" width="100%" height="360px" viewBox="0 0 360 360">
+                <G id="slices"></G>
+                <CIRCLE id="pie-center"></CIRCLE>
+                <foreignObject id="total-interviews-label" style="display:table"><DIV><STRONG id="num-interviews-label" style="font-size:55px;font-weight:600px;line-height:55px"></STRONG></BR><P style="font-size:15px;font-weight:300px;line-height:20px;">interviews</P></DIV></foreignObject>
+            </SVG>
+        </DIV>
+        <DIV class="tableview" id="interviews_list_tableview" style="top: 400px;">
+            <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
+                {{#list interviewers}}
+                <DIV class="tableview-cell non_selectable">
+                    <DIV>
+                    <DIV class="interviewer_avatar_frame" style="position:relative;">
+                        {{#if use_avatar}}
+                            <DIV style="background-image:url('{{avatar_url}}');"></DIV>
+                        {{else}}
+                            <DIV style="background-color:rgb(72, 195, 252); color:rgb(255,255,255); text-align:center; line-height:35px;">{{initials}}</DIV>
+                        {{/if}}
+                    </DIV>  
+                    <DIV class="interviewer_name" style="position:relative;">{{name}}</DIV>
+                    <DIV style="position:relative;float:right;width:50px;margin-left:30px;text-align:right;"><P><strong>{{avg_response_time}}</strong> m</P></DIV>
+                    <DIV style="position:relative;float:none;height:100%;width:auto;margin-right:80px;margin-left:300px;z-index:5;overflow:hidden;">
+                        <SVG id="interview-dots-{{username}}" width="100%" height="100%" viewBox="0 0 388 44"></SVG>
+                    </DIV>
+                    </DIV>
+                </DIV>  
+                {{/list}}
+            </SCRIPT>
+        </DIV>
+	</BODY>
+</HTML>

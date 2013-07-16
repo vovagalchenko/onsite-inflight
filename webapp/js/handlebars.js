@@ -22,6 +22,15 @@ THE SOFTWARE.
 
 */
 
+function build_content_from_template(script_id, data, target_container_id)
+{   
+    var templateSource = document.getElementById(script_id);
+    var template= Handlebars.compile(templateSource.innerHTML);
+    var built_html = template(data);
+    var final_html = built_html + templateSource.outerHTML;
+    document.getElementById(target_container_id).innerHTML = final_html;
+}
+
 // lib/handlebars/browser-prefix.js
 var Handlebars = {};
 
