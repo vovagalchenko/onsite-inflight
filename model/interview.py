@@ -51,7 +51,7 @@ class Interview(Base):
         hh,mm = divmod((delta.days * 24*60*60 + delta.seconds + 30) // 60, 60)
         return "%s%+03d:%02d" % (ts.isoformat(), hh, mm)
 
-    def dict_representation(self):
+    def dict_representation(self, show_scores = False):
         interviewer = {
             'name' : self.interviewer.name,
             'email' : self.interviewer.email,
@@ -59,19 +59,21 @@ class Interview(Base):
         }
         if self.interviewer.avatar_url is not None:
             interviewer['avatar_url'] = self.interviewer.avatar_url
-        return {
+        interview_dict = {
             'id' : self.id,
             'interviewer' : interviewer,
             'start_time' : Interview.datetime_to_string(self.start_time),
             'end_time' : Interview.datetime_to_string(self.end_time),
             'candidate_name' : self.candidate_name,
             'room' : self.room,
-            'technical_score' : self.technical_score,
-            'cultural_score' : self.cultural_score,
             'number_of_pings' : self.number_of_pings,
             'is_coffee_break' : self.is_coffee_break(),
-            'notes' : self.notes,
             'technical_score_ts' : Interview.datetime_to_string(self.technical_score_ts),
             'cultural_score_ts' : Interview.datetime_to_string(self.cultural_score_ts),
             'notes_ts' : Interview.datetime_to_string(self.notes_ts)
-        };
+        }
+        if show_scores is True:
+            interview_dict['technical_score'] = self.technical_score
+            interview_dict['cultural_score'] = self.cultural_score
+            interview_dict['notes'] = self.notes
+        return interview_dict

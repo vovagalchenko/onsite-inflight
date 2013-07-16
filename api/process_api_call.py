@@ -28,7 +28,15 @@ if match is not None:
 
 params_storage = cgi.FieldStorage()
 try:
-    response_builder = end_points[endpoint](params_storage)
+    response_builder_class = end_points.get(endpoint, None)
+    if response_builder_class is None:
+        output_str = json.dumps({'error' : 'invalid api endpoint: ' + endpoint})
+        sys.stderr.write(output_str)
+        print "Content-Type: application/json"
+        print
+        print json.dumps(output_str)
+        exit()
+    response_builder = response_builder_class(params_storage)
 # This 'except' is meant to only catch exceptions that are thrown when passed in
 # arguments are insufficient or inappropriate. Probably should create a subclass
 # of ValueError for this purpose, but it's not critical right now.

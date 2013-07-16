@@ -9,7 +9,6 @@ import json
 
 class Candidate_List_HTTP_Response_Builder(HTTP_Response_Builder):
     date = Parameter('date', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)
-    requires_authn = True
 
     def print_body(self):
         db_session = DB_Session_Factory.get_db_session()

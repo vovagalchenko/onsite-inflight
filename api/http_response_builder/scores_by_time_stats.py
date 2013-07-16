@@ -9,7 +9,6 @@ from sqlalchemy import func
 import json
 
 class Scores_By_Time_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
-    requires_authn = False
     earliest_ts = Parameter('earliest_ts', required = False, default = datetime.now() - timedelta(days=30), parameter_type = Date_Time_Parameter_Type)
     latest_ts = Parameter('latest_ts', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)
     days = {
@@ -22,6 +21,8 @@ class Scores_By_Time_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
         7 : 'Sat'
     }
     
+    def check_auth(self):
+        return None
 
     def print_body(self):
         stats = []

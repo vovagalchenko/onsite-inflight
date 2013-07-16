@@ -8,7 +8,9 @@ import json
 
 class Opt_In_List_HTTP_Response_Builder(HTTP_Response_Builder):
     date = Parameter('date', required = False, default = None, parameter_type = Date_Time_Parameter_Type)
-    requires_authn = False
+
+    def check_auth(self):
+        return None
 
     def print_body(self):
         opt_ins = []

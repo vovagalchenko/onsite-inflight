@@ -5,6 +5,7 @@
         <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
         <META name="apple-mobile-web-app-capable" content="yes">
         <SCRIPT type="text/javascript">
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             var ranges = [
                 {
                     'range' : [0, 20*60000],
@@ -102,6 +103,94 @@
                 return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
             }
 
+            function update_interview_popover(candidate)
+            {
+                var popover = d3.select('.interview-dot-popover');
+                if (popover.node() === null)
+                    return;
+                var interview_id = parseInt(popover.attr('id').replace('interview_', ''));
+                var received_interviews = candidate.interviews;
+                var found = false;
+                for (var i = 0; i < received_interviews.length; i++)
+                {
+                    if (received_interviews[i].id === interview_id)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    return;
+                }
+                var candidate_detail_div = popover.append('div').classed('measure', true);
+                candidate_detail_div.append('strong').style('font-size', 20).text(candidate.candidate_name);
+                candidate_detail_div.append('br');
+                candidate_detail_div.append('p').text(candidate.position);
+                candidate_detail_div.append('br');
+                var start_time = new Date(candidate.interviews[0].start_time);
+                candidate_detail_div.append('strong').text(months[start_time.getMonth()] + " " + start_time.getDate() + ", " + start_time.getFullYear());
+                candidate_detail_div.append('br');
+                candidate_detail_div.append('br');
+                candidate_detail_div.append('br');
+                var interview_sessions_enter = candidate_detail_div.selectAll('.interview-session-details').data(candidate.interviews).enter();
+                var interview_sessions = interview_sessions_enter.append('div').style("height", "37px");
+                interview_sessions.append('div').style("float", "left").style("padding-right", "10px").append('p').style("line-height", "37px").html(function (d)
+                {
+                    var result = d.interviewer.name;
+                    if (d.id === interview_id)
+                    {
+                        result = "<strong>" + result + "</strong>";
+                    }
+                    return result;
+                });
+                interview_sessions.append('p').style('float', 'right').style('text-align', 'left').style('width', '50px').style("line-height", "37px").html(function (d)
+                {
+                    var result = null;
+                    if (d.cultural_score_ts === null)
+                    {
+                        result = "<strong>&infin;</strong>";
+                    }
+                    else
+                    {
+                        result = "<strong>" + Math.round(time_to_response(d)/60000).toString() + "</strong>" + " m";
+                    }
+                    return result;
+                });
+                interview_sessions.append('div').classed("interview-detail-color-indicator", true).
+                    style('background-color', function(d)
+                {
+                    var color = "rgb(0, 0, 0)";
+                    if (d.cultural_score_ts === null)
+                    {
+                        color = ranges[ranges.length - 1].color;
+                    }
+                    else
+                    {
+                        for (var i = 0; i < ranges.length; i++)
+                        {
+                            if (time_to_response(d) <= ranges[i].range[1])
+                            {
+                                color = ranges[i].color;
+                                break;
+                            }
+                        }
+                    }
+                    return color;
+                });
+                interview_sessions.append('div').classed("interview-details-spacer", true).append("hr");
+                
+                var old_computed_style = getComputedStyle(popover.node())
+                var expanded_popover_height = parseInt(getComputedStyle(candidate_detail_div.node()).height);
+                popover.transition().style('top', parseInt(old_computed_style.top) - (expanded_popover_height - parseInt(old_computed_style.height))).style('height', expanded_popover_height).each("end", function()
+                {
+                    popover.select('#progress_indicator').transition().style('opacity', 0).remove().each("end", function()
+                    {
+                        candidate_detail_div.style("opacity", 0).classed('measure', false).transition().style("opacity", 1);
+                    });
+                });
+            }
+
             function on_interviewer_data_receipt(interviewers_data)
             {
                 var interviewer_array = [];
@@ -189,6 +278,40 @@
                                 }
                             }
                         }).
+                        on('mouseover', function(d, i)
+                        {
+                            console.log(d)
+                            var circle_rect = this.getBoundingClientRect();
+                            var popover_div = d3.select("body").append("div").style('opacity', 0);
+                            var pointer_height = 10;
+                            var popover_border_width = 1;
+                            var popover_bottom_padding = 4;
+                            popover_div.
+                                classed("interview-dot-popover", true).
+                                attr("id", "interview_" + d.id).
+                                html(d3.select("#progress_indicator").attr('hidden', null).node().outerHTML).
+                                style('top', function(d)
+                                {
+                                    return circle_rect.top - pointer_height - this.getBoundingClientRect().height - popover_bottom_padding;
+                                }).
+                                style('left', function(d)
+                                {
+                                    return circle_rect.left - this.getBoundingClientRect().width/2 - popover_border_width*2;
+                                }).
+                                style('opacity', 0).
+                                transition().
+                                duration(500).
+                                style('opacity', 1).each("end", function()
+                                {
+                                    make_ajax_request("/api/candidate_detail?candidate_name=" + encodeURIComponent(d.candidate_name) + "&show_scores=false&date=" + (new Date(d.end_time).getTime()/1000).toString(), update_interview_popover, null);
+                                })
+
+                        }).
+                        on('mouseout', function(d, i)
+                        {
+                            d3.selectAll(".interview-dot-popover").style('opacity', 0).remove();
+                            d3.select("#progress_indicator").attr('hidden', '');
+                        }).
                         transition().
                         attr('r', interview_dot_radius).
                         delay(function (data, i)
@@ -256,20 +379,11 @@
                         }
                     }).
                     duration(1000);
-/*
-                total_interviews_label.
-                    append('tspan').
-                    style('font-size', '40px').
-                    text('145');
-                total_interviews_label.
-                    append('tspan').
-                    style('font-size', '10px').
-                    text('interviews');
-*/
             }
         </SCRIPT>
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
 		<LINK href="css/time_stats.css" type="text/css" rel="stylesheet">
+		<LINK href="css/progress_indication.css" type="text/css" rel="stylesheet">
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="http://d3js.org/d3.v3.min.js" charset="utf-8"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/handlebars.js" charset="utf-8"></SCRIPT>
@@ -285,7 +399,7 @@
         <DIV class="tableview" id="interviews_list_tableview" style="top: 400px;">
             <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                 {{#list interviewers}}
-                <DIV class="tableview-cell non_selectable">
+                <DIV class="tableview-cell non_selectable" style="cursor:default">
                     <DIV>
                     <DIV class="interviewer_avatar_frame" style="position:relative;">
                         {{#if use_avatar}}
@@ -303,6 +417,16 @@
                 </DIV>  
                 {{/list}}
             </SCRIPT>
+        </DIV>
+        <DIV id='progress_indicator' hidden style="margin-left:166px;">
+            <DIV class='progress_indicator_segment' id='rotateG_01'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_02'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_03'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_04'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_05'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_06'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_07'></DIV>
+            <DIV class='progress_indicator_segment' id='rotateG_08'></DIV>
         </DIV>
 	</BODY>
 </HTML>

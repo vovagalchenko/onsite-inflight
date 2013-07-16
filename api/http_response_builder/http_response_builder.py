@@ -9,7 +9,6 @@ from datetime import datetime
 from lib.conf import CFG
 
 class HTTP_Response_Builder(object):
-    requires_authn = False
     content_type = 'application/json'
     params_dump = {}
 
@@ -24,9 +23,8 @@ class HTTP_Response_Builder(object):
             setattr(self, param_name, param_value)
 
     def check_auth(self):
-        if not self.requires_authn or not CFG.get_instance().is_live():
+        if not CFG.get_instance().is_live():
             return None
-
         try:
             cookie_string = os.environ['HTTP_COOKIE']
             cookie = Cookie.SimpleCookie(cookie_string)

@@ -3,9 +3,11 @@ from param_definition.parameter import Parameter, Base_64_Encoded_XML_Parameter_
 from model.user_model import User
 
 class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
-    requires_authn = False
     relay_state = Parameter('RelayState', required = False, default = 'dashboard')
     saml_response = Parameter('SAMLResponse', required = True, parameter_type = Base_64_Encoded_XML_Parameter_Type)
+
+    def check_auth(self):
+        return None
 
     def print_forbidden_headers(self):
         print "Status: 403"

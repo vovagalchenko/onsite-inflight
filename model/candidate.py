@@ -18,13 +18,13 @@ class Candidate(Base):
     def __repr__(self):
         return "<Candidate<'%s'>>" % self.candidate_name
 
-    def json_representation(self, moment_of_interest = None):
+    def json_representation(self, moment_of_interest = None, show_scores = False):
         interviews_array = []
         if moment_of_interest is None:
             moment_of_interest = datetime.today()
         for interview in self.interviews:
             if interview.end_time.date() == moment_of_interest.date():
-                interviews_array.append(interview.dict_representation())
+                interviews_array.append(interview.dict_representation(show_scores))
         candidate_dict = {
             'candidate_name' : self.candidate_name,
             'position' : self.position,

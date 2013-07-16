@@ -9,16 +9,11 @@ from sqlalchemy import func
 import json
 
 class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
-    requires_authn = False
     earliest_ts = Parameter('earliest_ts', required = False, default = datetime.now() - timedelta(days=30), parameter_type = Date_Time_Parameter_Type)
     latest_ts = Parameter('earliest_ts', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)
 
-    @staticmethod
-    def insert_interview_into_bucket(interview, bucket):
-        interviews = bucket['interviews']
-        if interviews.get(interview.interviewer_email, None) is None:
-            interviews[interview.interviewer_email] = []
-        interviews[interview.interviewer_email].append(interview.dict_representation())
+    def check_auth(self):
+        return None
 
     def print_body(self):
         db_session = DB_Session_Factory.get_db_session()
@@ -27,6 +22,6 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
             if interviewers.get(interview.interviewer_email, None) is None:
                 interviewers[interview.interviewer_email] = db_session.query(Interviewer).get(interview.interviewer_email).dict_representation()
                 interviewers[interview.interviewer_email]['interviews'] = []
-            interviewers[interview.interviewer_email]['interviews'].append(interview.dict_representation())
+            interviewers[interview.interviewer_email]['interviews'].append(interview.dict_representation(show_scores = False))
         interviewers_array = []
         print json.dumps(interviewers)

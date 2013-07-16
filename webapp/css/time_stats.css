@@ -3,3 +3,79 @@ body
     min-height: 400px;
     margin: 8px;
 }
+
+div.interview-dot-popover
+{
+    position: absolute;
+    width: 360px;
+    z-index: 4;
+    box-shadow: 0 4px 5px -2px #DDDDDD;
+    -moz-box-shadow: 0 4px 5px -2px #DDDDDD;
+    -webkit-box-shadow: 0 4px 5px -2px #DDDDDD;
+    border-radius: 10px;
+    background-color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    border: 1px solid #CCCCCC;
+    text-align: center;
+}
+
+div.interview-dot-popover:after
+{
+    position: absolute;
+    content: "";
+    width: 0px;
+    height: 0px;
+    border-left: 10px solid rgba(0, 0, 0, 0);
+    border-right: 10px solid rgba(0, 0, 0, 0);
+    border-top: 10px solid white;
+    bottom: -10;
+    left: 195;
+}
+
+div.interview-dot-popover:before
+{
+    position: absolute;
+    bottom: -11;
+    left: 194;
+    content: "";
+    width: 0px;
+    height: 0px;
+    border-left: 11px solid rgba(0, 0, 0, 0);
+    border-right: 11px solid rgba(0, 0, 0, 0);
+    border-top: 11px solid #CCCCCC;
+}
+
+.measure
+{
+    position: absolute;
+    visibility: hidden;
+    left: -10000px;
+    top: -10000px;
+}
+
+.interview-details-spacer
+{
+    overflow: hidden;
+    height:37px; 
+}
+
+.interview-detail-color-indicator
+{
+    float: right;
+    height: 33px;
+    width: 5px;
+    margin-right: 10px;
+    margin-left: 3px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+hr
+{
+    margin-top: 18px;
+    margin-bottom: 18px;
+    border: 1px dotted rgba(0, 0, 0, .4);
+}
