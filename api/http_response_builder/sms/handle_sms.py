@@ -12,6 +12,9 @@ class Handle_SMS_HTTP_Response_Builder(HTTP_Response_Builder):
         super(Handle_SMS_HTTP_Response_Builder, self).__init__(params_storage)
         log_incoming_sms(self.phone_number, self.params_dump)
 
+    def check_auth(self):
+        return None
+
     def print_headers(self):
         print "Content-Type: application/xml"
 
