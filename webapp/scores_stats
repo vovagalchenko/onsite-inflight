@@ -4,6 +4,7 @@
     <head>
         <meta charset="utf-8">
         <title>D3 Test</title>
+       <script type="text/javascript" src="js/ajax.js"></script>
         <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
 		<style type="text/css">
 		.axis path,
@@ -77,6 +78,7 @@
 			var padding = 40;  
       var TimeOfDay =[];
       var DayOfWeek = [];
+      var DayTimeMatrix=[];
       var max_score ;
       var min_score ;
       var max_sample_size;
@@ -86,11 +88,15 @@
    
          window.onload = function()
         {
-         //   make_ajax_request("api/scores_by_time_stats", update_ui, null);
+         make_ajax_request("api/scores_by_time_stats",update_DayTimeMatrix,  null);
         update_Chart_Data('Avg_Technical_Score');
         update_chart(DayTimeMatrix,'Avg_Technical_Score');                
 
         }
+
+	function update_DayTimeMatrix(aDayTimeMatrix){
+		DayTimeMatrix=aDayTimeMatrix;
+         };
 
 
         var days_of_week = {
@@ -120,9 +126,7 @@
             return keys;
         }
 		
-        var DayTimeMatrix=[{"Avg_Cultural_Score": 3.0, "Sample_Size": 3, "Avg_Technical_Score": 3.125, "Day": "Mon", "Hour": 11}, {"Avg_Cultural_Score": 2.25, "Sample_Size": 7, "Avg_Technical_Score": 1.75, "Day": "Mon", "Hour": 12}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 5, "Avg_Technical_Score": 2.33333333333333, "Day": "Mon", "Hour": 13}, {"Avg_Cultural_Score": 2.20833333333333, "Sample_Size": 6, "Avg_Technical_Score": 2.29166666666667, "Day": "Mon", "Hour": 14}, {"Avg_Cultural_Score": 2.875, "Sample_Size": 5, "Avg_Technical_Score": 2.0, "Day": "Mon", "Hour": 15}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 3, "Avg_Technical_Score": 2.375, "Day": "Mon", "Hour": 16}, {"Avg_Cultural_Score": 4.0, "Sample_Size": 3, "Avg_Technical_Score": 4.0, "Day": "Mon", "Hour": 17}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 1, "Avg_Technical_Score": 4.0, "Day": "Tue", "Hour": 13}, {"Avg_Cultural_Score": 2.875, "Sample_Size": 8, "Avg_Technical_Score": 2.53125, "Day": "Tue", "Hour": 14}, {"Avg_Cultural_Score": 2.82692307692308, "Sample_Size": 15, "Avg_Technical_Score": 2.28571428571429, "Day": "Tue", "Hour": 15}, {"Avg_Cultural_Score": 3.19444444444444, "Sample_Size": 10, "Avg_Technical_Score": 2.90625, "Day": "Tue", "Hour": 16}, {"Avg_Cultural_Score": 2.82142857142857, "Sample_Size": 8, "Avg_Technical_Score": 3.0, "Day": "Tue", "Hour": 17}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 2.0, "Day": "Tue", "Hour": 18}, {"Avg_Cultural_Score": null, "Sample_Size": 1, "Avg_Technical_Score": null, "Day": "Wed", "Hour": 10}, {"Avg_Cultural_Score": 2.66666666666667, "Sample_Size": 4, "Avg_Technical_Score": 2.66666666666667, "Day": "Wed", "Hour": 11}, {"Avg_Cultural_Score": 2.3125, "Sample_Size": 4, "Avg_Technical_Score": 2.125, "Day": "Wed", "Hour": 12}, {"Avg_Cultural_Score": 2.35, "Sample_Size": 5, "Avg_Technical_Score": 2.9, "Day": "Wed", "Hour": 13}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 7, "Avg_Technical_Score": 2.79166666666667, "Day": "Wed", "Hour": 14}, {"Avg_Cultural_Score": 2.6875, "Sample_Size": 4, "Avg_Technical_Score": 2.875, "Day": "Wed", "Hour": 15}, {"Avg_Cultural_Score": 2.66666666666667, "Sample_Size": 4, "Avg_Technical_Score": 2.66666666666667, "Day": "Wed", "Hour": 16}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 4, "Avg_Technical_Score": 2.6875, "Day": "Wed", "Hour": 17}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 4.0, "Day": "Thu", "Hour": 10}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 2, "Avg_Technical_Score": 2.375, "Day": "Thu", "Hour": 11}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 1.0, "Day": "Thu", "Hour": 12}, {"Avg_Cultural_Score": 2.0, "Sample_Size": 1, "Avg_Technical_Score": 2.0, "Day": "Thu", "Hour": 14}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 2, "Avg_Technical_Score": 2.0, "Day": "Thu", "Hour": 15}, {"Avg_Cultural_Score": null, "Sample_Size": 1, "Avg_Technical_Score": null, "Day": "Fri", "Hour": 10}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 6, "Avg_Technical_Score": 3.5, "Day": "Fri", "Hour": 11}, {"Avg_Cultural_Score": 3.16666666666667, "Sample_Size": 6, "Avg_Technical_Score": 2.9375, "Day": "Fri", "Hour": 12}, {"Avg_Cultural_Score": 2.53125, "Sample_Size": 9, "Avg_Technical_Score": 2.3125, "Day": "Fri", "Hour": 13}, {"Avg_Cultural_Score": 2.71428571428571, "Sample_Size": 10, "Avg_Technical_Score": 2.82142857142857, "Day": "Fri", "Hour": 14}, {"Avg_Cultural_Score": 3.02272727272727, "Sample_Size": 12, "Avg_Technical_Score": 2.65, "Day": "Fri", "Hour": 15}, {"Avg_Cultural_Score": 2.78125, "Sample_Size": 9, "Avg_Technical_Score": 2.64285714285714, "Day": "Fri", "Hour": 16}, {"Avg_Cultural_Score": 2.6, "Sample_Size": 6, "Avg_Technical_Score": 2.8, "Day": "Fri", "Hour": 17}];
-
-  
+   
 
         function update_Chart_Data(selected_score_of_interest)
         {
@@ -291,8 +295,8 @@
             .text(score_of_interest+" : "+d[score_of_interest].toFixed(1)+' sample size '+d["Sample_Size"]);
          
 
-         console.log (d["Sample_Size"])
-         console.log (d["Sample_Size"]/max_sample_size)
+      //   console.log (d["Sample_Size"])
+      //   console.log (d["Sample_Size"]/max_sample_size)
 
           //Show the tooltip
           d3.select("#tooltip").classed("hidden", false);

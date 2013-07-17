@@ -30,13 +30,24 @@
 
             window.onload = function()
             {
-                make_ajax_request("/api/time_to_respond_stats", on_interviewer_data_receipt, null);
+                var hash = window.location.hash;
+                var url = "/api/time_to_respond_stats";
+                if (hash == "#include_non_responders")
+                {
+                    url += "?include_non_responders=true";
+                }
+                make_ajax_request(url, on_interviewer_data_receipt, null);
             }
 
             // In ms
             function time_to_response(interview)
             {
-                return new Date(interview['cultural_score_ts']).getTime() - (new Date(interview['end_time']).getTime() + 5*60000);
+                var return_value = Number.MAX_VALUE;
+                if (interview.cultural_score_ts !== null)
+                {
+                    return_value = new Date(interview['cultural_score_ts']).getTime() - (new Date(interview['end_time']).getTime() + 5*60000);
+                }
+                return return_value;
             }
 
             function clone(obj)
@@ -78,7 +89,7 @@
                             {
                                 buckets[k].interviews = [];
                             }
-                            if (time_to_respond < buckets[k].range[1])
+                            if (time_to_respond <= buckets[k].range[1])
                             {
                                 buckets[k].interviews.push(interviewers[i].interviews[j]);
                                 break;
@@ -96,11 +107,6 @@
                     'x' : center.x + Math.cos(angle)*radius,
                     'y' : center.y + Math.sin(angle)*radius
                 };
-            }
-
-            function linear_distance(a, b)
-            {
-                return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
             }
 
             function update_interview_popover(candidate)
@@ -208,29 +214,50 @@
                     interviewer['use_avatar'] = use_avatar;
                     interviewer['initials'] = (interviewer_name.charAt(0) + interviewer_name.split(/\s/).pop().charAt(0)).toUpperCase();
                     var total_interview_response_time = 0;
+                    var total_num_responses = 0;
                     var interview_index = interviewer.interviews.length;
                     while(interview_index--)
                     {
+                        total_num_interviews++;
                         if (interviewer.interviews[interview_index].cultural_score_ts)
                         {
+                            total_num_responses++;
                             total_interview_response_time += time_to_response(interviewer.interviews[interview_index]);
-                            total_num_interviews++;
-                        }
-                        else
-                        {
-                            interviewer.interviews.splice(interview_index, 1);
                         }
                     }
-                    interviewer['avg_response_time'] = parseInt((total_interview_response_time/interviewer['interviews'].length)/60000);
+                    interviewer['avg_response_time'] = (total_num_responses > 0)? Math.round((total_interview_response_time/total_num_responses)/60000) : null;
                     interviewer['username'] = interviewer['email'].replace(/@box.com$/, '');
                     interviewer_array.push(interviewer);
                 }
                 interviewer_array.sort(function (interviewer_a, interviewer_b)
                 {
                     result = get_score(interviewer_b, max_num_interviews) - get_score(interviewer_a, max_num_interviews);
+                    var a_avg_response_time = Number.MAX_VALUE;
+                    var b_avg_response_time = Number.MAX_VALUE;
+                    if (interviewer_a.avg_response_time !== null)
+                    {
+                        a_avg_response_time = interviewer_a.avg_response_time;
+                    }
+                    if (interviewer_b.avg_response_time !== null)
+                    {
+                        b_avg_response_time = interviewer_b.avg_response_time;
+                    }
                     if (result === 0)
                     {
-                        result = interviewer_a.avg_response_time - interviewer_b.avg_response_time;
+                        result = a_avg_response_time - b_avg_response_time;
+                    }
+                    return result;
+                });
+                Handlebars.registerHelper('if_not_null', function (argument, options)
+                {
+                    var result = "";
+                    if (argument !== null)
+                    {
+                        result = options.fn(this);
+                    }
+                    else
+                    {
+                        result = options.inverse(this);
                     }
                     return result;
                 });
@@ -270,13 +297,16 @@
                         attr('fill', function(interview)
                         {
                             var time_it_took = time_to_response(interview);
+                            var color = ranges[ranges.length - 1].color;
                             for (var j = 0; j < ranges.length; j++)
                             {
-                                if (time_it_took < ranges[j].range[1])
+                                if (time_it_took <= ranges[j].range[1])
                                 {
-                                    return ranges[j].color;
+                                    color = ranges[j].color;
+                                    break;
                                 }
                             }
+                            return color;
                         }).
                         on('mouseover', function(d, i)
                         {
@@ -409,7 +439,15 @@
                         {{/if}}
                     </DIV>  
                     <DIV class="interviewer_name" style="position:relative;">{{name}}</DIV>
-                    <DIV style="position:relative;float:right;width:50px;margin-left:30px;text-align:right;"><P><strong>{{avg_response_time}}</strong> m</P></DIV>
+                    <DIV style="position:relative;float:right;width:50px;margin-left:30px;text-align:right;">
+                        <P>
+                            {{#if_not_null avg_response_time}}
+                            <STRONG>{{avg_response_time}}</STRONG> m
+                            {{else}}
+                            <STRONG>N/A</STRONG>
+                            {{/if_not_null}}
+                        </P>
+                    </DIV>
                     <DIV style="position:relative;float:none;height:100%;width:auto;margin-right:80px;margin-left:300px;z-index:5;overflow:hidden;">
                         <SVG id="interview-dots-{{username}}" width="100%" height="100%" viewBox="0 0 388 44"></SVG>
                     </DIV>
