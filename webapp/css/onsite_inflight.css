@@ -307,6 +307,17 @@ p
     user-select: none;
 }
 
+.selectable
+{
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    cursor: text;
+}
+
 .inactive_button
 {
     cursor: default;

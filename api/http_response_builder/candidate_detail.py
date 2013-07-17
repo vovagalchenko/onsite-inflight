@@ -2,6 +2,7 @@ from http_response_builder import HTTP_Response_Builder
 from param_definition.parameter import Parameter, Date_Time_Parameter_Type, Boolean_Parameter_Type
 from model.db_session import DB_Session_Factory
 from model.candidate import Candidate
+import json
 
 class Candidate_Detail_HTTP_Response_Builder(HTTP_Response_Builder):
     candidate_name = Parameter('candidate_name', required = True)

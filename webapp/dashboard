@@ -339,7 +339,7 @@
                     {
                         interview = interviews[i];
 
-                        if (expanded_interviews[interview['id']] === true)
+                        if (expanded_interviews[interview['id']] === true || interview.notes != null)
                         {
                             interview['expanded'] = true;
                         }
@@ -391,13 +391,6 @@
             function update_candidate_detail_ui_initially(data)
             {
                 last_avatar_refresh_ts = new Date().getTime();
-                for (var i = 0; i < data['interviews'].length; i++)
-                {
-                    if (data['interviews'][i]['notes'] != null)
-                    {
-                        expanded_interviews[data['interviews'][i]['id']] = true;
-                    }
-                }
                 update_candidate_detail_ui(data);
             }
 
@@ -529,7 +522,7 @@
             <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
-                    <DIV class="tableview-cell non_selectable {{#if expanded}} expanded{{/if}}" onclick="handle_interview_click(this, {{id}})">
+                    <DIV class="tableview-cell non_selectable {{#if expanded}} expanded{{/if}}" {{#if notes}}style="cursor:default;"{{else}}onclick="handle_interview_click(this, {{id}})"{{/if}}>
                         <DIV>
                         <DIV class="progress-indicator" {{#if progress}}style="width:{{progress}};"{{else}}hidden=true{{/if}}></DIV>
                         <DIV class="above-progress interviewer_avatar_frame" style="position:relative;">
@@ -545,7 +538,7 @@
                         <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                         </BR>
                         <DIV class="interview-detail">
-                            <DIV class="detail-text above-progress" style="position:relative; margin-bottom:5px;">{{notes}}</DIV>
+                            <DIV class="detail-text above-progress selectable" style="position:relative; margin-bottom:5px;">{{notes}}</DIV>
                             {{#if notes}}
                             </BR>
                             {{/if}}
