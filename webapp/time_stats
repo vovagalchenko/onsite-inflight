@@ -28,7 +28,7 @@
             var num_interview_dots_per_row;
             var num_interview_dot_rows;
 
-            window.onload = function()
+            window.onhashchange = function()
             {
                 var hash = window.location.hash;
                 var url = "/api/time_to_respond_stats";
@@ -38,6 +38,8 @@
                 }
                 make_ajax_request(url, on_interviewer_data_receipt, null);
             }
+
+            window.onload = window.onhashchange;
 
             // In ms
             function time_to_response(interview)
@@ -107,6 +109,17 @@
                     'x' : center.x + Math.cos(angle)*radius,
                     'y' : center.y + Math.sin(angle)*radius
                 };
+            }
+
+            function coordinate_to_percentage(coordinate, center, radius)
+            {
+                var angle = Math.acos((coordinate.x - center.x)/radius);
+                if (coordinate.y < center.y)
+                {
+                    angle = 2*Math.PI - angle;
+                }
+                var percentage = angle/(Math.PI*2);
+                return percentage;
             }
 
             function update_interview_popover(candidate)
@@ -282,18 +295,22 @@
                     var viewBox_height = interview_dots_svg.attr('viewBox').split(/\s+/)[3];
                     interview_dot_vertical_padding = (viewBox_height - 2*interview_dot_radius*num_interview_dot_rows - (num_interview_dot_rows-1)*padding_between_dot_rows)/2;
                     var right_padding_per_dot = ((viewBox_width - (interview_dot_horizontal_padding*2)) - (2*interview_dot_radius*num_interview_dots_per_row))/(num_interview_dots_per_row-1);
-                    interview_dots_svg.selectAll('circle').data(interviewer_array[i].interviews).enter().append('circle').
+                    var circles = interview_dots_svg.selectAll('circle').data(interviewer_array[i].interviews)
+                    var cx_function = function(data, i)
+                    {
+                        var column  = i%num_interview_dots_per_row;
+                        return interview_dot_horizontal_padding + column*right_padding_per_dot + (1 + 2*column)*interview_dot_radius;
+                    };
+                    var cy_function = function(data, i)
+                    {
+                        var row = Math.floor(i/num_interview_dots_per_row);
+                        return interview_dot_vertical_padding + row*padding_between_dot_rows + (1 + 2*row)*interview_dot_radius;
+                    };
+                    var circle_animation_duration = 1000;
+                    circles.enter().append('circle').
                         attr('r', 0).
-                        attr('cx', function(data, i)
-                        {
-                            var column  = i%num_interview_dots_per_row;
-                            return interview_dot_horizontal_padding + column*right_padding_per_dot + (1 + 2*column)*interview_dot_radius;
-                        }).
-                        attr('cy', function(data, i)
-                        {
-                            var row = Math.floor(i/num_interview_dots_per_row);
-                            return interview_dot_vertical_padding + row*padding_between_dot_rows + (1 + 2*row)*interview_dot_radius;
-                        }).
+                        attr('cx', cx_function).
+                        attr('cy', cy_function).
                         attr('fill', function(interview)
                         {
                             var time_it_took = time_to_response(interview);
@@ -310,7 +327,6 @@
                         }).
                         on('mouseover', function(d, i)
                         {
-                            console.log(d)
                             var circle_rect = this.getBoundingClientRect();
                             var popover_div = d3.select("body").append("div").style('opacity', 0);
                             var pointer_height = 10;
@@ -341,14 +357,24 @@
                         {
                             d3.selectAll(".interview-dot-popover").style('opacity', 0).remove();
                             d3.select("#progress_indicator").attr('hidden', '');
-                        }).
+                        });
+                    var circle_animation_delay_function = function(data, i)
+                    {
+                        return i*100;
+                    };
+                    circles.
                         transition().
                         attr('r', interview_dot_radius).
-                        delay(function (data, i)
-                        {
-                            return i*100;
-                        }).
-                        duration(1000);
+                        attr('cx', cx_function).
+                        attr('cy', cy_function).
+                        delay(circle_animation_delay_function).
+                        duration(circle_animation_duration);
+                    circles.exit().
+                        transition().
+                        attr('r', 0).
+                        delay(circle_animation_delay_function).
+                        duration(circle_animation_duration).
+                        remove();
                 }
                 
                 var buckets = get_buckets(interviewer_array);
@@ -365,10 +391,27 @@
                     attr('fill', function(bucket)
                     {
                         return bucket.color;
-                    });
+                    }).
+                    attr('d', "M" + center.x + "," + center.y + " L" + (center.x + radius) + ","  + center.y + " A" + radius + "," + radius + " " + "0 0 1 " + (center.x + radius) + "," + center.y + " z");
+                var piechart_animation_duration = 1000;
                 slices_group.transition().
                     attrTween('d', function (data, i, start_value)
                     {
+                        var path_d_regex = /^M\d+(?:.\d+)?,\d+(?:.\d+)? L(\d+(?:.\d+)?),(\d+(?:.\d+)?) A\d+(?:.\d+)?,\d+(?:.\d+)? \d \d 1 (\d+(?:.\d+)?),(\d+(?:.\d+)?) z$/;
+                        var match = path_d_regex.exec(start_value);
+                        var initial_start_percentage = 0;
+                        var initial_end_percentage = 0;
+                        if (match != null && match.length == 5)
+                        {
+                            var start_coordinate = {"x" : match[1], "y" : match[2]};
+                            initial_start_percentage = coordinate_to_percentage(start_coordinate, center, radius);
+                            end_coordinate = {"x" : match[3], "y" : match[4]};
+                            initial_end_percentage = coordinate_to_percentage(end_coordinate, center, radius);
+                        }
+                        else
+                        {
+                            console.log("y u confuse me: " + start_value);
+                        }
                         return function(progress)
                         {
                             var interviews_already_plotted = 0;
@@ -376,17 +419,19 @@
                             {
                                 interviews_already_plotted += buckets[j].interviews.length;
                             }
-                            var start_coordinate = percentage_to_coordinate(progress * (interviews_already_plotted/total_num_interviews), center, radius);
-                            var end_coordinate = percentage_to_coordinate(progress * (interviews_already_plotted/total_num_interviews + data.interviews.length/total_num_interviews), center, radius);
+                            var arc_start_percentage = initial_start_percentage + progress*((interviews_already_plotted/total_num_interviews) - initial_start_percentage);
+                            var arc_end_percentage = initial_end_percentage + progress*((interviews_already_plotted/total_num_interviews + data.interviews.length/total_num_interviews) - initial_end_percentage);
+                            var start_coordinate = percentage_to_coordinate(arc_start_percentage, center, radius);
+                            var end_coordinate = percentage_to_coordinate(arc_end_percentage, center, radius);
                             var arc_sweep_flags = "0 0";
-                            if (progress * (data.interviews.length/total_num_interviews) > .5)
+                            if ((arc_end_percentage - arc_start_percentage) > .5)
                             {
                                 arc_sweep_flags = "1 1";
                             }
-                            return "M" + center.x + "," + center.y + " " + "L" + start_coordinate.x + ","  + start_coordinate.y + " " + "A" + radius + "," + radius + " " + arc_sweep_flags + " 1" + end_coordinate.x + "," + end_coordinate.y + " z";
+                            return "M" + center.x + "," + center.y + " " + "L" + start_coordinate.x + ","  + start_coordinate.y + " " + "A" + radius + "," + radius + " " + arc_sweep_flags + " 1 " + end_coordinate.x + "," + end_coordinate.y + " z";
                         }
                     }).
-                    duration(1000);
+                    duration(piechart_animation_duration);
                 slices_group.attr('transform', "rotate(-90 " + center.x + " " + center.y + ")")
                 pie_chart.select("#pie-center").
                     attr('fill', 'rgb(243, 243, 243)').
@@ -398,17 +443,19 @@
                     attr('y', center.y - radius/4).
                     attr('width', radius/2).
                     attr('height', radius/2);
-                d3.select("#num-interviews-label").data([total_num_interviews]).
-                    text("0").
+                var num_interviews_label = d3.select("#num-interviews-label");
+                num_interviews_label.data([total_num_interviews]).
                     transition().
                     tween("text", function(d, i)
                     {
+                        var start_text = (d3.select(this).text() === "")? "0" : d3.select(this).text();
+                        var start_num = parseInt(start_text);
                         return function(progress)
                         {
-                            this.textContent = Math.floor(progress*d).toString();
+                            this.textContent = Math.floor(start_num + progress*(d - start_num)).toString();
                         }
                     }).
-                    duration(1000);
+                    duration(piechart_animation_duration);
             }
         </SCRIPT>
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
