@@ -10,14 +10,20 @@
                 {
                     'range' : [0, 20*60000],
                     'color' : 'rgb(151, 215, 255)',
+                    'label' : "< 20 m",
+                    'label_color' : 'rgb(0, 0, 0)',
                 },
                 {
                     'range' : [20*60000, 40*60000],
                     'color' : 'rgb(1, 59, 102)',
+                    'label' : "20 < 40 m",
+                    'label_color' : 'rgb(255, 255, 255)',
                 },
                 {
                     'range' : [40*60000, Number.MAX_VALUE],
                     'color' : 'rgb(229, 19, 19)',
+                    'label' : "> 40 m",
+                    'label_color' : 'rgb(255, 255, 255)',
                 },
             ];
             var interview_dot_horizontal_padding = 10;
@@ -257,6 +263,7 @@
                     }
                     return result;
                 });
+
                 update_interviewer_list(interviewer_array, max_num_interviews);
                 
                 var buckets = get_buckets(interviewer_array);
@@ -265,8 +272,78 @@
                 var viewBox_width = pie_chart.attr('viewBox').split(/\s+/)[2];
                 var viewBox_height = pie_chart.attr('viewBox').split(/\s+/)[3];
                 var center = {};
+                var piechart_animation_duration = 1000;
                 center['x'] = viewBox_width/2;
                 center['y'] = viewBox_height/2;
+
+                var legend_box_width = 75;
+                var legend_box_height = 15;
+                var legend_label_height = 8;
+                var legend_box_padding = 0;
+                var num_legend_boxes = buckets.length;
+                var legend_y_origin = (viewBox_height - (num_legend_boxes*(legend_box_height + legend_box_padding) - legend_box_padding))/2;
+                var legend_box_y_func = function(data, i)
+                {   
+                    return legend_y_origin + i*(legend_box_height + legend_box_padding) - legend_box_padding;
+                };
+                pie_chart.selectAll("rect").data(buckets).enter().append("rect").
+                    attr("width", legend_box_width).
+                    attr("height", legend_box_height).
+                    attr("x", 0).
+                    attr("y", legend_box_y_func).
+                    attr("fill", function(data, i)
+                    {
+                        return data.color;
+                    });
+                var legend_label_y_func = function(data, i)
+                {
+                    return legend_box_y_func(data, i) + (legend_box_height + legend_label_height)/2;
+                };
+                pie_chart.selectAll(".legend-label").data(buckets).enter().append("text").
+                    classed("legend-label", true).
+                    attr("width", legend_box_width).
+                    attr("height", legend_label_height).
+                    attr("x", legend_box_width/2).
+                    attr("y", legend_label_y_func).
+                    attr("fill", function(data)
+                    {
+                        return data.label_color;
+                    }).
+                    text(function(data)
+                    {
+                        return data.label;
+                    });
+                var legend_percentage = pie_chart.selectAll(".legend-percentage").data(buckets);
+                legend_percentage.enter().append("text").
+                    classed("legend-percentage", true).
+                    attr("width", legend_box_width).
+                    attr("height", legend_label_height).
+                    attr("x", legend_box_width + 10).
+                    attr("y", legend_label_y_func).
+                    attr("fill", "black");
+                legend_percentage.
+                    transition().
+                    duration(piechart_animation_duration).
+                    tween("text", function(data, i)
+                    {
+                        var start_text = (d3.select(this).text() === "")? "0%" : d3.select(this).text();
+                        var percentage_regex = /^(\d+)%$/;
+                        var match = percentage_regex.exec(start_text);
+                        var start_percentage = 0;
+                        if (match != null && match.length == 2)
+                        {
+                            start_percentage = parseInt(match[1]);
+                        }
+                        else
+                        {
+                            console.log("bro... i'm confused.");
+                        }
+                        var target_percentage = (data.interviews.length/total_num_interviews)*100;
+                        return function(progress)
+                        {
+                            this.textContent = Math.round(start_percentage + (target_percentage - start_percentage) * progress).toString() + "%";
+                        }
+                    });
             
                 var radius = Math.min(center.x, center.y);
                 slices_group.enter().append('path').
@@ -275,7 +352,6 @@
                         return bucket.color;
                     }).
                     attr('d', "M" + center.x + "," + center.y + " L" + (center.x + radius) + ","  + center.y + " A" + radius + "," + radius + " " + "0 0 1 " + (center.x + radius) + "," + center.y + " z");
-                var piechart_animation_duration = 1000;
                 slices_group.transition().
                     attrTween('d', function (data, i, start_value)
                     {
@@ -519,7 +595,7 @@
 	</HEAD>
 	<BODY>
         <DIV class="header-bar" style="height:360px;padding-top:20px;padding-bottom:20px;">
-            <SVG id="pie-chart" width="100%" height="360px" viewBox="0 0 360 360">
+            <SVG id="pie-chart" width="800px" height="360px" viewBox="0 0 800 360">
                 <G id="slices"></G>
                 <CIRCLE id="pie-center"></CIRCLE>
                 <foreignObject id="total-interviews-label" style="display:table"><DIV><STRONG id="num-interviews-label" style="font-size:55px;font-weight:600px;line-height:55px"></STRONG></BR><P style="font-size:15px;font-weight:300px;line-height:20px;">interviews</P></DIV></foreignObject>

@@ -1,6 +1,7 @@
 body
 {
     min-height: 400px;
+    min-width: 800px;
     margin: 8px;
 }
 
@@ -99,4 +100,17 @@ hr
     margin-left: 300px;
     z-index: 5;
     overflow: hidden;
+}
+
+.legend-label
+{
+    font-size: 13px;
+    font-weight: 200;
+    text-anchor: middle;
+}
+
+.legend-percentage
+{
+    font-size: 13px;
+    font-weight: 400;
 }
