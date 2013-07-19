@@ -114,3 +114,13 @@ hr
     font-size: 13px;
     font-weight: 400;
 }
+
+.tableview-cell.highlighted
+{
+    background: #eaeaea; /* Old browsers */
+    background: -moz-linear-gradient(top,  #eaeaea 0%, #eeeeee 32%, #eeeeee 74%, #eaeaea 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eaeaea), color-stop(32%,#eeeeee), color-stop(74%,#eeeeee), color-stop(100%,#eaeaea)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #eaeaea 0%,#eeeeee 32%,#eeeeee 74%,#eaeaea 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #eaeaea 0%,#eeeeee 32%,#eeeeee 74%,#eaeaea 100%); /* Opera 11.10+ */
+    background: linear-gradient(to bottom,  #eaeaea 0%,#eeeeee 32%,#eeeeee 74%,#eaeaea 100%); /* W3C */
+}

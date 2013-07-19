@@ -33,6 +33,7 @@
             var max_num_interview_dots_per_row = 15;
             var num_interview_dots_per_row;
             var num_interview_dot_rows;
+            var full_interviewer_array = null;
 
             window.onhashchange = function()
             {
@@ -220,7 +221,6 @@
             {
                 var interviewer_array = [];
                 var max_num_interviews = -1;
-                var total_num_interviews = 0;
                 for (var interviewer_email in interviewers_data)
                 {
                     var interviewer = interviewers_data[interviewer_email];
@@ -233,7 +233,6 @@
                     var interview_index = interviewer.interviews.length;
                     while(interview_index--)
                     {
-                        total_num_interviews++;
                         if (interviewer.interviews[interview_index].cultural_score_ts)
                         {
                             total_num_responses++;
@@ -263,10 +262,23 @@
                     }
                     return result;
                 });
+                full_interviewer_array = interviewer_array;
 
                 update_interviewer_list(interviewer_array, max_num_interviews);
+                update_piechart(interviewer_array);
+            }
                 
+            function update_piechart(interviewer_array)
+            {
                 var buckets = get_buckets(interviewer_array);
+                var total_num_interviews = 0;
+                for (var i = 0; i < buckets.length; i++)
+                {
+                    if (buckets[i].interviews)
+                    {
+                        total_num_interviews += buckets[i].interviews.length;
+                    }
+                }
                 var slices_group = d3.select("#slices").selectAll("path").data(buckets);
                 var pie_chart = d3.select("#pie-chart");
                 var viewBox_width = pie_chart.attr('viewBox').split(/\s+/)[2];
@@ -294,7 +306,11 @@
                     attr("fill", function(data, i)
                     {
                         return data.color;
-                    });
+                    }).
+                    style("opacity", 0).
+                    transition().
+                    duration(piechart_animation_duration).
+                    style("opacity", 1);
                 var legend_label_y_func = function(data, i)
                 {
                     return legend_box_y_func(data, i) + (legend_box_height + legend_label_height)/2;
@@ -312,7 +328,11 @@
                     text(function(data)
                     {
                         return data.label;
-                    });
+                    }).
+                    style("opacity", 0).
+                    transition().
+                    duration(piechart_animation_duration).
+                    style("opacity", 1);
                 var legend_percentage = pie_chart.selectAll(".legend-percentage").data(buckets);
                 legend_percentage.enter().append("text").
                     classed("legend-percentage", true).
@@ -320,10 +340,12 @@
                     attr("height", legend_label_height).
                     attr("x", legend_box_width + 10).
                     attr("y", legend_label_y_func).
-                    attr("fill", "black");
+                    attr("fill", "black").
+                    style("opacity", 0);
                 legend_percentage.
                     transition().
                     duration(piechart_animation_duration).
+                    style("opacity", 1).
                     tween("text", function(data, i)
                     {
                         var start_text = (d3.select(this).text() === "")? "0%" : d3.select(this).text();
@@ -338,7 +360,11 @@
                         {
                             console.log("bro... i'm confused.");
                         }
-                        var target_percentage = (data.interviews.length/total_num_interviews)*100;
+                        var target_percentage = 0;
+                        if (data.interviews)
+                        {
+                            target_percentage = (data.interviews.length/total_num_interviews)*100;
+                        }
                         return function(progress)
                         {
                             this.textContent = Math.round(start_percentage + (target_percentage - start_percentage) * progress).toString() + "%";
@@ -355,7 +381,7 @@
                 slices_group.transition().
                     attrTween('d', function (data, i, start_value)
                     {
-                        var path_d_regex = /^M\d+(?:.\d+)?,\d+(?:.\d+)? L(\d+(?:.\d+)?),(\d+(?:.\d+)?) A\d+(?:.\d+)?,\d+(?:.\d+)? \d \d 1 (\d+(?:.\d+)?),(\d+(?:.\d+)?) z$/;
+                        var path_d_regex = /^M[^,]*,[^ ]* L([^,]*),([^ ]*) A[^,]*,[^ ]* \d \d 1 ([^,]*),([^ ]*) z$/;
                         var match = path_d_regex.exec(start_value);
                         var initial_start_percentage = 0;
                         var initial_end_percentage = 0;
@@ -368,6 +394,8 @@
                         }
                         else
                         {
+                            initial_start_percentage = 0;
+                            initial_end_percentage = 1;
                             console.log("y u confuse me: " + start_value);
                         }
                         return function(progress)
@@ -375,10 +403,22 @@
                             var interviews_already_plotted = 0;
                             for (var j = 0; j < i; j++)
                             {
-                                interviews_already_plotted += buckets[j].interviews.length;
+                                if (buckets[j].interviews)
+                                {
+                                    interviews_already_plotted += buckets[j].interviews.length;
+                                }
+                            }
+                            var num_interviews_in_bucket = 0;
+                            if (data.interviews)
+                            {
+                                num_interviews_in_bucket = data.interviews.length;
                             }
                             var arc_start_percentage = initial_start_percentage + progress*((interviews_already_plotted/total_num_interviews) - initial_start_percentage);
-                            var arc_end_percentage = initial_end_percentage + progress*((interviews_already_plotted/total_num_interviews + data.interviews.length/total_num_interviews) - initial_end_percentage);
+                            var arc_end_percentage = initial_end_percentage + progress*((interviews_already_plotted/total_num_interviews + num_interviews_in_bucket/total_num_interviews) - initial_end_percentage);
+                            if (arc_end_percentage - arc_start_percentage >= .9999)
+                            {
+                                arc_end_percentage = .9999;
+                            }
                             var start_coordinate = percentage_to_coordinate(arc_start_percentage, center, radius);
                             var end_coordinate = percentage_to_coordinate(arc_end_percentage, center, radius);
                             var arc_sweep_flags = "0 0";
@@ -420,10 +460,22 @@
             {
                 var tableview = d3.select("#interviewer-list-tableview");
                 var tableview_cells = tableview.selectAll(".tableview-cell").data(interviewer_array);
-                var inner_tableviewcell_div = tableview_cells.enter().append("div").
-                    classed("tableview-cell", true).
-                    classed("non_selectable", true).
-                    style("cursor", "default").
+                var inner_tableviewcell_div = tableview_cells.enter().
+                    append("div").
+                        classed("tableview-cell", true).
+                        classed("non_selectable", true).
+                        style("cursor", "default");
+                tableview_cells.
+                    on("mouseover", function(data)
+                    {
+                        d3.select(this).classed("highlighted", true);
+                        update_piechart([data]);
+                    }).
+                    on("mouseout", function(data)
+                    {
+                        d3.select(this).classed("highlighted", false);
+                        update_piechart(full_interviewer_array);
+                    }).
                     append("div");
                 inner_tableviewcell_div.append("div").
                     classed("interviewer_avatar_frame", true).
@@ -519,20 +571,16 @@
                         attr('r', 0).
                         attr('cx', cx_function).
                         attr('cy', cy_function).
-                        attr('fill', function(interview)
+                        on('mouseout', function(d, i)
                         {
-                            var time_it_took = time_to_response(interview);
-                            var color = ranges[ranges.length - 1].color;
-                            for (var j = 0; j < ranges.length; j++)
-                            {
-                                if (time_it_took <= ranges[j].range[1])
-                                {
-                                    color = ranges[j].color;
-                                    break;
-                                }
-                            }
-                            return color;
-                        }).
+                            d3.selectAll(".interview-dot-popover").style('opacity', 0).remove();
+                            d3.select("#progress_indicator").attr('hidden', '');
+                        });
+                    var circle_animation_delay_function = function(data, i)
+                    {
+                        return i*100;
+                    };
+                    circles.
                         on('mouseover', function(d, i)
                         {
                             var circle_rect = this.getBoundingClientRect();
@@ -561,20 +609,24 @@
                                 })
 
                         }).
-                        on('mouseout', function(d, i)
-                        {
-                            d3.selectAll(".interview-dot-popover").style('opacity', 0).remove();
-                            d3.select("#progress_indicator").attr('hidden', '');
-                        });
-                    var circle_animation_delay_function = function(data, i)
-                    {
-                        return i*100;
-                    };
-                    circles.
                         transition().
                         attr('r', interview_dot_radius).
                         attr('cx', cx_function).
                         attr('cy', cy_function).
+                        attr('fill', function(interview)
+                        {
+                            var time_it_took = time_to_response(interview);
+                            var color = ranges[ranges.length - 1].color;
+                            for (var j = 0; j < ranges.length; j++)
+                            {
+                                if (time_it_took <= ranges[j].range[1])
+                                {
+                                    color = ranges[j].color;
+                                    break;
+                                }
+                            }
+                            return color;
+                        }).
                         delay(circle_animation_delay_function).
                         duration(circle_animation_duration);
                     circles.exit().
