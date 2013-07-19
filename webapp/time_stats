@@ -222,10 +222,6 @@
                     {
                         max_num_interviews = interviewer.interviews.length;
                     }
-                    var use_avatar = interviewer['avatar_url'] != null;
-                    var interviewer_name = interviewer['name'];
-                    interviewer['use_avatar'] = use_avatar;
-                    interviewer['initials'] = (interviewer_name.charAt(0) + interviewer_name.split(/\s/).pop().charAt(0)).toUpperCase();
                     var total_interview_response_time = 0;
                     var total_num_responses = 0;
                     var interview_index = interviewer.interviews.length;
@@ -261,30 +257,166 @@
                     }
                     return result;
                 });
-                Handlebars.registerHelper('if_not_null', function (argument, options)
-                {
-                    var result = "";
-                    if (argument !== null)
+                update_interviewer_list(interviewer_array, max_num_interviews);
+                
+                var buckets = get_buckets(interviewer_array);
+                var slices_group = d3.select("#slices").selectAll("path").data(buckets);
+                var pie_chart = d3.select("#pie-chart");
+                var viewBox_width = pie_chart.attr('viewBox').split(/\s+/)[2];
+                var viewBox_height = pie_chart.attr('viewBox').split(/\s+/)[3];
+                var center = {};
+                center['x'] = viewBox_width/2;
+                center['y'] = viewBox_height/2;
+            
+                var radius = Math.min(center.x, center.y);
+                slices_group.enter().append('path').
+                    attr('fill', function(bucket)
                     {
-                        result = options.fn(this);
-                    }
-                    else
+                        return bucket.color;
+                    }).
+                    attr('d', "M" + center.x + "," + center.y + " L" + (center.x + radius) + ","  + center.y + " A" + radius + "," + radius + " " + "0 0 1 " + (center.x + radius) + "," + center.y + " z");
+                var piechart_animation_duration = 1000;
+                slices_group.transition().
+                    attrTween('d', function (data, i, start_value)
                     {
-                        result = options.inverse(this);
-                    }
-                    return result;
-                });
-                Handlebars.registerHelper('list', function(data_array, options)
-                {
-                    var out = '';
-                    var length;
-                    for (var i = 0; i < data_array.length; i++)
+                        var path_d_regex = /^M\d+(?:.\d+)?,\d+(?:.\d+)? L(\d+(?:.\d+)?),(\d+(?:.\d+)?) A\d+(?:.\d+)?,\d+(?:.\d+)? \d \d 1 (\d+(?:.\d+)?),(\d+(?:.\d+)?) z$/;
+                        var match = path_d_regex.exec(start_value);
+                        var initial_start_percentage = 0;
+                        var initial_end_percentage = 0;
+                        if (match != null && match.length == 5)
+                        {
+                            var start_coordinate = {"x" : match[1], "y" : match[2]};
+                            initial_start_percentage = coordinate_to_percentage(start_coordinate, center, radius);
+                            end_coordinate = {"x" : match[3], "y" : match[4]};
+                            initial_end_percentage = coordinate_to_percentage(end_coordinate, center, radius);
+                        }
+                        else
+                        {
+                            console.log("y u confuse me: " + start_value);
+                        }
+                        return function(progress)
+                        {
+                            var interviews_already_plotted = 0;
+                            for (var j = 0; j < i; j++)
+                            {
+                                interviews_already_plotted += buckets[j].interviews.length;
+                            }
+                            var arc_start_percentage = initial_start_percentage + progress*((interviews_already_plotted/total_num_interviews) - initial_start_percentage);
+                            var arc_end_percentage = initial_end_percentage + progress*((interviews_already_plotted/total_num_interviews + data.interviews.length/total_num_interviews) - initial_end_percentage);
+                            var start_coordinate = percentage_to_coordinate(arc_start_percentage, center, radius);
+                            var end_coordinate = percentage_to_coordinate(arc_end_percentage, center, radius);
+                            var arc_sweep_flags = "0 0";
+                            if ((arc_end_percentage - arc_start_percentage) > .5)
+                            {
+                                arc_sweep_flags = "1 1";
+                            }
+                            return "M" + center.x + "," + center.y + " " + "L" + start_coordinate.x + ","  + start_coordinate.y + " " + "A" + radius + "," + radius + " " + arc_sweep_flags + " 1 " + end_coordinate.x + "," + end_coordinate.y + " z";
+                        }
+                    }).
+                    duration(piechart_animation_duration);
+                slices_group.attr('transform', "rotate(-90 " + center.x + " " + center.y + ")")
+                pie_chart.select("#pie-center").
+                    attr('fill', 'rgb(243, 243, 243)').
+                    attr('r', radius/2).
+                    attr('cx', center.x).
+                    attr('cy', center.y);
+                var total_interviews_label = d3.select('#total-interviews-label').
+                    attr('x', center.x - radius/4).
+                    attr('y', center.y - radius/4).
+                    attr('width', radius/2).
+                    attr('height', radius/2);
+                var num_interviews_label = d3.select("#num-interviews-label");
+                num_interviews_label.data([total_num_interviews]).
+                    transition().
+                    tween("text", function(d, i)
                     {
-                        out += options.fn(data_array[i]);
-                    }
-                    return out;
-                });
-                build_content_from_template('interviews_handlebars', {'interviewers' : interviewer_array}, 'interviews_list_tableview');
+                        var start_text = (d3.select(this).text() === "")? "0" : d3.select(this).text();
+                        var start_num = parseInt(start_text);
+                        return function(progress)
+                        {
+                            this.textContent = Math.floor(start_num + progress*(d - start_num)).toString();
+                        }
+                    }).
+                    duration(piechart_animation_duration);
+            }
+
+            function update_interviewer_list(interviewer_array, max_num_interviews)
+            {
+                var tableview = d3.select("#interviewer-list-tableview");
+                var tableview_cells = tableview.selectAll(".tableview-cell").data(interviewer_array);
+                var inner_tableviewcell_div = tableview_cells.enter().append("div").
+                    classed("tableview-cell", true).
+                    classed("non_selectable", true).
+                    style("cursor", "default").
+                    append("div");
+                inner_tableviewcell_div.append("div").
+                    classed("interviewer_avatar_frame", true).
+                    style("position", "relative").
+                    append("div").
+                        style("color", "rgb(255, 255, 255)").
+                        style("text-align", "center").
+                        style("line-height", "35px");
+                tableview.selectAll(".interviewer_avatar_frame").data(interviewer_array).select("div").
+                        style("background-image", function(data)
+                        {
+                            var background_image = "";
+                            if (data.avatar_url)
+                            {
+                                background_image = "url('" + data.avatar_url + "')";
+                            }
+                            return background_image;
+                        }).
+                        style("background-color", function(data)
+                        {
+                            var background_color = "";
+                            if (!data.avatar_url)
+                            {
+                                background_color = "rgb(72, 195, 252)";
+                            }
+                            return background_color;
+                        }).
+                        text(function(data)
+                        {
+                            var initials = "";
+                            if (!data.avatar_url)
+                            {
+                                initials = (data.name.charAt(0) + data.name.split(/\s/).pop().charAt(0)).toUpperCase();
+                            }
+                            return initials;
+                        });
+                inner_tableviewcell_div.append("div").
+                    classed("interviewer_name", true).
+                    style("position", "relative");
+                tableview.selectAll(".interviewer_name").data(interviewer_array).
+                    text(function(data, i)
+                    {
+                        return data.name;
+                    });
+                inner_tableviewcell_div.append("div").
+                    classed("average-response-time-label", true).
+                    append("p");
+                tableview.selectAll(".average-response-time-label").data(interviewer_array).select("p").
+                    html(function(data)
+                    {
+                        var avg_response_time = "<STRONG>N/A</STRONG>";
+                        if (data.avg_response_time)
+                        {
+                            avg_response_time = "<STRONG>" + data.avg_response_time.toString() + "</STRONG> m";
+                        }
+                        return avg_response_time;
+                    });
+                inner_tableviewcell_div.append("div").
+                    classed("dots-container", true).
+                        append("svg").
+                        attr("width", "100%").
+                        attr("height", "100%").
+                        attr("viewBox", "0 0 388 44");
+                tableview.selectAll(".dots-container").data(interviewer_array).select("svg").
+                    attr("id", function(data)
+                    {
+                        return "interview-dots-" + data.username;
+                    });
+                tableview_cells.exit().remove();
 
                 num_interview_dots_per_row = Math.min(max_num_interview_dots_per_row, max_num_interviews);
                 num_interview_dot_rows = Math.ceil(max_num_interviews/num_interview_dots_per_row);
@@ -376,86 +508,6 @@
                         duration(circle_animation_duration).
                         remove();
                 }
-                
-                var buckets = get_buckets(interviewer_array);
-                var slices_group = d3.select("#slices").selectAll("path").data(buckets);
-                var pie_chart = d3.select("#pie-chart");
-                var viewBox_width = pie_chart.attr('viewBox').split(/\s+/)[2];
-                var viewBox_height = pie_chart.attr('viewBox').split(/\s+/)[3];
-                var center = {};
-                center['x'] = viewBox_width/2;
-                center['y'] = viewBox_height/2;
-            
-                var radius = Math.min(center.x, center.y);
-                slices_group.enter().append('path').
-                    attr('fill', function(bucket)
-                    {
-                        return bucket.color;
-                    }).
-                    attr('d', "M" + center.x + "," + center.y + " L" + (center.x + radius) + ","  + center.y + " A" + radius + "," + radius + " " + "0 0 1 " + (center.x + radius) + "," + center.y + " z");
-                var piechart_animation_duration = 1000;
-                slices_group.transition().
-                    attrTween('d', function (data, i, start_value)
-                    {
-                        var path_d_regex = /^M\d+(?:.\d+)?,\d+(?:.\d+)? L(\d+(?:.\d+)?),(\d+(?:.\d+)?) A\d+(?:.\d+)?,\d+(?:.\d+)? \d \d 1 (\d+(?:.\d+)?),(\d+(?:.\d+)?) z$/;
-                        var match = path_d_regex.exec(start_value);
-                        var initial_start_percentage = 0;
-                        var initial_end_percentage = 0;
-                        if (match != null && match.length == 5)
-                        {
-                            var start_coordinate = {"x" : match[1], "y" : match[2]};
-                            initial_start_percentage = coordinate_to_percentage(start_coordinate, center, radius);
-                            end_coordinate = {"x" : match[3], "y" : match[4]};
-                            initial_end_percentage = coordinate_to_percentage(end_coordinate, center, radius);
-                        }
-                        else
-                        {
-                            console.log("y u confuse me: " + start_value);
-                        }
-                        return function(progress)
-                        {
-                            var interviews_already_plotted = 0;
-                            for (var j = 0; j < i; j++)
-                            {
-                                interviews_already_plotted += buckets[j].interviews.length;
-                            }
-                            var arc_start_percentage = initial_start_percentage + progress*((interviews_already_plotted/total_num_interviews) - initial_start_percentage);
-                            var arc_end_percentage = initial_end_percentage + progress*((interviews_already_plotted/total_num_interviews + data.interviews.length/total_num_interviews) - initial_end_percentage);
-                            var start_coordinate = percentage_to_coordinate(arc_start_percentage, center, radius);
-                            var end_coordinate = percentage_to_coordinate(arc_end_percentage, center, radius);
-                            var arc_sweep_flags = "0 0";
-                            if ((arc_end_percentage - arc_start_percentage) > .5)
-                            {
-                                arc_sweep_flags = "1 1";
-                            }
-                            return "M" + center.x + "," + center.y + " " + "L" + start_coordinate.x + ","  + start_coordinate.y + " " + "A" + radius + "," + radius + " " + arc_sweep_flags + " 1 " + end_coordinate.x + "," + end_coordinate.y + " z";
-                        }
-                    }).
-                    duration(piechart_animation_duration);
-                slices_group.attr('transform', "rotate(-90 " + center.x + " " + center.y + ")")
-                pie_chart.select("#pie-center").
-                    attr('fill', 'rgb(243, 243, 243)').
-                    attr('r', radius/2).
-                    attr('cx', center.x).
-                    attr('cy', center.y);
-                var total_interviews_label = d3.select('#total-interviews-label').
-                    attr('x', center.x - radius/4).
-                    attr('y', center.y - radius/4).
-                    attr('width', radius/2).
-                    attr('height', radius/2);
-                var num_interviews_label = d3.select("#num-interviews-label");
-                num_interviews_label.data([total_num_interviews]).
-                    transition().
-                    tween("text", function(d, i)
-                    {
-                        var start_text = (d3.select(this).text() === "")? "0" : d3.select(this).text();
-                        var start_num = parseInt(start_text);
-                        return function(progress)
-                        {
-                            this.textContent = Math.floor(start_num + progress*(d - start_num)).toString();
-                        }
-                    }).
-                    duration(piechart_animation_duration);
             }
         </SCRIPT>
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
@@ -473,36 +525,7 @@
                 <foreignObject id="total-interviews-label" style="display:table"><DIV><STRONG id="num-interviews-label" style="font-size:55px;font-weight:600px;line-height:55px"></STRONG></BR><P style="font-size:15px;font-weight:300px;line-height:20px;">interviews</P></DIV></foreignObject>
             </SVG>
         </DIV>
-        <DIV class="tableview" id="interviews_list_tableview" style="top: 400px;">
-            <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
-                {{#list interviewers}}
-                <DIV class="tableview-cell non_selectable" style="cursor:default">
-                    <DIV>
-                    <DIV class="interviewer_avatar_frame" style="position:relative;">
-                        {{#if use_avatar}}
-                            <DIV style="background-image:url('{{avatar_url}}');"></DIV>
-                        {{else}}
-                            <DIV style="background-color:rgb(72, 195, 252); color:rgb(255,255,255); text-align:center; line-height:35px;">{{initials}}</DIV>
-                        {{/if}}
-                    </DIV>  
-                    <DIV class="interviewer_name" style="position:relative;">{{name}}</DIV>
-                    <DIV style="position:relative;float:right;width:50px;margin-left:30px;text-align:right;">
-                        <P>
-                            {{#if_not_null avg_response_time}}
-                            <STRONG>{{avg_response_time}}</STRONG> m
-                            {{else}}
-                            <STRONG>N/A</STRONG>
-                            {{/if_not_null}}
-                        </P>
-                    </DIV>
-                    <DIV style="position:relative;float:none;height:100%;width:auto;margin-right:80px;margin-left:300px;z-index:5;overflow:hidden;">
-                        <SVG id="interview-dots-{{username}}" width="100%" height="100%" viewBox="0 0 388 44"></SVG>
-                    </DIV>
-                    </DIV>
-                </DIV>  
-                {{/list}}
-            </SCRIPT>
-        </DIV>
+        <DIV class="tableview" id="interviewer-list-tableview" style="top:400px;"></DIV>
         <DIV id='progress_indicator' hidden style="margin-left:166px;">
             <DIV class='progress_indicator_segment' id='rotateG_01'></DIV>
             <DIV class='progress_indicator_segment' id='rotateG_02'></DIV>
