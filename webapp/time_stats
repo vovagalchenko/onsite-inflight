@@ -277,7 +277,7 @@
                 center['y'] = viewBox_height/2;
 
                 var legend_box_width = 75;
-                var legend_box_height = 15;
+                var legend_box_height = 20;
                 var legend_label_height = 8;
                 var legend_box_padding = 0;
                 var num_legend_boxes = buckets.length;
