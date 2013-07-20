@@ -415,10 +415,8 @@
                             }
                             var arc_start_percentage = initial_start_percentage + progress*((interviews_already_plotted/total_num_interviews) - initial_start_percentage);
                             var arc_end_percentage = initial_end_percentage + progress*((interviews_already_plotted/total_num_interviews + num_interviews_in_bucket/total_num_interviews) - initial_end_percentage);
-                            if (arc_end_percentage - arc_start_percentage >= .9999)
-                            {
-                                arc_end_percentage = .9999;
-                            }
+                            arc_start_percentage = Math.min(.9999, arc_start_percentage);
+                            arc_end_percentage = Math.min(.9999, arc_end_percentage);
                             var start_coordinate = percentage_to_coordinate(arc_start_percentage, center, radius);
                             var end_coordinate = percentage_to_coordinate(arc_end_percentage, center, radius);
                             var arc_sweep_flags = "0 0";
