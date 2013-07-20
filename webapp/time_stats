@@ -422,9 +422,9 @@
                             var start_coordinate = percentage_to_coordinate(arc_start_percentage, center, radius);
                             var end_coordinate = percentage_to_coordinate(arc_end_percentage, center, radius);
                             var arc_sweep_flags = "0 0";
-                            if ((arc_end_percentage - arc_start_percentage) > .5)
+                            if ((arc_end_percentage - arc_start_percentage) >= .5)
                             {
-                                arc_sweep_flags = "1 1";
+                                arc_sweep_flags = "0 1";
                             }
                             return "M" + center.x + "," + center.y + " " + "L" + start_coordinate.x + ","  + start_coordinate.y + " " + "A" + radius + "," + radius + " " + arc_sweep_flags + " 1 " + end_coordinate.x + "," + end_coordinate.y + " z";
                         }
