@@ -18,12 +18,14 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def print_body(self):
         db_session = DB_Session_Factory.get_db_session()
+        self.earliest_ts = self.earliest_ts.date()
         interviewers = {}
-        for interview in db_session.query(Interview).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts).order_by(Interview.start_time).yield_per(5):
+        for interview_data in db_session.query(Interview, Interviewer).join(Interviewer, Interview.interviewer_email == Interviewer.email).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts).yield_per(5):
+            interview,interviewer = interview_data
             if self.include_non_responders is False and interview.cultural_score is None:
                 continue
             if interviewers.get(interview.interviewer_email, None) is None:
-                interviewers[interview.interviewer_email] = db_session.query(Interviewer).get(interview.interviewer_email).dict_representation()
+                interviewers[interview.interviewer_email] = interviewer.dict_representation()
                 interviewers[interview.interviewer_email]['interviews'] = []
             interviewers[interview.interviewer_email]['interviews'].append(interview.dict_representation(show_scores = False))
         interviewers_array = []
