@@ -33,4 +33,4 @@ lib
 Bucket for helpers that are used by various components of the system. Examples of such helpers are the *Google Calendar Python SDK* (from Google) and the *send_sms* Twilio API wrapper (by Boris).
 scripts
 -------
-Place to put various scripts for one off tasks. Currently includes a single script to refresh the list of interviewers the system knows about.
+Place to put various scripts for one off tasks.
