@@ -264,8 +264,92 @@
                 });
                 full_interviewer_array = interviewer_array;
 
-                update_interviewer_list(interviewer_array, max_num_interviews);
+                update_interviewer_list(interviewer_array);
+                set_up_interviewer_search();
                 update_piechart(interviewer_array);
+            }
+
+            function set_up_interviewer_search()
+            {
+                var find_interviewer_animation_duration = 200;
+                var find_interviewer_mouseout_func = function()
+                {
+                    var find_interviewer_div = d3.select("#find-interviewer-div");
+                    var tf = find_interviewer_div.select(".interviewer-textfield");
+                    if (tf.node().value == "")
+                    {
+                        find_interviewer_div.select(".mag-glass").
+                            classed("transition", true).
+                            classed("grayscale", true).
+                            style("left", 0);
+                        find_interviewer_div.select("#find-interviewer-label").
+                            attr("hidden", null).
+                            classed("transition", true).
+                            style("opacity", 1);
+                        tf.
+                            classed("transition", true).
+                            style("opacity", 0);
+                        find_interviewer_div.select("#cancel-search").
+                            classed("transition", true).
+                            style("opacity", 0);
+                        tf.node().blur();
+                    }
+                };
+                var mag_glass_right_padding = 5;
+                d3.select("#find-interviewer-div").
+                    on("mouseover", function()
+                    {
+                        var tf_div_rect = this.getBoundingClientRect();
+                        var mag_glass = d3.select(this).select(".mag-glass");
+                        var mag_glass_rect = mag_glass.node().getBoundingClientRect();
+                        mag_glass.
+                            classed("transition", true).
+                            classed("grayscale", false).
+                            style("left", tf_div_rect.width - mag_glass_rect.width - mag_glass_right_padding).
+                            style("right", 0);
+                        d3.select(this).select("#find-interviewer-label").
+                            classed("transition", true).
+                            style("opacity", 0);
+                        d3.select(this).select(".interviewer-textfield").
+                            classed("transition", true).
+                            style("opacity", 1);
+                        d3.select(this).select("#cancel-search").
+                            classed("transition", true).
+                            style("opacity", 1);
+        
+                    }).
+                    on("mouseout", find_interviewer_mouseout_func);
+                var filter_interviewers = function()
+                {
+                    var filter_term = d3.select(".interviewer-textfield").node().value;
+                    var filtered_interviewer_array = [];
+                    if (filter_term == "")
+                    {
+                        filtered_interviewer_array = clone(full_interviewer_array);
+                        setTimeout(find_interviewer_mouseout_func, 3000);
+                    }
+                    else
+                    {
+                        
+                        for (var i = 1; i < full_interviewer_array.length; i++)
+                        {
+                            if (full_interviewer_array[i].name.match(new RegExp(filter_term, "gi")))
+                            {
+                                filtered_interviewer_array.push(full_interviewer_array[i]);
+                            }
+                        }
+                    }
+                    update_interviewer_list(filtered_interviewer_array);
+                };
+                d3.select("#cancel-search").
+                    on("click", function()
+                    {
+                        d3.select(".interviewer-textfield").node().value = "";
+                        find_interviewer_mouseout_func();
+                        filter_interviewers();
+                    });
+                d3.select(".interviewer-textfield").
+                    on("input", filter_interviewers);
             }
                 
             function update_piechart(interviewer_array)
@@ -435,12 +519,16 @@
                     attr('cx', center.x).
                     attr('cy', center.y);
                 var total_interviews_label = d3.select('#total-interviews-label').
-                    attr('x', center.x - radius/4).
-                    attr('y', center.y - radius/4).
-                    attr('width', radius/2).
-                    attr('height', radius/2);
+                    attr('x', center.x - radius/2).
+                    attr('y', center.y - radius/2).
+                    attr('width', radius).
+                    attr('height', radius);
                 var num_interviews_label = d3.select("#num-interviews-label");
                 num_interviews_label.data([total_num_interviews]).
+                    text(function(data)
+                    {
+                        return (d3.select(this).text() === "")? "0" : d3.select(this).text();
+                    }).
                     transition().
                     tween("text", function(d, i)
                     {
@@ -452,10 +540,20 @@
                         }
                     }).
                     duration(piechart_animation_duration);
+                var total_interviews_content_rect = total_interviews_label.select("#total-interviews-div").node().getBoundingClientRect();
+                total_interviews_label.style("padding-top", (radius - total_interviews_content_rect.height)/2);
             }
 
-            function update_interviewer_list(interviewer_array, max_num_interviews)
+            function update_interviewer_list(interviewer_array)
             {
+                var max_num_interviews = -1;
+                for (var i = 0; i < interviewer_array.length; i++)
+                {
+                    if (max_num_interviews < interviewer_array[i].interviews.length)
+                    {
+                        max_num_interviews = interviewer_array[i].interviews.length;
+                    }
+                }
                 var tableview = d3.select("#interviewer-list-tableview");
                 var tableview_cells = tableview.selectAll(".tableview-cell").data(interviewer_array);
                 var inner_tableviewcell_div = tableview_cells.enter().
@@ -644,14 +742,24 @@
         <SCRIPT type="text/javascript" src="js/handlebars.js" charset="utf-8"></SCRIPT>
 	</HEAD>
 	<BODY>
-        <DIV class="header-bar" style="height:360px;padding-top:20px;padding-bottom:20px;">
-            <SVG id="pie-chart" width="800px" height="360px" viewBox="0 0 800 360">
+        <DIV class="header-bar" style="height:380px;padding-top:20px;min-width:inherit;">
+            <SVG id="pie-chart" width="800px" height="340px" viewBox="0 0 800 340">
                 <G id="slices"></G>
                 <CIRCLE id="pie-center"></CIRCLE>
-                <foreignObject id="total-interviews-label" style="display:table"><DIV><STRONG id="num-interviews-label" style="font-size:55px;font-weight:600px;line-height:55px"></STRONG></BR><P style="font-size:15px;font-weight:300px;line-height:20px;">interviews</P></DIV></foreignObject>
+                <foreignObject id="total-interviews-label" style="display:table"><DIV id="total-interviews-div"><STRONG id="num-interviews-label" style="font-size:55px;font-weight:600px;line-height:55px"></STRONG></BR><P style="font-size:15px;font-weight:300px;line-height:20px;">interviews</P></DIV></foreignObject>
             </SVG>
+            <DIV class="leaderboard-header non_selectable" style="cursor:default;">
+                <DIV style="float:left;padding-top:0px;" id="find-interviewer-div">
+                    <DIV class="selectable" style="position:absolute; cursor:pointer;" id="cancel-search">×</DIV>
+                    <DIV class="mag-glass grayscale"></DIV>
+                    <DIV style="position:absolute; padding-left:25px; z-index:-1;" id="find-interviewer-label">Find Interviewer</DIV>
+                    <INPUT class="interviewer-textfield selectable"></INPUT>
+                </DIV>
+                <DIV style="float:right">Avg Response Time</DIV>
+                <DIV>Interviews Taken Part In</DIV>
+            </DIV>
         </DIV>
-        <DIV class="tableview" id="interviewer-list-tableview" style="top:400px;"></DIV>
+        <DIV class="tableview" id="interviewer-list-tableview" style="top:400px;min-width:inherit;"></DIV>
         <DIV id='progress_indicator' hidden style="margin-left:166px;">
             <DIV class='progress_indicator_segment' id='rotateG_01'></DIV>
             <DIV class='progress_indicator_segment' id='rotateG_02'></DIV>
