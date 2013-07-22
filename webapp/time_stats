@@ -283,6 +283,11 @@
                 update_interviewer_list(interviewer_array);
                 set_up_interviewer_search();
                 update_piechart(interviewer_array);
+
+                var total_interviews_label = d3.select('#total-interviews-label');
+                var total_interviews_div = total_interviews_label.select("#total-interviews-div");
+                var total_interviews_content_rect = total_interviews_div.node().getBoundingClientRect();
+                total_interviews_div.style("padding-top", (parseInt(total_interviews_label.attr("height")) - total_interviews_content_rect.height)/2);
             }
 
             function set_up_interviewer_search()
@@ -556,8 +561,6 @@
                         }
                     }).
                     duration(piechart_animation_duration);
-                var total_interviews_content_rect = total_interviews_label.select("#total-interviews-div").node().getBoundingClientRect();
-                total_interviews_label.style("padding-top", (radius - total_interviews_content_rect.height)/2);
             }
 
             function update_interviewer_list(interviewer_array)
