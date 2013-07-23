@@ -43,10 +43,10 @@ class Interviewer(Base):
     def dict_representation(self):
         return {'name' : self.name, 'avatar_url' : self.avatar_url, 'email' : self.email}
 
-    def get_most_recently_completed_interview(self, for_update = False):
+    def get_most_recently_completed_interview(self, phone_number, for_update = False):
         last_interview = None
         db_session = DB_Session_Factory.get_db_session()
-        query = db_session.query(interview.Interview).filter(interview.Interview.interviewer_email==self.email, func.date(interview.Interview.start_time) == func.date(func.now()), interview.Interview.end_time < func.now()).order_by(interview.Interview.end_time.desc())
+        query = db_session.query(interview.Interview).filter(interview.Interview.interviewer_email==self.email, func.date(interview.Interview.start_time) == func.date(func.now()), interview.Interview.end_time < func.now(), interview.Interview.phone_number_to_use == phone_number).order_by(interview.Interview.end_time.desc())
         if for_update is True:
             query = query.with_lockmode('update')
         return query.first()

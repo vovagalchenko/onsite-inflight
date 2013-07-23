@@ -4,13 +4,14 @@ from lib.logger import log_incoming_sms, log_outgoing_sms
 import twilio.twiml
 
 class Handle_SMS_HTTP_Response_Builder(HTTP_Response_Builder):
-    requires_authn = False
-    phone_number = Parameter('From', required = True)
+    from_phone_number = Parameter('From', required = True)
     sms_body = Parameter('Body', required = True)
+    to_phone_number = Parameter('To', required = True)
+    
 
     def __init__(self, params_storage):
         super(Handle_SMS_HTTP_Response_Builder, self).__init__(params_storage)
-        log_incoming_sms(self.phone_number, self.params_dump)
+        log_incoming_sms(self.from_phone_number, self.params_dump)
 
     def check_auth(self):
         return None
@@ -22,7 +23,7 @@ class Handle_SMS_HTTP_Response_Builder(HTTP_Response_Builder):
         resp = twilio.twiml.Response()
         resp.sms(response_msg)
         print str(resp)
-        log_outgoing_sms(self.phone_number, response_msg)
+        log_outgoing_sms(self.from_phone_number, response_msg)
 
     def process_sms(self):
         raise NotImplementedError, "You must implement process_sms in your Handle_SMS_HTTP_Response_Builder subclass"

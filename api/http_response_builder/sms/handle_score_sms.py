@@ -31,15 +31,16 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
         return result
 
     def process_sms(self):
-        self.phone_number = self.phone_number[2:]
+        self.from_phone_number = self.from_phone_number[2:]
+        self.to_phone_number = self.to_phone_number[2:]
         db_session = DB_Session_Factory.get_db_session()
-        interviewer = Interviewer.get_interviewer_by_phone_number(self.phone_number)
+        interviewer = Interviewer.get_interviewer_by_phone_number(self.from_phone_number)
         interview = None
         response_msg = "Thanks for your feedback"
         if interviewer is None:
             response_msg = "I don't know who you are or what you want from me."
         else:
-            interview = interviewer.get_most_recently_completed_interview(for_update = True)
+            interview = interviewer.get_most_recently_completed_interview(self.to_phone_number, for_update = True)
             if interview is None:
                 response_msg = "You haven't done an interview recently so we have nothing to talk about."
 
