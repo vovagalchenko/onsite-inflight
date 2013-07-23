@@ -28,4 +28,6 @@ class Handle_SMS_HTTP_Response_Builder(HTTP_Response_Builder):
         raise NotImplementedError, "You must implement process_sms in your Handle_SMS_HTTP_Response_Builder subclass"
 
     def print_body(self):
-        self.print_response_message_body(self.process_sms())
+        response_msg = self.process_sms();
+        if response_msg is not None:
+            self.print_response_message_body(response_msg)

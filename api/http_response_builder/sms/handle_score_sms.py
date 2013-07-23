@@ -4,6 +4,7 @@ from model.db_session import DB_Session_Factory
 from model.interviewer import Interviewer
 import re
 from string import strip, lower
+from datetime import datetime, timedelta
 
 class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
     number_map = {
@@ -63,6 +64,9 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
             if interview.notes is None:
                 interview.notes = ""
             interview.notes = interview.notes + self.sms_body
-            response_msg = "Thanks. Your feedback was added to " + interview.candidate_name + "'s file."
+            if interview.notes_ts is None or datetime.now() - interview.notes_ts >= timedelta(seconds=3):
+                response_msg = "Thanks. Your feedback was added to " + interview.candidate_name + "'s file."
+            else:
+                response_msg = None
         db_session.commit()
         return response_msg
