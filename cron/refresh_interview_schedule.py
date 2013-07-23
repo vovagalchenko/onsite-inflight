@@ -12,7 +12,6 @@ import os
 import pprint
 import re
 import logging
-from copy import copy
 from model.interviewer import Interviewer
 from model.interview import Interview
 from model.candidate import Candidate
@@ -30,6 +29,13 @@ SECS_IN_DAY = 24*60*60
 LOS_ANGELES_TZ = 'America/Los_Angeles'
 FLAGS = gflags.FLAGS
 DEFAULT_DATE = '1970-01-01T07:00:00-07:00'
+
+phone_numbers = [
+    '4089403233',
+    '4088247390',
+    '4083354690',
+    '4086805381'
+]
 
 # CLIENT_SECRETS, name of a file containing the OAuth 2.0 information for this
 # application, including client_id and client_secret.
@@ -102,6 +108,7 @@ def main(argv):
     tomorrow = today_start + timedelta(days = 1)
     today_end = datetime(year = tomorrow.year, month = tomorrow.month, day = tomorrow.day, tzinfo = tomorrow.tzinfo)
     db_session = DB_Session_Factory.get_db_session()
+    db_session.autoflush = False;
     for interviewer in db_session.query(Interviewer).order_by(Interviewer.email):
         print "Checking schedule for " + interviewer.name
         existing_interviews = interviewer.todays_interviews
@@ -109,6 +116,7 @@ def main(argv):
         for existing_interview in existing_interviews:
             interviews_to_delete.append(existing_interview)
         events_request = service.events().list(calendarId = interviewer.email, timeZone = LOS_ANGELES_TZ, timeMin = today_start.isoformat(), timeMax = today_end.isoformat(), orderBy = 'startTime', singleEvents = True)
+        interviews_for_interviewer = []
         while (events_request != None):
             response = events_request.execute(http)
             for event in response.get('items', []):
@@ -136,12 +144,14 @@ def main(argv):
                             if existing_interview in interviews_to_delete:
                                 interviews_to_delete.remove(existing_interview)
                             interview_exists = True
+                            interviews_for_interviewer.append(existing_interview)
                             break
                     if interview_exists is False:
                         new_interview = Interview(interviewer.email, start_time, end_time, candidate_name, room)
                         new_interview.candidate = candidate
                         db_session.add(new_interview)
                         existing_interviews.append(new_interview)
+                        interviews_for_interviewer.append(new_interview)
             events_request = service.events().list_next(events_request, response)
         for interview_to_delete in interviews_to_delete:
             print "Deleting interview with " + interview_to_delete.candidate_name
@@ -149,6 +159,14 @@ def main(argv):
             db_session.delete(interview_to_delete)
             if not candidate.interviews:
                 db_session.delete(candidate)
+        phone_number_index = 0
+        for index, existing_interview in enumerate(interviews_for_interviewer):
+            if existing_interview.phone_number_to_use is None:
+                # Make sure that no two consecutive interviews use the same phone number
+                while get_phone_number(interviews_for_interviewer, index - 1) == phone_numbers[phone_number_index] or get_phone_number(interviews_for_interviewer, index + 1) == phone_numbers[phone_number_index]:
+                    phone_number_index = (phone_number_index + 1)%len(phone_numbers)
+                existing_interview.phone_number_to_use = phone_numbers[phone_number_index]
+        db_session.flush()
         db_session.commit()
 
     # For more information on the Calendar API API you can visit:
@@ -171,6 +189,9 @@ def main(argv):
 def google_ts_to_datetime(google_ts):
     google_ts = re.sub('-\d\d:\d\d$', '', google_ts)
     return datetime.strptime(google_ts, '%Y-%m-%dT%H:%M:%S')
+
+def get_phone_number(interviews_list, index):
+    return interviews_list[index].phone_number_to_use if index < len(interviews_list) else None
     
 
 if __name__ == '__main__':

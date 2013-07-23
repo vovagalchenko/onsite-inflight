@@ -16,6 +16,7 @@ class Interview(Base):
     start_time = Column(mysql.TIMESTAMP, nullable = False)
     end_time = Column(mysql.TIMESTAMP, nullable = False)
     candidate_name = Column(String(50), ForeignKey('candidate.candidate_name'), nullable = False)
+    phone_number_to_use = Column(String(10), nullable = False)
     room = Column(String(50), nullable = False)
     technical_score = Column(mysql.FLOAT(), nullable = True)
     cultural_score = Column(mysql.FLOAT(), nullable = True)
