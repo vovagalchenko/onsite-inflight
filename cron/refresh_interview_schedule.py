@@ -188,6 +188,7 @@ def main(argv):
 
 def google_ts_to_datetime(google_ts):
     google_ts = re.sub('-\d\d:\d\d$', '', google_ts)
+    google_ts = re.sub('Z.*$', '', google_ts)
     return datetime.strptime(google_ts, '%Y-%m-%dT%H:%M:%S')
 
 def get_phone_number(interviews_list, index):
