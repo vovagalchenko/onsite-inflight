@@ -16,8 +16,9 @@ from model.interviewer import Interviewer
 from model.interview import Interview
 from model.candidate import Candidate
 from model.db_session import DB_Session_Factory
-from pytz import timezone
+from pytz import timezone, utc
 from datetime import datetime, timedelta
+import pdb
 
 from apiclient.discovery import build
 from oauth2client.file import Storage
@@ -187,9 +188,29 @@ def main(argv):
       "the application to re-authorize")
 
 def google_ts_to_datetime(google_ts):
-    google_ts = re.sub('-\d\d:\d\d$', '', google_ts)
-    google_ts = re.sub('Z.*$', '', google_ts)
-    return datetime.strptime(google_ts, '%Y-%m-%dT%H:%M:%S')
+    last_char = google_ts[-1:]
+    tz_offset = 0;
+    if last_char == 'z' or last_char == 'Z':
+        google_ts = google_ts[:-1]
+    else:
+        matches = re.search(r"([-+])(\d\d):(\d\d)$", google_ts)
+        if matches is None:
+            raise Exception("Cannot parse the timestamp" + google_ts)
+        else:
+            hour_offset = int(matches.group(2))
+            minute_offset = int(matches.group(3))
+            operator = matches.group(1)
+            tz_offset = minute_offset + hour_offset * 60
+            if operator == '+':
+                tz_offset = -tz_offset
+            google_ts = re.sub('[\-+]\d\d:\d\d$', '', google_ts)
+    datetime_obj = datetime.strptime(google_ts, '%Y-%m-%dT%H:%M:%S')
+    datetime_obj = datetime_obj + timedelta(minutes=tz_offset)
+    utc_datetime = datetime_obj.replace(tzinfo = utc)
+    localized_datetime = utc_datetime.astimezone(timezone(LOS_ANGELES_TZ))
+    return localized_datetime.replace(tzinfo = None)
+    
+    
 
 def get_phone_number(interviews_list, index):
     return interviews_list[index].phone_number_to_use if index < len(interviews_list) else None
