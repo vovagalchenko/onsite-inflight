@@ -413,7 +413,7 @@
 
             function switch_to_candidate_detail_page(candidate_name)
             {
-                location.hash = date_to_hash(current_date) + '/' + candidate_name;
+                location.hash = date_to_hash(current_date) + '/' + encode_hash_component(candidate_name);
             }
 
             function do_switch_to_candidate_detail_page(candidate_name)

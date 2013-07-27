@@ -15,6 +15,16 @@ function date_string_from_date(date)
     return ('00' + date_string).substr(-2);
 }
 
+function encode_hash_component(hash_component)
+{
+    return encodeURIComponent(hash_component).replace(/%20/g, "+");
+}
+
+function decode_hash_component(encoded_hash_component)
+{
+    return decodeURIComponent(encoded_hash_component.replace(/\+/g, "%20"));
+}
+
 function go_to_hash(animate_date_switch)
 {
     var new_hash = window.location.hash;
@@ -22,36 +32,33 @@ function go_to_hash(animate_date_switch)
         new_hash = date_to_hash(new Date());
     var date_to_set = null;
     var candidate_name = null;
-    if (new_hash)
+    new_hash = new_hash.replace(/^#/, '');
+    var path_components = new_hash.split('/');
+    var hash_is_invalid = false;
+    if (path_components.length >= 1)
     {
-        new_hash = new_hash.replace(/^#/, '');
-        var path_components = new_hash.split('/');
-        var hash_is_invalid = false;
-        if (path_components.length >= 1)
+        var date = path_components[0];
+        var date_match = date.match(/(\d\d\d\d)-(\d\d)-(\d\d)/);
+        if (date_match && date_match.length == 4)
         {
-            var date = path_components[0]
-            var date_match = date.match(/(\d\d\d\d)-(\d\d)-(\d\d)/);
-            if (date_match && date_match.length == 4)
-            {
-                date_to_set = new Date(date_match[1], date_match[2] - 1, date_match[3]);
-                if (date_to_set < min_date || date_to_set > new Date())
-                {
-                    hash_is_invalid = true;
-                }
-            }
-            else
+            date_to_set = new Date(date_match[1], date_match[2] - 1, date_match[3]);
+            if (date_to_set < min_date || date_to_set > new Date())
             {
                 hash_is_invalid = true;
             }
+        }
+        else
+        {
+            hash_is_invalid = true;
+        }
 
-            if (path_components.length == 2 && path_components[1].length > 0)
-            {
-                candidate_name = decodeURIComponent(path_components[1]);
-            }
-            else if (path_components.length > 2)
-            {
-                hash_is_invalid = true;
-            }
+        if (path_components.length == 2 && path_components[1].length > 0)
+        {
+            candidate_name = decode_hash_component(path_components[1]);
+        }
+        else if (path_components.length > 2)
+        {
+            hash_is_invalid = true;
         }
     }
 
