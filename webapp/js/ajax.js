@@ -26,9 +26,9 @@ function make_ajax_request(url, results_process_callback, error_handling_callbac
                     results_process_callback(parsed_data);
                 }
             }
-            else if(error_handling_callback != null)
+            else if(error_handling_callback != null && request.status > 0)
             {
-                error_handling_callback();
+                error_handling_callback("Request failed.");
             }
         }
     }
