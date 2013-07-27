@@ -1,90 +1,49 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <title>Onsite Interviews</title>
-      	<script type="text/javascript" src="js/ajax.js"></script>
         <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-	<style type="text/css">
-		
-	.axis path,
-   	.axis line {
-    		fill: none;
-   		stroke: black;
-    		shape-rendering: crispEdges;
-    		}
-
-    	.axis text {
-    		font-family: sans-serif;
-    		font-size: 11px;
-    		}
-
-    	 #tooltip {
-        	position: absolute;
-       		width: 200px;
-        	height: auto;
-        	padding: 10px;
-        	background-color: white;
-        	-webkit-border-radius: 10px;
-        	-moz-border-radius: 10px;
-        	border-radius: 10px;
-        	-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        	-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        	pointer-events: none;
-      		}
-      
-     	 #tooltip.hidden {
-       		 display: none;
-     		 }
-      
-     	 #tooltip p {
-        	margin: 0;
-        	font-family: sans-serif;
-        	font-size: 16px;
-        	line-height: 20px;
-     		 }
-
-
-	</style>
-
+        <script type="text/javascript" src="js/ajax.js"></script>
+        <LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+    
     </head>
     <body>
 
-      <div id="content">
-      <div id="left" style="width: 50%; float:left">
+      <div id="content" class="header-bar" style="height:1024px;padding-top:20px;">
+        <SVG id="heatmap">
+         </SVG> 
         <div id="tooltip" class="hidden">
         <p><strong></strong></p>
         <p><span id="value">100</span></p>
         </div>
-       </div> 
-      <div id="right">
        <p id="Cultural">Click for Avg Cultural Score</p>
        <p id="Technical">Click for Avg Technical Score</p>
-      </div>
-    <br style="clear:both;"/>
     </div>  
-
+  </div>
 
         <script type="text/javascript">
 
   
-	var svg = d3.select("#left").append("svg");
-			
-	var w = 600;
-	var h = 500;
-	var padding = 40;  
-      	
-	var TimeOfDay =[];
-      	var DayOfWeek = [];
-      	var DayTimeMatrix=[];
-      	var max_score ;
-      	var min_score ;
-      	var max_sample_size;
-      	var score_of_interest ;
-	
-	var days_of_week = {
+  //var svg = d3.select("#left").append("svg");
+    var svg=d3.select("#heatmap");
+      
+  var w = 600;
+  var h = 500;
+  var padding = 40;  
+        
+  var TimeOfDay =[];
+  var DayOfWeek = [];
+  var DayTimeMatrix=[];
+  var DayTimeMatrixFill = [];
+  var max_score ;
+  var min_score ;
+  var max_sample_size;
+  var score_of_interest ;
+  
+  var days_of_week = {
             'Mon' : 0,
             'Tue' : 1,
             'Wed' : 2,
@@ -97,15 +56,21 @@
 
    
          window.onload = function()
-	{
-        	 make_ajax_request("api/scores_by_time_stats",update_DayTimeMatrix,  null);
+       {
+           make_ajax_request("api/scores_by_time_stats?earliest_ts=0",update_DayTimeMatrix,  null);
+         
+           //update_DayTimeMatrix([{"Avg_Cultural_Score": 3.0, "Sample_Size": 3, "Avg_Technical_Score": 3.125, "Day": "Mon", "Hour": 11}, {"Avg_Cultural_Score": 2.25, "Sample_Size": 7, "Avg_Technical_Score": 1.75, "Day": "Mon", "Hour": 12}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 5, "Avg_Technical_Score": 2.33333333333333, "Day": "Mon", "Hour": 13}, {"Avg_Cultural_Score": 2.20833333333333, "Sample_Size": 6, "Avg_Technical_Score": 2.29166666666667, "Day": "Mon", "Hour": 14}, {"Avg_Cultural_Score": 2.875, "Sample_Size": 5, "Avg_Technical_Score": 2.0, "Day": "Mon", "Hour": 15}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 3, "Avg_Technical_Score": 2.375, "Day": "Mon", "Hour": 16}, {"Avg_Cultural_Score": 4.0, "Sample_Size": 3, "Avg_Technical_Score": 4.0, "Day": "Mon", "Hour": 17}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 1, "Avg_Technical_Score": 4.0, "Day": "Tue", "Hour": 13}, {"Avg_Cultural_Score": 2.875, "Sample_Size": 8, "Avg_Technical_Score": 2.53125, "Day": "Tue", "Hour": 14}, {"Avg_Cultural_Score": 2.82692307692308, "Sample_Size": 15, "Avg_Technical_Score": 2.28571428571429, "Day": "Tue", "Hour": 15}, {"Avg_Cultural_Score": 3.19444444444444, "Sample_Size": 10, "Avg_Technical_Score": 2.90625, "Day": "Tue", "Hour": 16}, {"Avg_Cultural_Score": 2.82142857142857, "Sample_Size": 8, "Avg_Technical_Score": 3.0, "Day": "Tue", "Hour": 17}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 2.0, "Day": "Tue", "Hour": 18}, {"Avg_Cultural_Score": null, "Sample_Size": 1, "Avg_Technical_Score": null, "Day": "Wed", "Hour": 10}, {"Avg_Cultural_Score": 2.66666666666667, "Sample_Size": 4, "Avg_Technical_Score": 2.66666666666667, "Day": "Wed", "Hour": 11}, {"Avg_Cultural_Score": 2.3125, "Sample_Size": 4, "Avg_Technical_Score": 2.125, "Day": "Wed", "Hour": 12}, {"Avg_Cultural_Score": 2.35, "Sample_Size": 5, "Avg_Technical_Score": 2.9, "Day": "Wed", "Hour": 13}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 7, "Avg_Technical_Score": 2.79166666666667, "Day": "Wed", "Hour": 14}, {"Avg_Cultural_Score": 2.6875, "Sample_Size": 4, "Avg_Technical_Score": 2.875, "Day": "Wed", "Hour": 15}, {"Avg_Cultural_Score": 2.66666666666667, "Sample_Size": 4, "Avg_Technical_Score": 2.66666666666667, "Day": "Wed", "Hour": 16}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 4, "Avg_Technical_Score": 2.6875, "Day": "Wed", "Hour": 17}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 4.0, "Day": "Thu", "Hour": 10}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 2, "Avg_Technical_Score": 2.375, "Day": "Thu", "Hour": 11}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 1.0, "Day": "Thu", "Hour": 12}, {"Avg_Cultural_Score": 2.0, "Sample_Size": 1, "Avg_Technical_Score": 2.0, "Day": "Thu", "Hour": 14}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 2, "Avg_Technical_Score": 2.0, "Day": "Thu", "Hour": 15}, {"Avg_Cultural_Score": null, "Sample_Size": 1, "Avg_Technical_Score": null, "Day": "Fri", "Hour": 10}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 6, "Avg_Technical_Score": 3.5, "Day": "Fri", "Hour": 11}, {"Avg_Cultural_Score": 3.16666666666667, "Sample_Size": 6, "Avg_Technical_Score": 2.9375, "Day": "Fri", "Hour": 12}, {"Avg_Cultural_Score": 2.53125, "Sample_Size": 9, "Avg_Technical_Score": 2.3125, "Day": "Fri", "Hour": 13}, {"Avg_Cultural_Score": 2.71428571428571, "Sample_Size": 10, "Avg_Technical_Score": 2.82142857142857, "Day": "Fri", "Hour": 14}, {"Avg_Cultural_Score": 3.02272727272727, "Sample_Size": 12, "Avg_Technical_Score": 2.65, "Day": "Fri", "Hour": 15}, {"Avg_Cultural_Score": 2.78125, "Sample_Size": 9, "Avg_Technical_Score": 2.64285714285714, "Day": "Fri", "Hour": 16}, {"Avg_Cultural_Score": 2.6, "Sample_Size": 6, "Avg_Technical_Score": 2.8, "Day": "Fri", "Hour": 17}])
          }
 
-	function update_DayTimeMatrix(ajaxResult)
-	{
-		DayTimeMatrix=ajaxResult;
-       		update_Chart_Data("Avg_Technical_Score");
-        	update_chart("Avg_Technical_Score");                
+  function update_DayTimeMatrix(ajaxResult)
+  {
+    DayTimeMatrix=ajaxResult;
+/*
+          update_Chart_Data("Avg_Cultural_Score");
+          update_chart("Avg_Cultural_Score");                
+*/
+          update_Chart_Data("Avg_Technical_Score");
+          update_chart("Avg_Technical_Score");                
          };
 
 
@@ -126,7 +91,7 @@
             for(var k in dict) keys.push(parseIntOrLeaveString(k));
             return keys;
         }
-		
+    
    
 
         function update_Chart_Data(selected_score_of_interest)
@@ -166,130 +131,100 @@
             {
                 return days_of_week[a] - days_of_week[b];
             });
-          };  
- 				
 
-				
+          for (var i=0;i<DayOfWeek.length;i++)
+            for (var j=0;j<TimeOfDay.length;j++)
+            DayTimeMatrixFill.push({Day : DayOfWeek[i],Hour : TimeOfDay[j]});
+            };  
+        
+
  
 
-   	 d3.selectAll("p")
+     d3.selectAll("p")
             .on("click", function() 
-		{ 
-         		var paragraphID = d3.select(this).attr("id");
-         		if (paragraphID == "Cultural")
-			{
-          			update_Chart_Data("Avg_Cultural_Score")  
-               			update_chart("Avg_Cultural_Score")      
-			} 
-         		if(paragraphID == "Technical") 
-			{
-            		update_Chart_Data("Avg_Technical_Score")
-            		update_chart("Avg_Technical_Score") 
-                	}
-		});        
+    { 
+            var paragraphID = d3.select(this).attr("id");
+            if (paragraphID == "Cultural")
+      {
+                update_Chart_Data("Avg_Cultural_Score")  
+                    update_chart("Avg_Cultural_Score")      
+      } 
+            if(paragraphID == "Technical") 
+      {
+                update_Chart_Data("Avg_Technical_Score")
+                update_chart("Avg_Technical_Score") 
+                  }
+    });        
 
-    	
-	function update_chart(score_of_interest)
-	{
+      
+  function update_chart(score_of_interest)
+  {
 
-		var yScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2],0.05);
-		var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding],0.05); 
-     		//var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length).rangeRoundBands([padding, h - padding],0.05);
-       		var yTickScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2]);
-      		var xTickScale =d3.scale.ordinal() .domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding]);
+    var yScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2],0.05);
+    var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding],0.05); 
+        //var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length).rangeRoundBands([padding, h - padding],0.05);
+          var yTickScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2]);
+          var xTickScale =d3.scale.ordinal() .domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding]);
      
-     		//  Draw Axis
+        //  Draw Axis
         
-       		var xAxis = d3.svg.axis().scale(xTickScale).orient("top").tickValues(DayOfWeek);
-        	var yAxis = d3.svg.axis().scale(yTickScale).orient("left").tickValues(TimeOfDay);
-      		svg.append("g").attr("class", "axis").attr("transform", "translate(0," + padding + ")").call(xAxis);     
-        	svg.append("g").attr("class", "axis").attr("transform", "translate(" + padding + ",0)").call(yAxis);                  
+          var xAxis = d3.svg.axis().scale(xTickScale).orient("top").tickValues(DayOfWeek);
+          var yAxis = d3.svg.axis().scale(yTickScale).orient("left").tickValues(TimeOfDay);
+        //  svg.append("g").attr("class", "axis").attr("transform", "translate(0," + padding + ")").call(xAxis);     
+        //  svg.append("g").attr("class", "axis").attr("transform", "translate(" + padding + ",0)").call(yAxis);                  
 
-  		 // Add bars
+       // Add bars
 
-    		var bars = svg.selectAll("rect").data(DayTimeMatrix);
-      		bars
-         	.enter()
-         	.append("rect")
-         	.transition(100)
-        	.attr("y", function(d, i) {return yScale(TimeOfDay.indexOf(d.Hour));})
-         	.attr("x", function(d, i) {return xScale(DayOfWeek.indexOf(d.Day));})         
-         	.attr("rx",10)
-         	.attr("ry",10)
-         	.attr("width", xScale.rangeBand())
-         	.attr("height", yScale.rangeBand())
-          	.style("fill-opacity",function(d) {return (d["Sample_Size"] / max_sample_size)+ 0.3; })
- 		.style("fill", function(d) {
-            	if (d[score_of_interest] === null)
-            	{
-                return "rgba(0, 0, 0, 0)";
-            	}
-            	var color_offset = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
-       		//console.log(d);	 
-            	var ret_value = "rgb(" + (255 - color_offset).toString()
-                          + ","+(0 + color_offset).toString()
-                          + ", 0"
-                          + ")";
-            	return ret_value;
-        	});
-
-        	bars
-         	.on("mouseover", function(d) {
-
-          	//Get this bar's x/y values, then augment for the tooltip
-          	var xPosition = parseFloat(d3.select(this).attr("x")) + xScale.rangeBand() / 2;
-          	var yPosition = parseFloat(d3.select(this).attr("y")) / 2 + w / 2;
-
-          	//Update the tooltip position and value
-          	d3.select("#tooltip")
-            	.style("left", xPosition + "px")
-            	.style("top", yPosition + "px")           
-            	.select("#value")
-            	.text(score_of_interest+" : "+d[score_of_interest].toFixed(1)+' sample size '+d["Sample_Size"]);
-         
-
-        	// console.log (d["Sample_Size"])
-         	//console.log (d["Sample_Size"]/max_sample_size)
-
-          	//Show the tooltip
-          	d3.select("#tooltip").classed("hidden", false);
-
-         	})
-         	.on("mouseout", function() {
-         
-          	//Hide the tooltip
-          	d3.select("#tooltip").classed("hidden", true);
+        var barsfill = svg.selectAll("rect").data(DayTimeMatrixFill);
+          barsfill
+          .enter()
+          .append("svg:image")
+          .attr("xlink:href", "img/NoScore.png") 
+          .attr("margin",0)
+          .attr("y", function(d, i) {return yScale(TimeOfDay.indexOf(d.Hour));})
+          .attr("x", function(d, i) {return xScale(DayOfWeek.indexOf(d.Day));}) 
+          .attr("width", xScale.rangeBand())
+          .attr("height", yScale.rangeBand())  ;
+          // .append("svg:image")
+          // .attr("xlink:href", "NoScore.png") ;
           
-         	});
- 
-       		bars.exit().remove(); 
-
-       		//On update  change color
-
-       		bars
-        	.transition(100)
-		.style("fill", function(d) {
-            	if (d[score_of_interest] === null)
-            	{
+          
+     var bars = svg.selectAll("rect").data(DayTimeMatrix);
+          bars
+          .enter()
+          .append("rect")
+          //.transition(100)
+          .attr("y", function(d, i) {return yScale(TimeOfDay.indexOf(d.Hour));})
+          .attr("x", function(d, i) {return xScale(DayOfWeek.indexOf(d.Day));})         
+          .attr("width", xScale.rangeBand())
+          .attr("height", yScale.rangeBand())
+          .transition()
+          .style("fill", function(d) {
+              if (d[score_of_interest] === null)
+              {
                 return "rgba(0, 0, 0, 0)";
-            	}
-            	var color_offset = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
-        
-            	var ret_value = "rgb(" + (255 - color_offset).toString()
-                          + ","+(0 + color_offset).toString()
-                          + ", 0"
+              }
+              var color_offset = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
+          //console.log(d);  
+              var ret_value = "rgb(" + (255 - color_offset).toString()
+                          + ","+(0 
+                          + ", 0" + color_offset).toString()
                           + ")";
-            	return ret_value;
-        	});
+              return ret_value;
+          })
+          .duration(1000) 
+          .delay(100)  
+          ;
+
+    
+
+       
 
         }  
 
                
 
         </script>
-
-	</div>
-
 
     </body>
 </html>   
