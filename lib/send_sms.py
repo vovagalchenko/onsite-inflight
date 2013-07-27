@@ -1,10 +1,11 @@
 from model.interview import Interview
 from twilio.rest import TwilioRestClient
 from logger import log_outgoing_sms
+from conf import CFG
  
-# The session object makes use of a secret key.
-account_sid = "AC7ff9fa3ed7b9477f96f5a113ff8bb18c"
-auth_token = "92910305d42bd12e61cb987defcc4fbd"
+cfg = CFG.get_instance()
+account_sid = cfg.get('twilio', 'account_sid')
+auth_token = cfg.get('twilio', 'auth_token')
 
 def send_initial_request_for_scores(interview):
     interviewer = interview.interviewer
