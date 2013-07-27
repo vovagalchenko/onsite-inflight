@@ -3,6 +3,7 @@ from param_definition.parameter import Parameter, Date_Time_Parameter_Type, Bool
 from model.db_session import DB_Session_Factory
 from model.candidate import Candidate
 import json
+import sys
 
 class Candidate_Detail_HTTP_Response_Builder(HTTP_Response_Builder):
     candidate_name = Parameter('candidate_name', required = True)
@@ -11,7 +12,7 @@ class Candidate_Detail_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def check_auth(self):
         if self.show_scores is True:
-            super(Candidate_Detail_HTTP_Response_Builder, self).check_auth()
+            return super(Candidate_Detail_HTTP_Response_Builder, self).check_auth()
         else:
             return None
 
