@@ -34,4 +34,4 @@ class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
         user = User.refresh_user_session(email)
         print "Status: 303"
         print "Set-Cookie: session_id=" + user.session_id + "; Domain=onsite-inflight.com; Path=/"
-        print "Location: http://onsite-inflight.com/" + self.relay_state
+        print "Location: https://onsite-inflight.com/" + self.relay_state
