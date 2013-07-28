@@ -30,11 +30,11 @@ params_storage = cgi.FieldStorage()
 try:
     response_builder_class = end_points.get(endpoint, None)
     if response_builder_class is None:
-        output_str = json.dumps({'error' : 'invalid api endpoint: ' + endpoint})
+        output_str = json.dumps({'error' : 'invalid api endpoint: ' + str(endpoint)})
         sys.stderr.write(output_str)
         print "Content-Type: application/json"
         print
-        print json.dumps(output_str)
+        print output_str
         exit()
     response_builder = response_builder_class(params_storage)
 # This 'except' is meant to only catch exceptions that are thrown when passed in
