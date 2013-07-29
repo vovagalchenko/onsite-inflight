@@ -1,216 +1,37 @@
 #!/usr/bin/env python
 
 import sys
-from lib.conf import CFG
-
-root_path = CFG.get_instance().get('installation', 'root')
-sys.path.insert(1, root_path + "/code/lib/gcal_sdk")
-
-import gflags
-import httplib2
-import os
 import pprint
-import re
-import logging
 from model.interviewer import Interviewer
-from model.interview import Interview
-from model.candidate import Candidate
-from model.db_session import DB_Session_Factory
 from pytz import timezone, utc
 from datetime import datetime, timedelta
-import pdb
+from lib.calendar import Google_Calendar
+from lib.conf import CFG
+from model.db_session import DB_Session_Factory
 
-from apiclient.discovery import build
-from oauth2client.file import Storage
-from oauth2client.client import AccessTokenRefreshError
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.tools import run
-
-SECS_IN_DAY = 24*60*60
-LOS_ANGELES_TZ = 'America/Los_Angeles'
-FLAGS = gflags.FLAGS
-DEFAULT_DATE = '1970-01-01T07:00:00-07:00'
-
-phone_numbers = CFG.get_instance().get('twilio', 'from_phone_numbers').split(',')
-
-# CLIENT_SECRETS, name of a file containing the OAuth 2.0 information for this
-# application, including client_id and client_secret.
-# You can see the Client ID and Client secret on the API Access tab on the
-# Google APIs Console <https://code.google.com/apis/console>
-CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '../lib/gcal_sdk/client_secrets.json')
-
-# Helpful message to display if the CLIENT_SECRETS file is missing.
-MISSING_CLIENT_SECRETS_MESSAGE = """
-WARNING: Please configure OAuth 2.0 for Google Calendar
-
-This cronjob expects Google Calendar client secrets at
-
-   %s
-
-""" % CLIENT_SECRETS
-
-# Set up a Flow object to be used for authentication.
-# Add one or more of the following scopes. PLEASE ONLY ADD THE SCOPES YOU
-# NEED. For more information on using scopes please see
-# <https://developers.google.com/+/best-practices>.
-FLOW = flow_from_clientsecrets(CLIENT_SECRETS,
-    scope=[
-      'https://www.googleapis.com/auth/calendar.readonly',
-    ],
-    message=MISSING_CLIENT_SECRETS_MESSAGE)
-
-
-# The gflags module makes defining command-line options easy for
-# applications. Run this program with the '--help' argument to see
-# all the flags that it understands.
-gflags.DEFINE_enum('logging_level', 'ERROR',
-    ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-    'Set the level of logging detail.')
-
+LOS_ANGELES_TZ = "America/Los_Angeles"
 
 def main(argv):
-  # Let the gflags module process the command-line arguments
-  try:
-    argv = FLAGS(argv)
-  except gflags.FlagsError, e:
-    print '%s\\nUsage: %s ARGS\\n%s' % (e, argv[0], FLAGS)
-    sys.exit(1)
-
-  # Set the logging according to the command-line flag
-  logging.getLogger().setLevel(getattr(logging, FLAGS.logging_level))
-
-  # If the Credentials don't exist or are invalid, run through the native
-  # client flow. The Storage object will ensure that if successful the good
-  # Credentials will get written back to a file.
-  auth_credentials_path = os.path.join(os.path.dirname(__file__), '../lib/gcal_sdk/auth_credentials.dat')
-  storage = Storage(auth_credentials_path)
-  credentials = storage.get()
-
-  if credentials is None or credentials.invalid:
-    credentials = run(FLOW, storage)
-
-  # Create an httplib2.Http object to handle our HTTP requests and authorize it
-  # with our good Credentials.
-  http = httplib2.Http()
-  http = credentials.authorize(http)
-
-  service = build('calendar', 'v3', http=http)
-
-  try:
-
+    update_dirty_calendars_only = False
+    if len(argv) is 2 and argv[1] == "dirty_only":
+        update_dirty_calendars_only = True
     now = datetime.now(timezone(LOS_ANGELES_TZ))
-    today_start = datetime(year = now.year, month = now.month, day = now.day, tzinfo = now.tzinfo)
-#    today_start = today_start - timedelta(days=1)
-    tomorrow = today_start + timedelta(days = 1)
-    today_end = datetime(year = tomorrow.year, month = tomorrow.month, day = tomorrow.day, tzinfo = tomorrow.tzinfo)
+    period_start = datetime(year = now.year, month = now.month, day = now.day, tzinfo = now.tzinfo)
+    period_end = period_start + timedelta(days = int(CFG.get_instance().get('refresh_interview_schedule', 'num_days_to_get_schedule_for')))
+    calendar = Google_Calendar.get_calendar()
     db_session = DB_Session_Factory.get_db_session()
-    db_session.autoflush = False;
-    for interviewer in db_session.query(Interviewer).order_by(Interviewer.email):
-        print "Checking schedule for " + interviewer.name
-        existing_interviews = interviewer.todays_interviews
-        interviews_to_delete = []
-        for existing_interview in existing_interviews:
-            interviews_to_delete.append(existing_interview)
-        events_request = service.events().list(calendarId = interviewer.email, timeZone = LOS_ANGELES_TZ, timeMin = today_start.isoformat(), timeMax = today_end.isoformat(), orderBy = 'startTime', singleEvents = True)
-        interviews_for_interviewer = []
-        while (events_request != None):
-            response = events_request.execute(http)
-            for event in response.get('items', []):
-                summary = event.get('summary', '')
-                match = re.search("Interview scheduled for ([\w '.]+), (.*?) candidate", summary)
-                if match:
-                    if (re.match("^.*?[Ss][Hh][Aa][Dd][Oo][Ww].*?Interview", summary)):
-                        continue
-                    print "Found interview: " + summary
-                    candidate_name = match.group(1)
-                    position = match.group(2)
-                    candidate = db_session.query(Candidate).get(candidate_name)
-                    if candidate is None:
-                        candidate = Candidate(candidate_name, position, 'tomas@box.com')
-                    room = event.get('location', 'Unknown Location')
-                    start_time = google_ts_to_datetime(event.get('start', {}).get('dateTime', DEFAULT_DATE))
-                    end_time = google_ts_to_datetime(event.get('end', {}).get('dateTime', DEFAULT_DATE))
-                    interview_exists = False
-                    for existing_interview in existing_interviews:
-                        if existing_interview.candidate_name == candidate_name:
-                            existing_interview.room = room
-                            existing_interview.start_time = start_time
-                            existing_interview.end_time = end_time
-                            existing_interview.candidate = candidate
-                            if existing_interview in interviews_to_delete:
-                                interviews_to_delete.remove(existing_interview)
-                            interview_exists = True
-                            interviews_for_interviewer.append(existing_interview)
-                            break
-                    if interview_exists is False:
-                        new_interview = Interview(interviewer.email, start_time, end_time, candidate_name, room)
-                        new_interview.candidate = candidate
-                        db_session.add(new_interview)
-                        existing_interviews.append(new_interview)
-                        interviews_for_interviewer.append(new_interview)
-            events_request = service.events().list_next(events_request, response)
-        for interview_to_delete in interviews_to_delete:
-            print "Deleting interview with " + interview_to_delete.candidate_name
-            candidate = interview_to_delete.candidate
-            db_session.delete(interview_to_delete)
-            if not candidate.interviews:
-                db_session.delete(candidate)
-        phone_number_index = 0
-        for index, existing_interview in enumerate(interviews_for_interviewer):
-            if existing_interview.phone_number_to_use is None:
-                # Make sure that no two consecutive interviews use the same phone number
-                while len(phone_numbers) > 1 and (get_phone_number(interviews_for_interviewer, index - 1) == phone_numbers[phone_number_index] or get_phone_number(interviews_for_interviewer, index + 1) == phone_numbers[phone_number_index]):
-                    print len(phone_numbers)
-                    phone_number_index = (phone_number_index + 1)%len(phone_numbers)
-                existing_interview.phone_number_to_use = phone_numbers[phone_number_index]
-        db_session.flush()
+    if update_dirty_calendars_only is True:
+        interviewer_list = db_session.query(Interviewer).filter(Interviewer.needs_calendar_sync == 1).with_lockmode('update').all()
+        for interviewer in interviewer_list:
+            interviewer.needs_calendar_sync = 0
         db_session.commit()
-
-    # For more information on the Calendar API API you can visit:
-    #
-    #   https://developers.google.com/google-apps/calendar/firstapp
-    #
-    # For more information on the Calendar API API python library surface you
-    # can visit:
-    #
-    #   https://google-api-client-libraries.appspot.com/documentation/calendar/v3/python/latest/
-    #
-    # For information on the Python Client Library visit:
-    #
-    #   https://developers.google.com/api-client-library/python/start/get_started
-
-  except AccessTokenRefreshError:
-    print ("The credentials have been revoked or expired, please re-run"
-      "the application to re-authorize")
-
-def google_ts_to_datetime(google_ts):
-    last_char = google_ts[-1:]
-    tz_offset = 0;
-    if last_char == 'z' or last_char == 'Z':
-        google_ts = google_ts[:-1]
     else:
-        matches = re.search(r"([-+])(\d\d):(\d\d)$", google_ts)
-        if matches is None:
-            raise Exception("Cannot parse the timestamp" + google_ts)
-        else:
-            hour_offset = int(matches.group(2))
-            minute_offset = int(matches.group(3))
-            operator = matches.group(1)
-            tz_offset = minute_offset + hour_offset * 60
-            if operator == '+':
-                tz_offset = -tz_offset
-            google_ts = re.sub('[\-+]\d\d:\d\d$', '', google_ts)
-    datetime_obj = datetime.strptime(google_ts, '%Y-%m-%dT%H:%M:%S')
-    datetime_obj = datetime_obj + timedelta(minutes=tz_offset)
-    utc_datetime = datetime_obj.replace(tzinfo = utc)
-    localized_datetime = utc_datetime.astimezone(timezone(LOS_ANGELES_TZ))
-    return localized_datetime.replace(tzinfo = None)
-    
-    
-
-def get_phone_number(interviews_list, index):
-    return interviews_list[index].phone_number_to_use if index < len(interviews_list) else None
-    
-
+        interviewer_list = db_session.query(Interviewer).order_by(Interviewer.email)
+    for interviewer in interviewer_list:
+        print "Checking schedule for " + interviewer.name
+        calendar.refresh_interviews(interviewer, period_start, period_end)
+        calendar.stop_push_notifications(interviewer)
+        calendar.register_for_push_notifications(interviewer)
+        
 if __name__ == '__main__':
   main(sys.argv)

@@ -21,4 +21,4 @@ class CFG(object):
         return self.env_conf.get(name_of_section, name_of_conf)
 
     def is_live(self):
-        return re.match('\/var\/onsite-inflight\/', __file__)
+        return self.get("installation", "env_name") == "live"

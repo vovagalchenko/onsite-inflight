@@ -7,14 +7,19 @@ from model.user_model import User
 import uuid
 from datetime import datetime
 from lib.conf import CFG
+import sys
 
 class HTTP_Response_Builder(object):
     content_type = 'application/json'
     params_dump = {}
 
     def __init__(self, params_storage):
-        for key in params_storage.keys():
-            self.params_dump[key] = params_storage[key].value
+        try:
+            for key in params_storage.keys():
+                self.params_dump[key] = params_storage[key].value
+        except TypeError:
+            # FieldStorage throws a type error when trying to iterate it if no params are passed in... wtf
+            pass
         for param_name in dir(self):
             param_definition = getattr(self, param_name)
             if not isinstance(param_definition, Parameter):

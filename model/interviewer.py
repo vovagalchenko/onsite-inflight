@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.dialects.mysql import TEXT
+from sqlalchemy.dialects.mysql import BIT, TEXT, VARBINARY
 from db_session import DB_Session_Factory
 from datetime import datetime, timedelta
 from base import Base
@@ -16,6 +16,8 @@ class Interviewer(Base):
     avatar_url = Column(String(2083))
     bio = Column(TEXT, nullable = False, default="")
     position = Column(String(50), nullable = False, default = "")
+    needs_calendar_sync = Column(BIT, nullable = False, default = 0)
+    push_notification_id = Column(VARBINARY(50), nullable = True, default = "")
 
     # The delete-orphan cascade option makes the framework remove the row associated with the interview
     # when it is disassociated from the interviewer. It makes no sense to have an interview with no interviewer.
@@ -23,7 +25,8 @@ class Interviewer(Base):
         "Interview",
         backref = backref('interviewer'),
         cascade = "all, delete-orphan",
-        order_by='Interview.end_time'
+        order_by='Interview.end_time',
+        lazy='dynamic'
     )
     todays_interviews = relationship(
         "Interview",

@@ -18,7 +18,8 @@ end_points = {
     'handle_opt_in_sms' : handle_optin_sms.Handle_Opt_In_SMS_HTTP_Response_Builder,
     'opt_in_list' : opt_in_list.Opt_In_List_HTTP_Response_Builder,
     'time_to_respond_stats' : time_to_respond_stats.Time_To_Respond_Stats_HTTP_Response_Builder,
-    'scores_by_time_stats' : scores_by_time_stats.Scores_By_Time_Stats_HTTP_Response_Builder
+    'scores_by_time_stats' : scores_by_time_stats.Scores_By_Time_Stats_HTTP_Response_Builder,
+    'calendar_notification' : calendar_notification.Calendar_Notification_HTTP_Response_Builder
 }
 
 request_uri = environ.get('REQUEST_URI', '')
@@ -27,7 +28,6 @@ endpoint = None
 if match is not None:
     endpoint = match.group(1)
 
-params_storage = cgi.FieldStorage()
 try:
     response_builder_class = end_points.get(endpoint, None)
     if response_builder_class is None:
@@ -37,6 +37,7 @@ try:
         print
         print output_str
         exit()
+    params_storage = cgi.FieldStorage()
     response_builder = response_builder_class(params_storage)
 # This 'except' is meant to only catch exceptions that are thrown when passed in
 # arguments are insufficient or inappropriate. Probably should create a subclass
