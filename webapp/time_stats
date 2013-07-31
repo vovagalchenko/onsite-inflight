@@ -761,7 +761,7 @@
 		<LINK href="css/time_stats.css" type="text/css" rel="stylesheet">
 		<LINK href="css/progress_indication.css" type="text/css" rel="stylesheet">
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
-        <SCRIPT type="text/javascript" src="http://d3js.org/d3.v3.min.js" charset="utf-8"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/d3.v3.min.js" charset="utf-8"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/handlebars.js" charset="utf-8"></SCRIPT>
 	</HEAD>
 	<BODY>
