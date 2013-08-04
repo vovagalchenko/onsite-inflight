@@ -12,6 +12,7 @@ import sys
 end_points = {   
     'candidate_list' : candidate_list.Candidate_List_HTTP_Response_Builder,
     'candidate_detail' : candidate_detail.Candidate_Detail_HTTP_Response_Builder,
+    'teammates' : teammates.Teammates_HTTP_Response_Builder,
     'post-sso' : post_sso.Post_SSO_HTTP_Response_Builder,
     'handle_score_sms' : handle_score_sms.Handle_Score_SMS_HTTP_Response_Builder,
     'handle_opt_in_sms' : handle_optin_sms.Handle_Opt_In_SMS_HTTP_Response_Builder,

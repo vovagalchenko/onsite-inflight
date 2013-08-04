@@ -4,9 +4,10 @@ import sys
 from model.db_session import DB_Session_Factory
 from model.interview import Interview
 from model.interviewer import Interviewer
+from model.interviewer_tag import Interviewer_Tag
 from model.optin import Opt_In
 from urllib import urlretrieve
-from os import listdir, remove, path
+from os import listdir, remove, path, walk
 from lib.conf import CFG
 import re
 
@@ -18,7 +19,7 @@ def main(argv):
     db_session.execute(deletion_sql)
     interviewers = {}
     
-    with open("scripts/interviewers.dat", "r") as interviewer_file:
+    with open("../data/bootstrap/interviewers.dat", "r") as interviewer_file:
         for interviewer_info in interviewer_file:
             interviewer_info = interviewer_info.strip(' \t\n\r')
             if not interviewer_info:
@@ -45,6 +46,25 @@ def main(argv):
         if interviewers.get(optin.email, None) is None:
             print optin.name + "\t" + optin.email + "\t" + optin.phone_number;
             db_session.add(Interviewer(optin.email, optin.name, optin.phone_number))
+    db_session.commit()
+    print "Done"
+
+    db_session.execute(Interviewer_Tag.__table__.delete('1'))
+
+    for dir_name, dir_names, file_names in walk("../data/bootstrap/tags", "r"):
+        for tag_name in file_names:
+            print "Adding tag <" + tag_name + ">"
+            file_path = path.join(dir_name, tag_name)
+            tag = Interviewer_Tag(tag_name)
+            interviewers_for_tag = []
+            with open(file_path, "r") as tag_file:
+                for interviewer_email in tag_file:
+                    interviewer_email = interviewer_email.strip(' \t\n\r')
+                    interviewer = db_session.query(Interviewer).get(interviewer_email)
+                    if interviewer is None:
+                        raise Exception("Invalid interviewer info in the bootstrap data: " + interviewer_email)
+                    tag.add_interviewer(interviewer)
+            db_session.add(tag)
     db_session.commit()
 
 if __name__ == '__main__':

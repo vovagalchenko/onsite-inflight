@@ -159,7 +159,8 @@ def main(argv):
         for index, existing_interview in enumerate(interviews_for_interviewer):
             if existing_interview.phone_number_to_use is None:
                 # Make sure that no two consecutive interviews use the same phone number
-                while len(phone_numbers) > 1 and get_phone_number(interviews_for_interviewer, index - 1) == phone_numbers[phone_number_index] or get_phone_number(interviews_for_interviewer, index + 1) == phone_numbers[phone_number_index]:
+                while len(phone_numbers) > 1 and (get_phone_number(interviews_for_interviewer, index - 1) == phone_numbers[phone_number_index] or get_phone_number(interviews_for_interviewer, index + 1) == phone_numbers[phone_number_index]):
+                    print len(phone_numbers)
                     phone_number_index = (phone_number_index + 1)%len(phone_numbers)
                 existing_interview.phone_number_to_use = phone_numbers[phone_number_index]
         db_session.flush()
