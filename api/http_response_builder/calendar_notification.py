@@ -15,6 +15,10 @@ class Calendar_Notification_HTTP_Response_Builder(HTTP_Response_Builder):
         resource_state = os.environ.get('HTTP_X_GOOG_RESOURCE_STATE', None)
         resource_id = os.environ.get('HTTP_X_GOOG_RESOURCE_ID', None)
         channel_id = os.environ.get('HTTP_X_GOOG_CHANNEL_ID', None)
+        if resource_state is not None and resource_id is not None and channel_id is not None:
+            sys.stderr.write(channel_id + ":" + resource_id + ":" + resource_state)
+        else:
+            sys.stderr.write("Didn't get an expected param for calendar_notification: " + str(os.environ))
         if resource_state == "exists" and resource_id is not None and channel_id is not None:
             db_session = DB_Session_Factory.get_db_session()
             interviewer = db_session.query(Interviewer).filter(Interviewer.push_notification_id == resource_id).first()
@@ -23,6 +27,7 @@ class Calendar_Notification_HTTP_Response_Builder(HTTP_Response_Builder):
             elif interviewer is None:
                 sys.stderr.write("Received notification for an unknown resource id: " + resource_id)
             else:
+                sys.stderr.write("Calendar out of sync for " + interviewer.name)
                 interviewer.needs_calendar_sync = 1
                 db_session.add(interviewer)
                 db_session.commit()
