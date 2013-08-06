@@ -13,6 +13,7 @@ from oauth2client.client import AccessTokenRefreshError
 import httplib2
 
 from apiclient.discovery import build
+from apiclient.errors import HttpError
 
 from model.candidate import Candidate
 from model.db_session import DB_Session_Factory
@@ -79,6 +80,8 @@ def get_phone_number(interviews_list, index):
     return interviews_list[index].phone_number_to_use if index < len(interviews_list) else None
 
 def get_resource_id_for_interviewer(interviewer):
+    if interviewer is None:
+        return None
     return CFG.get_instance().get("installation", "env_name") + "_" + re.sub("@.*", "", interviewer.email)
 
 class Google_Calendar(object):
@@ -136,11 +139,18 @@ This cronjob expects Google Calendar client secrets at
         db_session.commit()
 
     def stop_push_notifications(self, interviewer):
-        if interviewer.push_notification_id is not None:
-            self.service.channels().stop(body = {
-                'id' : get_resource_id_for_interviewer(interviewer),
-                'resourceId' : interviewer.push_notification_id
-            }).execute()
+        if interviewer.push_notification_id is not None and interviewer.push_notification_id != "": 
+            print "Stopping notifications for " + get_resource_id_for_interviewer(interviewer) + ":" + interviewer.push_notification_id;
+            try:
+                self.service.channels().stop(body = {
+                    'id' : get_resource_id_for_interviewer(interviewer),
+                    'resourceId' : interviewer.push_notification_id
+                }).execute()
+            except HttpError, e:
+                if e.resp.status in [404]:
+                    print "Nothing to stop"
+                else:
+                    raise e
 
     def refresh_interviews(self, interviewer, period_start, period_end):
         db_session = DB_Session_Factory.get_db_session()
