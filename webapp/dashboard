@@ -174,7 +174,7 @@
                 tableview.innerHTML = document.getElementById('candidates_handlebars').outerHTML;
                 current_date = new_date;
                 var day_after = new Date(new_date.getFullYear(), new_date.getMonth(), new_date.getDate() + 1);
-                document.getElementById('date_ff').className = get_date_button_class(day_after > new Date());
+                document.getElementById('date_ff').className = get_date_button_class(day_after > get_max_supported_date());
 
                 var day_before = new Date(new_date.getFullYear(), new_date.getMonth(), new_date.getDate() - 1);
                 document.getElementById('date_rw').className = get_date_button_class(day_before < min_date);
@@ -457,7 +457,7 @@
         <SCRIPT type="text/javascript" src="js/handlebars.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/page_manager.js"></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/hash_helper.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/hash_helper81e706c.js"></SCRIPT>
 	</HEAD>
 	<BODY>
         <DIV id="app-container">

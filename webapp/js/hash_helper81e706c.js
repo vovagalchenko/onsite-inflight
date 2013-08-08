@@ -25,6 +25,12 @@ function decode_hash_component(encoded_hash_component)
     return decodeURIComponent(encoded_hash_component.replace(/\+/g, "%20"));
 }
 
+function get_max_supported_date()
+{
+    var now = new Date();
+    return now.setDate(now.getDate() + 7);
+}
+
 function go_to_hash(animate_date_switch)
 {
     var new_hash = window.location.hash;
@@ -42,7 +48,7 @@ function go_to_hash(animate_date_switch)
         if (date_match && date_match.length == 4)
         {
             date_to_set = new Date(date_match[1], date_match[2] - 1, date_match[3]);
-            if (date_to_set < min_date || date_to_set > new Date())
+            if (date_to_set < min_date || date_to_set > get_max_supported_date())
             {
                 hash_is_invalid = true;
             }
