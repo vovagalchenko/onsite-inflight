@@ -5,224 +5,295 @@
     <head>
         <meta charset="utf-8">
         <title>Onsite Interviews</title>
-        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-        <script type="text/javascript" src="js/ajax.js"></script>
         <LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+         <script type="text/javascript" src="js/d3.v3.min.js"></script>
+         <script type="text/javascript" src="js/ajax.js"></script>
+         <style type="text/css">
+
+          .axis path,
+          .axis line {
+              fill: none;
+              stroke: none;
+              shape-rendering: crispEdges;
+          }
+
+          .axis text {
+              font-family: sans-serif;
+              font-size: 13px;
+              fill: gray;
+            }
     
+          </style>
+
+
     </head>
     <body>
 
-      <div id="content" class="header-bar" style="height:1024px;padding-top:20px;">
-        <SVG id="heatmap">
-         </SVG> 
-        <div id="tooltip" class="hidden">
-        <p><strong></strong></p>
-        <p><span id="value">100</span></p>
-        </div>
-       <p id="Cultural">Click for Avg Cultural Score</p>
-       <p id="Technical">Click for Avg Technical Score</p>
-    </div>  
-  </div>
-
-        <script type="text/javascript">
-
-  
-  //var svg = d3.select("#left").append("svg");
-    var svg=d3.select("#heatmap");
-      
-  var w = 600;
-  var h = 500;
-  var padding = 40;  
-        
-  var TimeOfDay =[];
-  var DayOfWeek = [];
-  var DayTimeMatrix=[];
-  var DayTimeMatrixFill = [];
-  var max_score ;
-  var min_score ;
-  var max_sample_size;
-  var score_of_interest ;
-  
-  var days_of_week = {
-            'Mon' : 0,
-            'Tue' : 1,
-            'Wed' : 2,
-            'Thu' : 3,
-            'Fri' : 4,
-            'Sat' : 5,
-            'Sun' : 6
-        }
  
+        <div id="content" class="header-bar" style="height:1024px;padding-top:20px;width:768px;margin: 0 auto; ">
+            <div style="float: left;width:80%;"> 
+              HOURLY AVERAGE CULTURAL SCORE
+              <SVG id="heatmap"></SVG> 
+            </div>
+         <div style="float: right;;width:20%;"> 
+                 <p style="font-family: sans-serif;font-size: 13px;"> score range</p>
+                 
+                 <svg >
+                   <defs>
+                      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:rgb(248,0,0);stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:rgb(138,216,255);stop-opacity:1" />
+                      </linearGradient>
+                    </defs>       
+                  <rect width="90%" height="10" fill="url(#grad1)"></rect> 
 
-   
-         window.onload = function()
-       {
-           make_ajax_request("api/scores_by_time_stats?earliest_ts=0",update_DayTimeMatrix,  null);
+                </svg>
+                  
+          </div>
+      </div>
+
+    <script type="text/javascript">
+
+
+      var svg=d3.select("#heatmap");
+          
+      var w = 600;
+      var h = 600;
+      var padding = 70;  
+            
+      var TimeOfDay =[];
+      var DayOfWeek = [];
+      var DayTimeMatrix=[];
+      var DayTimeMatrixFill = [];
+      var max_score ;
+      var min_score ;
+      var max_sample_size;
+      var score_of_interest ;
+      
+      var days_of_week = {'Mon' : 0,'Tue' : 1,'Wed' : 2,'Thu' : 3,'Fri' : 4,'Sat' : 5,'Sun' : 6};
          
-           //update_DayTimeMatrix([{"Avg_Cultural_Score": 3.0, "Sample_Size": 3, "Avg_Technical_Score": 3.125, "Day": "Mon", "Hour": 11}, {"Avg_Cultural_Score": 2.25, "Sample_Size": 7, "Avg_Technical_Score": 1.75, "Day": "Mon", "Hour": 12}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 5, "Avg_Technical_Score": 2.33333333333333, "Day": "Mon", "Hour": 13}, {"Avg_Cultural_Score": 2.20833333333333, "Sample_Size": 6, "Avg_Technical_Score": 2.29166666666667, "Day": "Mon", "Hour": 14}, {"Avg_Cultural_Score": 2.875, "Sample_Size": 5, "Avg_Technical_Score": 2.0, "Day": "Mon", "Hour": 15}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 3, "Avg_Technical_Score": 2.375, "Day": "Mon", "Hour": 16}, {"Avg_Cultural_Score": 4.0, "Sample_Size": 3, "Avg_Technical_Score": 4.0, "Day": "Mon", "Hour": 17}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 1, "Avg_Technical_Score": 4.0, "Day": "Tue", "Hour": 13}, {"Avg_Cultural_Score": 2.875, "Sample_Size": 8, "Avg_Technical_Score": 2.53125, "Day": "Tue", "Hour": 14}, {"Avg_Cultural_Score": 2.82692307692308, "Sample_Size": 15, "Avg_Technical_Score": 2.28571428571429, "Day": "Tue", "Hour": 15}, {"Avg_Cultural_Score": 3.19444444444444, "Sample_Size": 10, "Avg_Technical_Score": 2.90625, "Day": "Tue", "Hour": 16}, {"Avg_Cultural_Score": 2.82142857142857, "Sample_Size": 8, "Avg_Technical_Score": 3.0, "Day": "Tue", "Hour": 17}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 2.0, "Day": "Tue", "Hour": 18}, {"Avg_Cultural_Score": null, "Sample_Size": 1, "Avg_Technical_Score": null, "Day": "Wed", "Hour": 10}, {"Avg_Cultural_Score": 2.66666666666667, "Sample_Size": 4, "Avg_Technical_Score": 2.66666666666667, "Day": "Wed", "Hour": 11}, {"Avg_Cultural_Score": 2.3125, "Sample_Size": 4, "Avg_Technical_Score": 2.125, "Day": "Wed", "Hour": 12}, {"Avg_Cultural_Score": 2.35, "Sample_Size": 5, "Avg_Technical_Score": 2.9, "Day": "Wed", "Hour": 13}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 7, "Avg_Technical_Score": 2.79166666666667, "Day": "Wed", "Hour": 14}, {"Avg_Cultural_Score": 2.6875, "Sample_Size": 4, "Avg_Technical_Score": 2.875, "Day": "Wed", "Hour": 15}, {"Avg_Cultural_Score": 2.66666666666667, "Sample_Size": 4, "Avg_Technical_Score": 2.66666666666667, "Day": "Wed", "Hour": 16}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 4, "Avg_Technical_Score": 2.6875, "Day": "Wed", "Hour": 17}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 4.0, "Day": "Thu", "Hour": 10}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 2, "Avg_Technical_Score": 2.375, "Day": "Thu", "Hour": 11}, {"Avg_Cultural_Score": 3.0, "Sample_Size": 1, "Avg_Technical_Score": 1.0, "Day": "Thu", "Hour": 12}, {"Avg_Cultural_Score": 2.0, "Sample_Size": 1, "Avg_Technical_Score": 2.0, "Day": "Thu", "Hour": 14}, {"Avg_Cultural_Score": 2.5, "Sample_Size": 2, "Avg_Technical_Score": 2.0, "Day": "Thu", "Hour": 15}, {"Avg_Cultural_Score": null, "Sample_Size": 1, "Avg_Technical_Score": null, "Day": "Fri", "Hour": 10}, {"Avg_Cultural_Score": 3.25, "Sample_Size": 6, "Avg_Technical_Score": 3.5, "Day": "Fri", "Hour": 11}, {"Avg_Cultural_Score": 3.16666666666667, "Sample_Size": 6, "Avg_Technical_Score": 2.9375, "Day": "Fri", "Hour": 12}, {"Avg_Cultural_Score": 2.53125, "Sample_Size": 9, "Avg_Technical_Score": 2.3125, "Day": "Fri", "Hour": 13}, {"Avg_Cultural_Score": 2.71428571428571, "Sample_Size": 10, "Avg_Technical_Score": 2.82142857142857, "Day": "Fri", "Hour": 14}, {"Avg_Cultural_Score": 3.02272727272727, "Sample_Size": 12, "Avg_Technical_Score": 2.65, "Day": "Fri", "Hour": 15}, {"Avg_Cultural_Score": 2.78125, "Sample_Size": 9, "Avg_Technical_Score": 2.64285714285714, "Day": "Fri", "Hour": 16}, {"Avg_Cultural_Score": 2.6, "Sample_Size": 6, "Avg_Technical_Score": 2.8, "Day": "Fri", "Hour": 17}])
-         }
+      window.onload = function()
+      {
+              make_ajax_request("api/scores_by_time_stats?earliest=0", update_DayTimeMatrix, null);
+      }
 
-  function update_DayTimeMatrix(ajaxResult)
-  {
-    DayTimeMatrix=ajaxResult;
-/*
-          update_Chart_Data("Avg_Cultural_Score");
-          update_chart("Avg_Cultural_Score");                
-*/
-          update_Chart_Data("Avg_Technical_Score");
-          update_chart("Avg_Technical_Score");                
-         };
+      function update_DayTimeMatrix(ajaxResult)
+      {
+        for (var i = 0; i < ajaxResult.length; i++) 
+        {
+          var j=lookupDayTime(ajaxResult[i].Day,ajaxResult[i].Hour);
+          if (j==-1) 
+            {
+              DayTimeMatrix.push(
+                  {Avg_Technical_Score : ajaxResult[i].Avg_Technical_Score
+                  ,Hour : ajaxResult[i].Hour
+                  ,Sample_Size : ajaxResult[i].Sample_Size
+                  ,Avg_Cultural_Score : ajaxResult[i].Avg_Cultural_Score
+                  ,Day : ajaxResult[i].Day}
+                  );
+              }
+          else
+            {
+              DayTimeMatrix[j].Avg_Technical_Score=(DayTimeMatrix[j].Avg_Technical_Score+ajaxResult[i].Avg_Technical_Score)/2
+              DayTimeMatrix[j].Avg_Cultural_Score=(DayTimeMatrix[j].Avg_Cultural_Score+ajaxResult[i].Avg_Cultural_Score)/2
+              DayTimeMatrix[j].Sample_Size=(DayTimeMatrix[j].Sample_Size+ajaxResult[i].Sample_Size)
+            } 
+        }
 
+        update_Chart_Data("Avg_Cultural_Score");
+        update_chart("Avg_Cultural_Score");                
+      };
+
+
+           
+      function parseIntOrLeaveString(stringValue)
+      {
+        var result = parseInt(stringValue);
+        if (isNaN(result))
+        {
+            result = stringValue;
+        }
+        return result;
+      }
+
+      function get_keys(dict)
+      {
+        var keys = [];
+        for(var k in dict) keys.push(parseIntOrLeaveString(k));
+        return keys;
+      }
+      
+      function lookupDayTime( day,hour ) 
+      {
+        for(var i = 0, len = DayTimeMatrix.length; i < len; i++) 
+          if( DayTimeMatrix[i].Day=== day && DayTimeMatrix[ i ].Hour==hour)
+            return i;
+          return -1;
+      }
 
        
-        function parseIntOrLeaveString(stringValue)
-        {
-            var result = parseInt(stringValue);
-            if (isNaN(result))
-            {
-                result = stringValue;
-            }
-            return result;
-        }
-
-        function get_keys(dict)
-        {
-            var keys = [];
-            for(var k in dict) keys.push(parseIntOrLeaveString(k));
-            return keys;
-        }
-    
-   
-
-        function update_Chart_Data(selected_score_of_interest)
-        {
-            max_score = -1;
-            min_score = Number.MAX_VALUE;
-            max_sample_size=0;
-            score_of_interest=selected_score_of_interest;
-            var times_of_day_dict = {};
-            var days_of_week_dict = {};
-            for (var i = 0; i < DayTimeMatrix.length; i++)
-            {
-                times_of_day_dict[DayTimeMatrix[i].Hour] = true;
-                days_of_week_dict[DayTimeMatrix[i].Day] = true;
-                if (DayTimeMatrix[i][score_of_interest] === null)
-                    continue;
-                if (DayTimeMatrix[i][score_of_interest] < min_score)
-                {
-                    min_score = DayTimeMatrix[i][score_of_interest];
-                }
-                else if(DayTimeMatrix[i][score_of_interest] > max_score)
-                {
-                    max_score = DayTimeMatrix[i][score_of_interest];
-                }
-                if (DayTimeMatrix[i]["Sample_Size"] > max_sample_size)
-                {
-                  max_sample_size=DayTimeMatrix[i]["Sample_Size"];
-                }
-            }
-            TimeOfDay = get_keys(times_of_day_dict);
-            TimeOfDay.sort(function(a, b)
-            {
-                return a - b;
-            });
-            DayOfWeek = get_keys(days_of_week_dict);
-            DayOfWeek.sort(function(a, b)
-            {
-                return days_of_week[a] - days_of_week[b];
-            });
-
-          for (var i=0;i<DayOfWeek.length;i++)
-            for (var j=0;j<TimeOfDay.length;j++)
-            DayTimeMatrixFill.push({Day : DayOfWeek[i],Hour : TimeOfDay[j]});
-            };  
-        
-
- 
-
-     d3.selectAll("p")
-            .on("click", function() 
-    { 
-            var paragraphID = d3.select(this).attr("id");
-            if (paragraphID == "Cultural")
+      function update_Chart_Data(selected_score_of_interest) 
       {
-                update_Chart_Data("Avg_Cultural_Score")  
-                    update_chart("Avg_Cultural_Score")      
-      } 
-            if(paragraphID == "Technical") 
-      {
-                update_Chart_Data("Avg_Technical_Score")
-                update_chart("Avg_Technical_Score") 
-                  }
-    });        
+        max_score = -1;
+        min_score = Number.MAX_VALUE;
+        max_sample_size=0;
+        score_of_interest=selected_score_of_interest;
+        var times_of_day_dict = {};
+        var days_of_week_dict = {};
+        for (var i = 0; i < DayTimeMatrix.length; i++)
+        {
+            times_of_day_dict[DayTimeMatrix[i].Hour] = true;
+            days_of_week_dict[DayTimeMatrix[i].Day] = true;
+            if (DayTimeMatrix[i][score_of_interest] === null)
+                  continue;
+            if (DayTimeMatrix[i][score_of_interest] < min_score)
+            {
+                min_score = DayTimeMatrix[i][score_of_interest];
+            }
+            else if(DayTimeMatrix[i][score_of_interest] > max_score)
+            {
+                max_score = DayTimeMatrix[i][score_of_interest];
+            }
+            if (DayTimeMatrix[i]["Sample_Size"] > max_sample_size)
+            {
+              max_sample_size=DayTimeMatrix[i]["Sample_Size"];
+            }
+        }
+        TimeOfDay = get_keys(times_of_day_dict);
+        TimeOfDay.sort(function(a, b)
+        {
+            return a - b;
+        });
+        DayOfWeek = get_keys(days_of_week_dict);
+        DayOfWeek.sort(function(a, b)
+        {
+            return days_of_week[a] - days_of_week[b];
+        });
 
+       for (var i=0;i<DayOfWeek.length;i++)
+         for (var j=0;j<TimeOfDay.length;j++)
+            if ((lookupDayTime(DayOfWeek[i],TimeOfDay[j]))==-1 || (lookupDayTime(DayOfWeek[i],TimeOfDay[j])>-1 && DayTimeMatrix[lookupDayTime(DayOfWeek[i],TimeOfDay[j])]=== null))             
+              DayTimeMatrixFill.push({Day : DayOfWeek[i],Hour : TimeOfDay[j]});
+      };  
       
-  function update_chart(score_of_interest)
-  {
 
-    var yScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2],0.05);
-    var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding],0.05); 
-        //var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length).rangeRoundBands([padding, h - padding],0.05);
-          var yTickScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2]);
-          var xTickScale =d3.scale.ordinal() .domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding]);
-     
-        //  Draw Axis
-        
-          var xAxis = d3.svg.axis().scale(xTickScale).orient("top").tickValues(DayOfWeek);
-          var yAxis = d3.svg.axis().scale(yTickScale).orient("left").tickValues(TimeOfDay);
-        //  svg.append("g").attr("class", "axis").attr("transform", "translate(0," + padding + ")").call(xAxis);     
-        //  svg.append("g").attr("class", "axis").attr("transform", "translate(" + padding + ",0)").call(yAxis);                  
+         d3.selectAll("p")
+                .on("click", function() 
+        { 
+                var paragraphID = d3.select(this).attr("id");
+                if (paragraphID == "Cultural")
+          {
+                    update_Chart_Data("Avg_Cultural_Score")  
+                        update_chart("Avg_Cultural_Score")      
+          } 
+                if(paragraphID == "Technical") 
+          {
+                    update_Chart_Data("Avg_Technical_Score")
+                    update_chart("Avg_Technical_Score") 
+                      }
+        });        
 
-       // Add bars
+          
+      function update_chart(score_of_interest)
+      {
 
-        var barsfill = svg.selectAll("rect").data(DayTimeMatrixFill);
-          barsfill
-          .enter()
-          .append("svg:image")
-          .attr("xlink:href", "img/NoScore.png") 
-          .attr("margin",0)
+        var yScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2],0);
+        var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding],0.15); 
+            //var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length).rangeRoundBands([padding, h - padding],0.05);
+        var yTickScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2]);
+        var xTickScale =d3.scale.ordinal() .domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding]);
+         
+            //  Draw Axis
+            
+        var xAxis = d3.svg.axis().scale(xTickScale).orient("top").tickValues(DayOfWeek);
+        var yAxis = d3.svg.axis().scale(yTickScale).orient("left").tickValues(TimeOfDay);
+        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + padding + ")").call(xAxis);     
+        svg.append("g").attr("class", "axis").attr("transform", "translate(" + padding + ",0)").call(yAxis);                  
+            
+        var bars = svg.selectAll("svg").data(DayTimeMatrix, function(d){return yScale(TimeOfDay.indexOf(d.Hour))*10+xScale(DayOfWeek.indexOf(d.Day));})
+        bars
+        .enter()
+        .append("svg")
+          .attr("y", function(d) {return yScale(TimeOfDay.indexOf(d.Hour));})
+          .attr("x", function(d) {return xScale(DayOfWeek.indexOf(d.Day));})         
+          .attr("width", xScale.rangeBand())
+          .attr("height", yScale.rangeBand());
+
+        bars.append("rect")
+        .attr("y", 0)
+        .attr("x", 0) 
+        .attr("width", xScale.rangeBand())
+        .attr("height", yScale.rangeBand())
+        .attr("opacity",1)
+        .style("fill", function(d) 
+        {
+          if (d[score_of_interest] === null)
+          {
+            return "rgba(0, 0, 0, 0)";
+          }
+          var color_offset_r = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 110);
+          var color_offset_g = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 216);
+          var color_offset_b = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
+
+
+          var ret_value = "rgb(" + (248 - color_offset_r).toString()
+                      + ","+(0+ color_offset_g).toString() 
+                      + ","+ (0 + color_offset_b).toString()
+                      + ")";
+          return ret_value;
+        })
+        ;
+
+
+        var barsfill = svg.selectAll("svg").data(DayTimeMatrixFill, function(d){return yScale(TimeOfDay.indexOf(d.Hour))*10+xScale(DayOfWeek.indexOf(d.Day));})
+        barsfill
+        .enter()
+        .append("svg")
           .attr("y", function(d, i) {return yScale(TimeOfDay.indexOf(d.Hour));})
           .attr("x", function(d, i) {return xScale(DayOfWeek.indexOf(d.Day));}) 
           .attr("width", xScale.rangeBand())
           .attr("height", yScale.rangeBand())  ;
-          // .append("svg:image")
-          // .attr("xlink:href", "NoScore.png") ;
-          
-          
-     var bars = svg.selectAll("rect").data(DayTimeMatrix);
-          bars
-          .enter()
-          .append("rect")
-          //.transition(100)
-          .attr("y", function(d, i) {return yScale(TimeOfDay.indexOf(d.Hour));})
-          .attr("x", function(d, i) {return xScale(DayOfWeek.indexOf(d.Day));})         
-          .attr("width", xScale.rangeBand())
-          .attr("height", yScale.rangeBand())
-          .transition()
-          .style("fill", function(d) {
-              if (d[score_of_interest] === null)
-              {
-                return "rgba(0, 0, 0, 0)";
-              }
-              var color_offset = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
-          //console.log(d);  
-              var ret_value = "rgb(" + (255 - color_offset).toString()
-                          + ","+(0 
-                          + ", 0" + color_offset).toString()
-                          + ")";
-              return ret_value;
-          })
-          .duration(1000) 
-          .delay(100)  
-          ;
 
-    
 
-       
+        barsfill
+          .append('defs')
+          .append('pattern')
+            .attr('id', 'diagonalHatch')
+            .attr('patternUnits', 'userSpaceOnUse')
+            .attr('width', 4)
+            .attr('height', 4)
+          .append('path')
+            .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+            .attr('stroke', 'lightgray')
+            .attr('stroke-width', 1);
 
-        }  
+          barsfill.append("rect")
+              .attr("x", 0)
+              .attr("width", 100)
+              .attr("height", 100)
+              .style("fill", 'none');
 
-               
+          barsfill.append("rect")
+            .attr("x", 0)
+            .attr("width", 100)
+            .attr("height", 100)
+            .attr('fill', 'url(#diagonalHatch)');
+
+              
+          barsfill.attr("id","fillpattern");
+
+           bars
+            .append("text")
+           .attr("y", function(d, i) {return yScale.rangeBand()/2+5;})
+            .attr("x", function(d, i) {return xScale.rangeBand()/2;})  
+            .attr("text-anchor","middle")
+            .attr("fill","white")
+            .attr("font-family","sans-serif")
+            .attr("font-size","11px")
+            .text(function(d,i) {  if (d[score_of_interest] !=null) return d[score_of_interest].toFixed(1);})
+
+    }
+                   
 
         </script>
 
