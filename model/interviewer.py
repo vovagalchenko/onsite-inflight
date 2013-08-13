@@ -18,6 +18,7 @@ class Interviewer(Base):
     position = Column(String(50), nullable = False, default = "")
     needs_calendar_sync = Column(BIT, nullable = False, default = 0)
     push_notification_id = Column(VARBINARY(50), nullable = True, default = "")
+    does_interviews = Column(BIT, nullable = False, default = 1)
 
     # The delete-orphan cascade option makes the framework remove the row associated with the interview
     # when it is disassociated from the interviewer. It makes no sense to have an interview with no interviewer.

@@ -26,7 +26,7 @@ def main(argv):
             interviewer.needs_calendar_sync = 0
         db_session.commit()
     else:
-        interviewer_list = db_session.query(Interviewer).order_by(Interviewer.email)
+        interviewer_list = db_session.query(Interviewer).filter(Interviewer.does_interviews == 1).order_by(Interviewer.email)
     for interviewer in interviewer_list:
         print "Checking schedule for " + interviewer.name
         calendar.refresh_interviews(interviewer, period_start, period_end)
