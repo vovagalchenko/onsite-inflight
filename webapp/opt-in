@@ -82,7 +82,7 @@
                     }
                     configure_table_cell(known_opt_in);
                     known_opt_ins[phone_number] = known_opt_in;
-                    last_ts = opt_in['updated'];
+                    last_ts = opt_in['created'];
                 }
                 last_received_opt_in_timestamp = last_ts;
             }
@@ -90,10 +90,11 @@
             function synchronize_with_server()
             {
                 var opt_in_list_url = '/api/opt_in_list';
-                if (last_received_opt_in_timestamp != null)
+                if (last_received_opt_in_timestamp == null)
                 {
-                    opt_in_list_url += '?date=' + last_received_opt_in_timestamp;
+                    last_received_opt_in_timestamp = Math.round(new Date().getTime()/1000)
                 }
+                opt_in_list_url += '?date=' + last_received_opt_in_timestamp;
                 make_ajax_request(opt_in_list_url, update_opt_in_table, handle_ajax_error);
             }
         </SCRIPT>

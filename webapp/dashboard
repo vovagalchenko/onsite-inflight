@@ -457,7 +457,7 @@
         <SCRIPT type="text/javascript" src="js/handlebars.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/page_manager.js"></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/hash_helper81e706c.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/hash_helper.js"></SCRIPT>
 	</HEAD>
 	<BODY>
         <DIV id="app-container">

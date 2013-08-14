@@ -5,7 +5,6 @@ from model.db_session import DB_Session_Factory
 from model.interview import Interview
 from model.interviewer import Interviewer
 from model.interviewer_tag import Interviewer_Tag
-from model.optin import Opt_In
 from urllib import urlretrieve
 from os import listdir, remove, path, walk
 from lib.conf import CFG
@@ -40,14 +39,6 @@ def main(argv):
                 interviewer.avatar_url = final_url
             interviewers[interviewer_data[1]] = interviewer
             db_session.add(interviewer)
-
-    print "Adding opt-ins now..."
-    for optin in db_session.query(Opt_In):
-        if interviewers.get(optin.email, None) is None:
-            print optin.name + "\t" + optin.email + "\t" + optin.phone_number;
-            db_session.add(Interviewer(optin.email, optin.name, optin.phone_number))
-    db_session.commit()
-    print "Done"
 
     db_session.execute(Interviewer_Tag.__table__.delete('1'))
 
