@@ -4,13 +4,12 @@
 		<META http-equiv="Content-type" value="text/html; charset=utf-8">
         <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
         <META name="apple-mobile-web-app-capable" content="yes">
+        <SCRIPT type="text/javascript" src="js/time_stats.js"></SCRIPT>
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
 		<LINK href="css/time_stats.css" type="text/css" rel="stylesheet">
 		<LINK href="css/progress_indication.css" type="text/css" rel="stylesheet">
-        <SCRIPT type="text/javascript" src="js/time_stats.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/d3.v3.min.js" charset="utf-8"></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/handlebars.js" charset="utf-8"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/compiled/d3.v3.min.js" charset="utf-8"></SCRIPT>
 	</HEAD>
 	<BODY>
         <DIV class="header-bar" style="height:380px;padding-top:20px;min-width:inherit;">
@@ -21,7 +20,7 @@
             </SVG>
             <DIV class="leaderboard-header non_selectable" style="cursor:default;">
                 <DIV style="float:left;padding-top:0px;" id="find-interviewer-div">
-                    <DIV class="selectable" style="position:absolute; cursor:pointer;" id="cancel-search">×</DIV>
+                    <DIV class="selectable" style="position:absolute; cursor:pointer;" id="cancel-search">&#x00D7;</DIV>
                     <DIV class="mag-glass grayscale"></DIV>
                     <DIV style="position:absolute; padding-left:25px; z-index:-1;" id="find-interviewer-label">Find Interviewer</DIV>
                     <INPUT class="interviewer-textfield selectable"></INPUT>

@@ -1,12 +1,11 @@
 <HTML>
 	<HEAD>
 		<TITLE>Onsite Interviews</TITLE>
-		<META http-equiv="Content-type" value="text/html; charset=utf-8">
         <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
         <META name="apple-mobile-web-app-capable" content="yes">
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
         <SCRIPT type="text/javascript" src="js/dashboard.js"></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/handlebars.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/compiled/handlebars.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/page_manager.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/hash_helper.js"></SCRIPT>

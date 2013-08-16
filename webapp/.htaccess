@@ -1,0 +1,5 @@
+Header unset ETag
+FileETag None
+Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "15 Sep 1987, 00:00:00 GMT"

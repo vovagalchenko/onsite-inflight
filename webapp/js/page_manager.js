@@ -58,7 +58,7 @@ function flip_pages(page_to_flip, direction, animation_will_start_callback)
         'transitionend',
         'webkitTransitionEnd',
         'msTransitionEnd',
-        'oTransitionEnd',
+        'oTransitionEnd'
     ];
     var page_flip_end_handler = function()
     {

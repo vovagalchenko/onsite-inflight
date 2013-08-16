@@ -25,6 +25,15 @@ function has_class(element, cls)
     return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 }
 
+function build_content_from_template(script_id, data, target_container_id)
+{   
+    var templateSource = document.getElementById(script_id);
+    var template= Handlebars.compile(templateSource.innerHTML);
+    var built_html = template(data);
+    var final_html = built_html + templateSource.outerHTML;
+    document.getElementById(target_container_id).innerHTML = final_html;
+}
+
 function handle_interview_session_size_change(tableviewcell_element, initial_height)
 {
     var content_element = tableviewcell_element.children[0];
@@ -42,7 +51,7 @@ function handle_interview_session_size_change(tableviewcell_element, initial_hei
         'transitionend',
         'webkitTransitionEnd',
         'msTransitionEnd',
-        'oTransitionEnd',
+        'oTransitionEnd'
     ];  
     for (var i = 0; i < transition_finished_events.length; i++)
     {   

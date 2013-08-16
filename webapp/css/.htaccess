@@ -1,0 +1,7 @@
+Header unset ETag
+FileETag None
+Header set Cache-Control "public, max-age=31536000"
+Header unset Pragma
+Header unset Expires
+ExpiresActive On
+ExpiresDefault "access plus 1 year"

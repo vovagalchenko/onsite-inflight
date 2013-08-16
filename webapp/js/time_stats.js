@@ -4,20 +4,20 @@ var ranges = [
         'range' : [0, 20*60000],
         'color' : 'rgb(151, 215, 255)',
         'label' : "< 20 m", 
-        'label_color' : 'rgb(0, 0, 0)',
+        'label_color' : 'rgb(0, 0, 0)'
     },  
     {   
         'range' : [20*60000, 40*60000],
         'color' : 'rgb(1, 59, 102)',
         'label' : "20 < 40 m", 
-        'label_color' : 'rgb(255, 255, 255)',
+        'label_color' : 'rgb(255, 255, 255)'
     },  
     {   
         'range' : [40*60000, Number.MAX_VALUE],
         'color' : 'rgb(229, 19, 19)',
         'label' : "> 40 m", 
-        'label_color' : 'rgb(255, 255, 255)',
-    },  
+        'label_color' : 'rgb(255, 255, 255)'
+    }
 ];  
 var interview_dot_horizontal_padding = 10; 
 var interview_dot_vertical_padding;
@@ -46,8 +46,8 @@ window.onhashchange = function()
         attr("id", "progress-indicator-container").
         html(progress_indicator.
             attr("hidden", null).
-            style("margin-left", (parseInt(header_bar_style.width) - parseInt(progress_indicator_style.width))/2).
-            style("margin-top", (parseInt(header_bar_style.height) - parseInt(progress_indicator_style.height))/2 - parseInt(header_bar_style.paddingTop)).
+            style("margin-left", (parseInt(header_bar_style.width) - parseInt(progress_indicator_style.width))/2 + "px").
+            style("margin-top", (parseInt(header_bar_style.height) - parseInt(progress_indicator_style.height))/2 - parseInt(header_bar_style.paddingTop) + "px").
             node().outerHTML);
     make_ajax_request(url, on_interviewer_data_receipt, null);
 }   
@@ -293,7 +293,7 @@ function on_interviewer_data_receipt(interviewers_data)
     var total_interviews_label = d3.select('#total-interviews-label');
     var total_interviews_div = total_interviews_label.select("#total-interviews-div");
     var total_interviews_content_rect = total_interviews_div.node().getBoundingClientRect();
-    total_interviews_div.style("padding-top", (parseInt(total_interviews_label.attr("height")) - total_interviews_content_rect.height)/2);
+    total_interviews_div.style("padding-top", (parseInt(total_interviews_label.attr("height")) - total_interviews_content_rect.height)/2 + "px");
 }
 
 function set_up_interviewer_search()
@@ -332,7 +332,7 @@ function set_up_interviewer_search()
             mag_glass.
                 classed("transition", true).
                 classed("grayscale", false).
-                style("left", tf_div_rect.width - mag_glass_rect.width - mag_glass_right_padding).
+                style("left", tf_div_rect.width - mag_glass_rect.width - mag_glass_right_padding + "px").
                 style("right", 0);
             d3.select(this).select("#find-interviewer-label").
                 classed("transition", true).
@@ -358,7 +358,7 @@ function set_up_interviewer_search()
         else
         {
             
-            for (var i = 1; i < full_interviewer_array.length; i++)
+            for (var i = 0; i < full_interviewer_array.length; i++)
             {
                 if (full_interviewer_array[i].name.match(new RegExp(filter_term, "gi")))
                 {
@@ -669,17 +669,21 @@ function update_interviewer_list(interviewer_array)
 
     num_interview_dots_per_row = Math.min(max_num_interview_dots_per_row, max_num_interviews);
     num_interview_dot_rows = Math.ceil(max_num_interviews/num_interview_dots_per_row);
+
+    
+
     for (var i = 0; i < interviewer_array.length; i++)
     {
         var interview_dots_svg = d3.select("#interview-dots-" + interviewer_array[i].username)
         var viewBox_width = interview_dots_svg.attr('viewBox').split(/\s+/)[2];
         var viewBox_height = interview_dots_svg.attr('viewBox').split(/\s+/)[3];
         interview_dot_vertical_padding = (viewBox_height - 2*interview_dot_radius*num_interview_dot_rows - (num_interview_dot_rows-1)*padding_between_dot_rows)/2;
-        var right_padding_per_dot = ((viewBox_width - (interview_dot_horizontal_padding*2)) - (2*interview_dot_radius*num_interview_dots_per_row))/(num_interview_dots_per_row-1);
+        var right_padding_per_dot = ((viewBox_width - (interview_dot_horizontal_padding*2)) - (2*interview_dot_radius*num_interview_dots_per_row))/(num_interview_dots_per_row+1);
         var circles = interview_dots_svg.selectAll('circle').data(interviewer_array[i].interviews)
         var cx_function = function(data, i)
         {
             var column  = i%num_interview_dots_per_row;
+            console.log(column + "\t" + i + "\t" + num_interview_dots_per_row + right_padding_per_dot);
             return interview_dot_horizontal_padding + column*right_padding_per_dot + (1 + 2*column)*interview_dot_radius;
         };
         var cy_function = function(data, i)

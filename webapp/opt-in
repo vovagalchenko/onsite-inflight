@@ -6,8 +6,8 @@
         <META name="apple-mobile-web-app-capable" content="yes">
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
 		<LINK href="css/opt-in.css" type="text/css" rel="stylesheet">
-        <SCRIPT type="text/javascript" src="js/opt-in.js></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/handlebars.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/opt-in.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/compiled/handlebars.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
 	</HEAD>
 	<BODY>
