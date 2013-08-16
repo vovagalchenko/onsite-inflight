@@ -453,3 +453,4 @@ function synchronize_with_server(initial)
         make_ajax_request("/api/candidate_detail?candidate_name=" + encodeURIComponent(focused_candidate_name) + "&date=" + Math.floor(current_date.getTime()/1000), ui_update_callback, handle_ajax_error);
     }
 }
+
