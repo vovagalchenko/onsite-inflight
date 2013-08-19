@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <HTML>
 	<HEAD>
 		<TITLE>Onsite Interviews</TITLE>
@@ -20,13 +21,14 @@
                     -ms-transform:rotate(90deg); /* IE 9 */
                     -webkit-transform:rotate(90deg); /* Safari and Chrome */
                 " id="date_rw" onclick="decrement_date(this.className);">&#9660;</P>
-                <P class="non_selectable" style="position:absolute;left:50;right:50;cursor:default;" id="date"></P>
                 <P style="
                     float:right;
                     transform:rotate(-90deg);
                     -ms-transform:rotate(-90deg); /* IE 9 */
                     -webkit-transform:rotate(-90deg); /* Safari and Chrome */
-                " id="date_ff" onclick="increment_date(this.className);">&#9660;</P></DIV>
+                " id="date_ff" onclick="increment_date(this.className);">&#9660;</P>
+                <P class="non_selectable" style="cursor:default;" id="date"></P>
+            </DIV>
 			<DIV class="tableview" id="candidate_list_tableview" style="top:44px;">
 		        <SCRIPT id="candidates_handlebars" type="text/x-handlebars">
 		            {{#list candidates}}
@@ -56,8 +58,8 @@
                 <DIV id="candidate_info">
                     <SCRIPT id="candidate_info_handlebars" type="text/x-handlebars">
                         <DIV class="status-bar">
-                            <DIV style="float:left; font-size: 35; color: #FFFFFF; cursor: pointer;" onclick="switch_to_candidate_list_page()">&times;</DIV>
-                            <P>{{status}}</P>
+                            <DIV style="float:left;font-size:35px;color:#FFFFFF;cursor:pointer;" onclick="switch_to_candidate_list_page()">&times;</DIV>
+                            <P style="position:relative;z-index:-1;">{{status}}</P>
                         </DIV>
                         <DIV id="candidate_detailed_info">
                             <P style="font-weight: bold; font-size: 19; height: 60%;">{{candidate_name}}</P>
@@ -73,7 +75,7 @@
             <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
-                    <DIV class="tableview-cell non_selectable {{#if expanded}} expanded{{/if}}" {{#if notes}}style="cursor:default;"{{else}}onclick="handle_interview_click(this, {{id}})"{{/if}}>
+                    <DIV class="tableview-cell non_selectable transition{{#if expanded}} expanded{{/if}}" {{#if notes}}style="cursor:default;"{{else}}onclick="handle_interview_click(this, {{id}})"{{/if}}>
                         <DIV>
                         <DIV class="progress-indicator" {{#if progress}}style="width:{{progress}};"{{else}}hidden=true{{/if}}></DIV>
                         <DIV class="above-progress interviewer_avatar_frame" style="position:relative;">
@@ -93,9 +95,9 @@
                             {{#if notes}}
                             </BR>
                             {{/if}}
-                            <DIV class="above-progress" style="position:relative; display:inline-block;"><IMG class="sprite time" width="1" height="1" src="img/spacer.gif"/><P class="detail-text"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
+                            <DIV class="above-progress" style="width:100%;position:relative;display:inline-block;"><IMG class="sprite time" width="1" height="1" src="img/spacer.gif"/><P class="detail-text"><strong>{{start_time}}</strong> - {{end_time}}</P></DIV>
                             </BR>
-                            <DIV class="above-progress" style="position:relative; display:inline-block;"><IMG class="sprite place" width="1" height="1" src="img/spacer.gif"/><P class="detail-text">{{room}}</P></DIV>
+                            <DIV class="above-progress" style="width:100%;position:relative;display:inline-block;"><IMG class="sprite place" width="1" height="1" src="img/spacer.gif"/><P class="detail-text">{{room}}</P></DIV>
                         </DIV>
                         </DIV>
                     </DIV>

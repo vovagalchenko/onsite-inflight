@@ -9,9 +9,9 @@ window.onload = function()
 {
     go_to_hash(false);
     setInterval(function()
-	            {
+	{
         synchronize_with_server(false);
-	            }, 10000);
+	}, 10000);
     window.history.replaceState(date_to_hash(current_date), '');
 }
 
@@ -41,10 +41,6 @@ function handle_interview_session_size_change(tableviewcell_element, initial_hei
 
     setTimeout(function()
     {
-        if (!has_class(tableviewcell_element, 'transition'))
-        {
-            tableviewcell_element.className += " transition";
-        }
         tableviewcell_element.style.height = has_class(tableviewcell_element, 'expanded')? content_height : tableviewcell_element.style.minHeight;
     }, 10);
     var transition_finished_events = [ 
@@ -59,7 +55,6 @@ function handle_interview_session_size_change(tableviewcell_element, initial_hei
         {
             if (has_class(tableviewcell_element, 'expanded'))
             {
-                tableviewcell_element.className = tableviewcell_element.className.replace(/\s*?transition/g, "");
                 tableviewcell_element.style.height = 'auto';
             }
         });
