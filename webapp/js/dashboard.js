@@ -34,48 +34,34 @@ function build_content_from_template(script_id, data, target_container_id)
     document.getElementById(target_container_id).innerHTML = final_html;
 }
 
-function handle_interview_session_size_change(tableviewcell_element, initial_height)
+function handle_interview_session_size_change(tableviewcell_element, expand, interview_id)
 {
     var content_element = tableviewcell_element.children[0];
     var content_height = content_element.clientHeight;
 
     setTimeout(function()
     {
-        tableviewcell_element.style.height = has_class(tableviewcell_element, 'expanded')? content_height : tableviewcell_element.style.minHeight;
-    }, 10);
-    var transition_finished_events = [ 
-        'transitionend',
-        'webkitTransitionEnd',
-        'msTransitionEnd',
-        'oTransitionEnd'
-    ];  
-    for (var i = 0; i < transition_finished_events.length; i++)
-    {   
-        tableviewcell_element.addEventListener(transition_finished_events[i], function()
+        tableviewcell_element.style.height = ((expand)? content_height + "px": getComputedStyle(tableviewcell_element)['minHeight']);
+        if (expand)
         {
-            if (has_class(tableviewcell_element, 'expanded'))
-            {
-                tableviewcell_element.style.height = 'auto';
-            }
-        });
-    }   
+            expanded_interviews[interview_id] = tableviewcell_element.style.height;
+        }
+    }, 10);
 }
 
 function handle_interview_click(tableviewcell_element, interview_id)
 {
-    var tableviewcell_height = tableviewcell_element.clientHeight;
+    var needs_expand = false;
     if (expanded_interviews[interview_id] == null)
     {
-        tableviewcell_element.className += " expanded";
-        expanded_interviews[interview_id] = true;
+        needs_expand = true;
     }
     else
     {
         tableviewcell_element.className = tableviewcell_element.className.replace(/\s*?expanded/g, "");
         delete expanded_interviews[interview_id];
     }
-    tableviewcell_element.style.height = tableviewcell_height;
-    handle_interview_session_size_change(tableviewcell_element, tableviewcell_height);
+    handle_interview_session_size_change(tableviewcell_element, needs_expand, interview_id);
 }
 
 function score_string(score_float)
@@ -336,11 +322,10 @@ function update_candidate_detail_ui(data)
         {
             interview = interviews[i];
 
-            if (expanded_interviews[interview['id']] === true || interview.notes != null)
+            if (expanded_interviews[interview.id])
             {
-                interview['expanded'] = true;
+                interview['cell_height'] = expanded_interviews[interview.id];
             }
-
             var interview_progress = get_interview_progress(interview);
             if (interview_progress != 1 && interview_progress != 0)
             {
