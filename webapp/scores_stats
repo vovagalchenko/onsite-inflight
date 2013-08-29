@@ -1,15 +1,11 @@
-
-
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Onsite Interviews</title>
-        <LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
-         <script type="text/javascript" src="js/compiled/d3.v3.min.js"></script>
-         <script type="text/javascript" src="js/ajax.js"></script>
-         <style type="text/css">
-
+<HTML lang="en">
+    <HEAD>
+        <META charset="utf-8">
+        <TITLE>Onsite Interviews</TITLE>
+        <LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet"> 
+        <STYLE type="text/css">
+          .highlighted  {background: gray}
           .axis path,
           .axis line {
               fill: none;
@@ -23,279 +19,48 @@
               fill: gray;
             }
     
-          </style>
-
-
-    </head>
-    <body>
+          </STYLE>
+    </HEAD>
+    <BODY>
 
  
-        <div id="content" class="header-bar" style="height:1024px;padding-top:20px;width:768px;margin: 0 auto; ">
-            <div style="float: left;width:80%;"> 
-              HOURLY AVERAGE CULTURAL SCORE
+        <DIV id="content" class="header-bar" style="height:1024px;padding-top:20px;width:768px;margin: 0 auto; " >
+            <DIV style="float: left;width:80%;"> 
+               AVERAGE SCORES
               <SVG id="heatmap"></SVG> 
-            </div>
-         <div style="float: right;;width:20%;"> 
-                 <p style="font-family: sans-serif;font-size: 13px;"> score range</p>
-                 
-                 <svg >
-                   <defs>
+            </DIV> 
+              <DIV style="float: right; width:20%;"> 
+                 <p style="font-family: sans-serif;font-size: 13px;"> score range</p>                
+                 <SVG height="20">
+                   <DEFS>
                       <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" style="stop-color:rgb(248,0,0);stop-opacity:1" />
                         <stop offset="100%" style="stop-color:rgb(138,216,255);stop-opacity:1" />
                       </linearGradient>
-                    </defs>       
-                  <rect width="90%" height="10" fill="url(#grad1)"></rect> 
+                    </DEFS>       
+                   <RECT width="90%" height="10" fill="url(#grad1)"></RECT> 
+    
+               </SVG>              
+          </DIV>
 
-                </svg>
-                  
-          </div>
-      </div>
-
-    <script type="text/javascript">
-
-
-      var svg=d3.select("#heatmap");
-          
-      var w = 600;
-      var h = 600;
-      var padding = 70;  
+                <DIV class="leaderboard-header non_selectable" style="cursor:default; top:550px; position:absolute;width:768px">
+                    <INPUT class="interviewer-textfield selectable" style="float:left;width:30%"></INPUT>
+                    <DIV id="cult_score_all" class='ScoreOfInterest  highlighted' style="float:right;width:30%">Cultural</DIV>
+                    <DIV id="tech_score_all" class='ScoreOfInterest ' style="float:right;width:30%">Technical</DIV>          
+                </DIV>
             
-      var TimeOfDay =[];
-      var DayOfWeek = [];
-      var DayTimeMatrix=[];
-      var DayTimeMatrixFill = [];
-      var max_score ;
-      var min_score ;
-      var max_sample_size;
-      var score_of_interest ;
-      
-      var days_of_week = {'Mon' : 0,'Tue' : 1,'Wed' : 2,'Thu' : 3,'Fri' : 4,'Sat' : 5,'Sun' : 6};
-         
-      window.onload = function()
-      {
-              make_ajax_request("api/scores_by_time_stats?earliest=0", update_DayTimeMatrix, null);
-      }
 
-      function update_DayTimeMatrix(ajaxResult)
-      {
-        for (var i = 0; i < ajaxResult.length; i++) 
-        {
-          var j=lookupDayTime(ajaxResult[i].Day,ajaxResult[i].Hour);
-          if (j==-1) 
-            {
-              DayTimeMatrix.push(
-                  {Avg_Technical_Score : ajaxResult[i].Avg_Technical_Score
-                  ,Hour : ajaxResult[i].Hour
-                  ,Sample_Size : ajaxResult[i].Sample_Size
-                  ,Avg_Cultural_Score : ajaxResult[i].Avg_Cultural_Score
-                  ,Day : ajaxResult[i].Day}
-                  );
-              }
-          else
-            {
-              DayTimeMatrix[j].Avg_Technical_Score=(DayTimeMatrix[j].Avg_Technical_Score+ajaxResult[i].Avg_Technical_Score)/2
-              DayTimeMatrix[j].Avg_Cultural_Score=(DayTimeMatrix[j].Avg_Cultural_Score+ajaxResult[i].Avg_Cultural_Score)/2
-              DayTimeMatrix[j].Sample_Size=(DayTimeMatrix[j].Sample_Size+ajaxResult[i].Sample_Size)
-            } 
-        }
+        <DIV class="tableview" id="interviewer-list-tableview" style="top:600px;min-width:inherit;"></DIV>
 
-        update_Chart_Data("Avg_Cultural_Score");
-        update_chart("Avg_Cultural_Score");                
-      };
+      </DIV>
+
+  
+
+    </BODY>
+
+         <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
+         <SCRIPT type="text/javascript" src="js/compiled/d3.v3.min.js"></SCRIPT>
+         <SCRIPT type="text/javascript" src="js/heat_map.js"></SCRIPT>
 
 
-           
-      function parseIntOrLeaveString(stringValue)
-      {
-        var result = parseInt(stringValue);
-        if (isNaN(result))
-        {
-            result = stringValue;
-        }
-        return result;
-      }
-
-      function get_keys(dict)
-      {
-        var keys = [];
-        for(var k in dict) keys.push(parseIntOrLeaveString(k));
-        return keys;
-      }
-      
-      function lookupDayTime( day,hour ) 
-      {
-        for(var i = 0, len = DayTimeMatrix.length; i < len; i++) 
-          if( DayTimeMatrix[i].Day=== day && DayTimeMatrix[ i ].Hour==hour)
-            return i;
-          return -1;
-      }
-
-       
-      function update_Chart_Data(selected_score_of_interest) 
-      {
-        max_score = -1;
-        min_score = Number.MAX_VALUE;
-        max_sample_size=0;
-        score_of_interest=selected_score_of_interest;
-        var times_of_day_dict = {};
-        var days_of_week_dict = {};
-        for (var i = 0; i < DayTimeMatrix.length; i++)
-        {
-            times_of_day_dict[DayTimeMatrix[i].Hour] = true;
-            days_of_week_dict[DayTimeMatrix[i].Day] = true;
-            if (DayTimeMatrix[i][score_of_interest] === null)
-                  continue;
-            if (DayTimeMatrix[i][score_of_interest] < min_score)
-            {
-                min_score = DayTimeMatrix[i][score_of_interest];
-            }
-            else if(DayTimeMatrix[i][score_of_interest] > max_score)
-            {
-                max_score = DayTimeMatrix[i][score_of_interest];
-            }
-            if (DayTimeMatrix[i]["Sample_Size"] > max_sample_size)
-            {
-              max_sample_size=DayTimeMatrix[i]["Sample_Size"];
-            }
-        }
-        TimeOfDay = get_keys(times_of_day_dict);
-        TimeOfDay.sort(function(a, b)
-        {
-            return a - b;
-        });
-        DayOfWeek = get_keys(days_of_week_dict);
-        DayOfWeek.sort(function(a, b)
-        {
-            return days_of_week[a] - days_of_week[b];
-        });
-
-       for (var i=0;i<DayOfWeek.length;i++)
-         for (var j=0;j<TimeOfDay.length;j++)
-            if ((lookupDayTime(DayOfWeek[i],TimeOfDay[j]))==-1 || (lookupDayTime(DayOfWeek[i],TimeOfDay[j])>-1 && DayTimeMatrix[lookupDayTime(DayOfWeek[i],TimeOfDay[j])]=== null))             
-              DayTimeMatrixFill.push({Day : DayOfWeek[i],Hour : TimeOfDay[j]});
-      };  
-      
-
-         d3.selectAll("p")
-                .on("click", function() 
-        { 
-                var paragraphID = d3.select(this).attr("id");
-                if (paragraphID == "Cultural")
-          {
-                    update_Chart_Data("Avg_Cultural_Score")  
-                        update_chart("Avg_Cultural_Score")      
-          } 
-                if(paragraphID == "Technical") 
-          {
-                    update_Chart_Data("Avg_Technical_Score")
-                    update_chart("Avg_Technical_Score") 
-                      }
-        });        
-
-          
-      function update_chart(score_of_interest)
-      {
-
-        var yScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2],0);
-        var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding],0.15); 
-            //var xScale = d3.scale.ordinal().domain(d3.range(DayOfWeek.length).rangeRoundBands([padding, h - padding],0.05);
-        var yTickScale = d3.scale.ordinal().domain(d3.range(TimeOfDay.length)).rangeRoundBands([padding, w - padding * 2]);
-        var xTickScale =d3.scale.ordinal() .domain(d3.range(DayOfWeek.length)).rangeRoundBands([padding, h - padding]);
-         
-            //  Draw Axis
-            
-        var xAxis = d3.svg.axis().scale(xTickScale).orient("top").tickValues(DayOfWeek);
-        var yAxis = d3.svg.axis().scale(yTickScale).orient("left").tickValues(TimeOfDay);
-        svg.append("g").attr("class", "axis").attr("transform", "translate(0," + padding + ")").call(xAxis);     
-        svg.append("g").attr("class", "axis").attr("transform", "translate(" + padding + ",0)").call(yAxis);                  
-            
-        var bars = svg.selectAll("svg").data(DayTimeMatrix, function(d){return yScale(TimeOfDay.indexOf(d.Hour))*10+xScale(DayOfWeek.indexOf(d.Day));})
-        bars
-        .enter()
-        .append("svg")
-          .attr("y", function(d) {return yScale(TimeOfDay.indexOf(d.Hour));})
-          .attr("x", function(d) {return xScale(DayOfWeek.indexOf(d.Day));})         
-          .attr("width", xScale.rangeBand())
-          .attr("height", yScale.rangeBand());
-
-        bars.append("rect")
-        .attr("y", 0)
-        .attr("x", 0) 
-        .attr("width", xScale.rangeBand())
-        .attr("height", yScale.rangeBand())
-        .attr("opacity",1)
-        .style("fill", function(d) 
-        {
-          if (d[score_of_interest] === null)
-          {
-            return "rgba(0, 0, 0, 0)";
-          }
-          var color_offset_r = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 110);
-          var color_offset_g = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 216);
-          var color_offset_b = Math.round(((d[score_of_interest] - min_score)/(max_score - min_score)) * 255);
-
-
-          var ret_value = "rgb(" + (248 - color_offset_r).toString()
-                      + ","+(0+ color_offset_g).toString() 
-                      + ","+ (0 + color_offset_b).toString()
-                      + ")";
-          return ret_value;
-        })
-        ;
-
-
-        var barsfill = svg.selectAll("svg").data(DayTimeMatrixFill, function(d){return yScale(TimeOfDay.indexOf(d.Hour))*10+xScale(DayOfWeek.indexOf(d.Day));})
-        barsfill
-        .enter()
-        .append("svg")
-          .attr("y", function(d, i) {return yScale(TimeOfDay.indexOf(d.Hour));})
-          .attr("x", function(d, i) {return xScale(DayOfWeek.indexOf(d.Day));}) 
-          .attr("width", xScale.rangeBand())
-          .attr("height", yScale.rangeBand())  ;
-
-
-        barsfill
-          .append('defs')
-          .append('pattern')
-            .attr('id', 'diagonalHatch')
-            .attr('patternUnits', 'userSpaceOnUse')
-            .attr('width', 4)
-            .attr('height', 4)
-          .append('path')
-            .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
-            .attr('stroke', 'lightgray')
-            .attr('stroke-width', 1);
-
-          barsfill.append("rect")
-              .attr("x", 0)
-              .attr("width", 100)
-              .attr("height", 100)
-              .style("fill", 'none');
-
-          barsfill.append("rect")
-            .attr("x", 0)
-            .attr("width", 100)
-            .attr("height", 100)
-            .attr('fill', 'url(#diagonalHatch)');
-
-              
-          barsfill.attr("id","fillpattern");
-
-           bars
-            .append("text")
-           .attr("y", function(d, i) {return yScale.rangeBand()/2+5;})
-            .attr("x", function(d, i) {return xScale.rangeBand()/2;})  
-            .attr("text-anchor","middle")
-            .attr("fill","white")
-            .attr("font-family","sans-serif")
-            .attr("font-size","11px")
-            .text(function(d,i) {  if (d[score_of_interest] !=null) return d[score_of_interest].toFixed(1);})
-
-    }
-                   
-
-        </script>
-
-    </body>
-</html>   
+</HTML>   
