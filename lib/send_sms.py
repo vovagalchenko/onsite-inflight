@@ -16,6 +16,9 @@ def send_initial_request_for_scores(interview):
 #        targetNumber = '+18185194891'
     initialScoreType = 'cultural' if interview.is_coffee_break() else 'technical'
     message = ''.join(["Hi ", interviewer.nickname(), "! What's the ", initialScoreType, " score for ", interview.candidate_name, "?"])
-    log_outgoing_sms(targetNumber, message)
+    send_sms("+1" + interview.phone_number_to_use, targetNumber, message)
+
+def send_sms(from_number, to_number, message):
+    log_outgoing_sms(to_number, message)
     client = TwilioRestClient(account_sid, auth_token)
-    client.sms.messages.create(to=targetNumber, from_="+1" + interview.phone_number_to_use, body=message)
+    client.sms.messages.create(to=to_number, from_=from_number, body=message)
