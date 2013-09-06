@@ -1,12 +1,12 @@
-from interviewer import *
-from sqlalchemy import ForeignKey
+from candidate import Candidate
+from sqlalchemy import ForeignKey, Column, Integer, String
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects import mysql
 from sqlalchemy.schema import FetchedValue
+from base import Base
 import json
 import datetime
 import calendar
-import candidate
 
 class Interview(Base):
     __tablename__ = 'interview'
@@ -40,7 +40,7 @@ class Interview(Base):
         return "<Interview<'%s'>" % self.candidate_name
 
     def is_coffee_break(self):
-        return (self.end_time - self.start_time).total_seconds() <= 30*60;
+        return (self.end_time - self.start_time).total_seconds() <= self.candidate.department.maximum_coffee_break_length;
 
     @staticmethod
     def datetime_to_string(ts):

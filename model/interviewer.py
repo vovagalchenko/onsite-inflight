@@ -6,7 +6,8 @@ from sqlalchemy.schema import FetchedValue
 from db_session import DB_Session_Factory
 from datetime import datetime, timedelta
 from base import Base
-import interview
+from interview import Interview
+
 
 class Interviewer(Base):
     __tablename__ = 'interviewer'
@@ -56,7 +57,7 @@ class Interviewer(Base):
     def get_most_recently_completed_interview(self, phone_number, for_update = False):
         last_interview = None
         db_session = DB_Session_Factory.get_db_session()
-        query = db_session.query(interview.Interview).filter(interview.Interview.interviewer_email==self.email, func.date(interview.Interview.start_time) == func.date(func.now()), interview.Interview.end_time < func.now(), interview.Interview.phone_number_to_use == phone_number).order_by(interview.Interview.end_time.desc())
+        query = db_session.query(Interview).filter(Interview.interviewer_email==self.email, func.date(Interview.start_time) == func.date(func.now()), Interview.end_time < func.now(), Interview.phone_number_to_use == phone_number).order_by(Interview.end_time.desc())
         if for_update is True:
             query = query.with_lockmode('update')
         return query.first()
