@@ -68,6 +68,8 @@ function score_string(score_float)
 {
     if (typeof score_float !== 'number')
         return score_float
+    else if (score_float == -1)
+        return '-';
     var score_int = Math.round(score_float);
     var modifier_string = '';
     if ((score_float - score_int) > 0)
@@ -344,7 +346,7 @@ function update_candidate_detail_ui(data)
             {
                 interview['cultural_score'] = '';
             }
-            else if (interview['cultural_score'] <= 2)
+            else if (interview['cultural_score'] >= 0 && interview['cultural_score'] <= 2)
             {
                 interview['cult_failure'] = true;
             }
@@ -357,7 +359,7 @@ function update_candidate_detail_ui(data)
             {
                 interview['technical_score'] = '';
             }
-            else if (interview['technical_score'] <= 2) 
+            else if (interview['technical_score'] >= 0 && interview['technical_score'] <= 2) 
             {
                 interview['tech_failure'] = true;
             }

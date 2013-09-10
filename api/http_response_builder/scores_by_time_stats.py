@@ -26,7 +26,7 @@ class Scores_By_Time_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def print_body(self):
         stats = []
-        for stats_for_hour in DB_Session_Factory.get_db_session().query(func.dayofweek(Interview.end_time), func.hour(Interview.end_time), func.avg(Interview.technical_score), func.avg(Interview.cultural_score), Interviewer, func.count(1)).group_by(func.dayofweek(Interview.end_time), func.hour(Interview.end_time), Interview.interviewer_email).join(Interviewer, Interview.interviewer_email == Interviewer.email).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts, or_(Interview.technical_score != None, Interview.cultural_score != None)):
+        for stats_for_hour in DB_Session_Factory.get_db_session().query(func.dayofweek(Interview.end_time), func.hour(Interview.end_time), func.avg(Interview.technical_score), func.avg(Interview.cultural_score), Interviewer, func.count(1)).group_by(func.dayofweek(Interview.end_time), func.hour(Interview.end_time), Interview.interviewer_email).join(Interviewer, Interview.interviewer_email == Interviewer.email).filter(Interview.start_time > self.earliest_ts, Interview.end_time < self.latest_ts, or_(Interview.technical_score != None, Interview.cultural_score != None), or_(Interview.technical_score != -1, Interview.cultural_score != -1)):
             stats.append({
                 'Day' : self.days[stats_for_hour[0]],
                 'Hour' : stats_for_hour[1],
