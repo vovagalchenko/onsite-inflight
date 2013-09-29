@@ -1,4 +1,5 @@
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 var focused_candidate_name;
 var last_avatar_refresh_ts;
 var min_date = new Date(1370502000000); // June 6th, 2013
@@ -154,7 +155,7 @@ function set_date(new_date)
         new_date = new Date(Math.floor(new_date.getTime()/1000) * 1000);
     }
 
-    document.getElementById('date').innerHTML = months[new_date.getMonth()] + " " + new_date.getDate();
+    document.getElementById('date').innerHTML = days[new_date.getDay()] + ", " + months[new_date.getMonth()] + " " + new_date.getDate();
     var tableview = document.getElementById('candidate_list_tableview');
     tableview.innerHTML = document.getElementById('candidates_handlebars').outerHTML;
     current_date = new_date;

@@ -33,7 +33,14 @@
 		        <SCRIPT id="candidates_handlebars" type="text/x-handlebars">
 		            {{#list candidates}}
 		            <DIV class="tableview-cell non_selectable" onclick="switch_to_candidate_detail_page('{{candidate_name}}');">
-		                <DIV style="float:left;">{{candidate_name}}</DIV>
+		                <DIV style="float:left;">
+                            <DIV style="line-height:17px;margin-top:8px;">
+                                {{candidate_name}}
+                            </DIV>
+                            <DIV class="detail-text" style="line-height:15px;">
+                                {{position}}
+                            </DIV>
+                        </DIV>
 		                <DIV class="{{status}} status" style="float:right;">
 		                    {{status_symbol}}
 		                </DIV>

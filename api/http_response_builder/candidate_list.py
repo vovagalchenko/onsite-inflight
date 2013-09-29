@@ -3,6 +3,7 @@ from param_definition.parameter import Parameter, Date_Time_Parameter_Type
 from datetime import datetime
 from model.db_session import DB_Session_Factory
 from model.interview import Interview
+from model.candidate import Candidate
 from sqlalchemy import func
 import json
 
@@ -35,6 +36,7 @@ class Candidate_List_HTTP_Response_Builder(HTTP_Response_Builder):
                 status = 'success'
             elif avg_tech_score is not 0 and avg_cultural_score is not 0:
                 status = 'failure'
-            interviewees.append({'candidate_name' : candidate_name, 'status' : status})
+            candidate = db_session.query(Candidate).get(candidate_name)
+            interviewees.append({'candidate_name' : candidate_name, 'status' : status, 'position' : candidate.position})
         final_output_dict = {'candidates' : interviewees, 'date' : self.date.strftime("%s")}
         print json.dumps(final_output_dict)
