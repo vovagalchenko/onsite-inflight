@@ -60,7 +60,7 @@ function time_to_response(interview)
     var return_value = Number.MAX_VALUE;
     if (interview.cultural_score_ts !== null)
     {   
-        return_value = new Date(interview['cultural_score_ts']).getTime() - (new Date(interview['end_time']).getTime() + 5*60000);
+        return_value = Math.max(new Date(interview['cultural_score_ts']).getTime() - (new Date(interview['end_time']).getTime() + 5*60000), 0);
     }   
     return return_value;
 }   
