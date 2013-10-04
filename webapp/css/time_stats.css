@@ -32,15 +32,15 @@ div.interview-dot-popover:after
     border-left: 10px solid rgba(0, 0, 0, 0);
     border-right: 10px solid rgba(0, 0, 0, 0);
     border-top: 10px solid white;
-    bottom: -10;
-    left: 195;
+    bottom: -10px;
+    left: 195px;
 }
 
 div.interview-dot-popover:before
 {
     position: absolute;
-    bottom: -11;
-    left: 194;
+    bottom: -11px;
+    left: 194px;
     content: "";
     width: 0px;
     height: 0px;
@@ -128,9 +128,7 @@ hr
 .leaderboard-header
 {
     height:25px;
-    line-height:20px;
-    margin-top: 12px;
-    margin-bottom: 3px;
+    line-height:25px;
 }
 
 .leaderboard-header div
@@ -138,12 +136,10 @@ hr
     color: #BBBBBB;
     font-weight: 500;
     font-size: 15px;
-    padding-top: 5px;
 }
 
 .mag-glass
 {
-    bottom: 2px;
     float:left;
     position:relative;
     width: 20px;
@@ -152,6 +148,7 @@ hr
     background-repeat:no-repeat;
     background-position: center bottom;
     z-index: 2;
+    margin-top:1px;
 }
 
 @media  (-webkit-min-device-pixel-ratio:1.5),
@@ -179,24 +176,22 @@ hr
 
 input.interviewer-textfield
 {
-    height: 100%;
     opacity: 0;
-    cursor: text;
-    z-index: 20;
+    left: 30px;
+    z-index:1;
     border-radius: 5px;
     padding-left: 2px;
     padding-right: 25px;
     cursor: auto;
+    position:absolute;
+    height: 18px;
+    bottom: 1px;
+    font-size: 18px;
 }
 
 input.interviewer-textfield:focus
 {
     outline-width: 0;
-}
-
-.leaderboard-header div div
-{
-   padding-top:5px;
 }
 
 #cancel-search

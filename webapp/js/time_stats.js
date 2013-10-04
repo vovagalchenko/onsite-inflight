@@ -169,13 +169,9 @@ function update_interview_popover(candidate)
         return;
     }
     var candidate_detail_div = popover.append('div').classed('measure', true);
-    candidate_detail_div.append('strong').style('font-size', 20).text(candidate.candidate_name);
-    candidate_detail_div.append('br');
     candidate_detail_div.append('p').text(candidate.position);
-    candidate_detail_div.append('br');
     var start_time = new Date(candidate.interviews[0].start_time);
     candidate_detail_div.append('strong').text(months[start_time.getMonth()] + " " + start_time.getDate() + ", " + start_time.getFullYear());
-    candidate_detail_div.append('br');
     candidate_detail_div.append('br');
     candidate_detail_div.append('br');
     var interview_sessions_enter = candidate_detail_div.selectAll('.interview-session-details').data(candidate.interviews).enter();
@@ -227,7 +223,7 @@ function update_interview_popover(candidate)
     
     var old_computed_style = getComputedStyle(popover.node())
     var expanded_popover_height = parseInt(getComputedStyle(candidate_detail_div.node()).height);
-    popover.transition().style('top', parseInt(old_computed_style.top) - (expanded_popover_height - parseInt(old_computed_style.height))).style('height', expanded_popover_height).each("end", function()
+    popover.transition().style('top', parseInt(old_computed_style.top) - (expanded_popover_height - parseInt(old_computed_style.height)) + "px").style('height', expanded_popover_height + "px").each("end", function()
     {
         popover.select('#progress_indicator').transition().style('opacity', 0).remove().each("end", function()
         {
@@ -292,8 +288,7 @@ function on_interviewer_data_receipt(interviewers_data)
 
     var total_interviews_label = d3.select('#total-interviews-label');
     var total_interviews_div = total_interviews_label.select("#total-interviews-div");
-    var total_interviews_content_rect = total_interviews_div.node().getBoundingClientRect();
-    total_interviews_div.style("padding-top", (parseInt(total_interviews_label.attr("height")) - total_interviews_content_rect.height)/2 + "px");
+    total_interviews_div.style("padding-top", (parseInt(total_interviews_label.attr("height")) - 83)/2 + "px");
 }
 
 function set_up_interviewer_search()
@@ -301,8 +296,11 @@ function set_up_interviewer_search()
     var find_interviewer_animation_duration = 200;
     var find_interviewer_mouseout_func = function()
     {
+        var tf = d3.select(".interviewer-textfield");
+        var currently_moused_over_node = event.relatedTarget || event.toElement;
+        if (currently_moused_over_node == d3.select(".mag-glass").node() || currently_moused_over_node == tf.node())
+            return;
         var find_interviewer_div = d3.select("#find-interviewer-div");
-        var tf = find_interviewer_div.select(".interviewer-textfield");
         if (tf.node().value == "")
         {
             find_interviewer_div.select(".mag-glass").
@@ -323,24 +321,23 @@ function set_up_interviewer_search()
         }
     };
     var mag_glass_right_padding = 5;
-    d3.select("#find-interviewer-div").
+    d3.select(".interviewer-textfield").
         on("mouseover", function()
         {
             var tf_div_rect = this.getBoundingClientRect();
-            var mag_glass = d3.select(this).select(".mag-glass");
+            var mag_glass = d3.select(".mag-glass");
             var mag_glass_rect = mag_glass.node().getBoundingClientRect();
             mag_glass.
                 classed("transition", true).
                 classed("grayscale", false).
-                style("left", tf_div_rect.width - mag_glass_rect.width - mag_glass_right_padding + "px").
-                style("right", 0);
+                style("left", 22 + tf_div_rect.width - mag_glass_rect.width - mag_glass_right_padding + "px");
             d3.select(this).select("#find-interviewer-label").
                 classed("transition", true).
                 style("opacity", 0);
-            d3.select(this).select(".interviewer-textfield").
+            d3.select(".leaderboard-header").select(".interviewer-textfield").
                 classed("transition", true).
                 style("opacity", 1);
-            d3.select(this).select("#cancel-search").
+            d3.select("#cancel-search").
                 classed("transition", true).
                 style("opacity", 1);
         
@@ -683,13 +680,12 @@ function update_interviewer_list(interviewer_array)
         var cx_function = function(data, i)
         {
             var column  = i%num_interview_dots_per_row;
-            console.log(column + "\t" + i + "\t" + num_interview_dots_per_row + right_padding_per_dot);
-            return interview_dot_horizontal_padding + column*right_padding_per_dot + (1 + 2*column)*interview_dot_radius;
+            return interview_dot_horizontal_padding + column*right_padding_per_dot + (1 + 2*column)*interview_dot_radius + "px";
         };
         var cy_function = function(data, i)
         {
             var row = Math.floor(i/num_interview_dots_per_row);
-            return interview_dot_vertical_padding + row*padding_between_dot_rows + (1 + 2*row)*interview_dot_radius;
+            return interview_dot_vertical_padding + row*padding_between_dot_rows + (1 + 2*row)*interview_dot_radius + "px";
         };
         var circle_animation_duration = 1000;
         circles.enter().append('circle').
@@ -719,15 +715,15 @@ function update_interviewer_list(interviewer_array)
                     html(d3.select("#progress_indicator").
                         attr('hidden', null).
                         style("margin-top", null).
-                        style("margin-left", 166).
+                        style("margin-left", 166 + "px").
                         node().outerHTML).
                     style('top', function(d)
                     {
-                        return circle_rect.top - pointer_height - this.getBoundingClientRect().height - popover_bottom_padding;
+                        return circle_rect.top - pointer_height - this.getBoundingClientRect().height - popover_bottom_padding + "px";
                     }).
                     style('left', function(d)
                     {
-                        return circle_rect.left - this.getBoundingClientRect().width/2 - popover_border_width*2;
+                        return circle_rect.left - this.getBoundingClientRect().width/2 - popover_border_width*2 + "px";
                     }).
                     style('opacity', 0).
                     transition().

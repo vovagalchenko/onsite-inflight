@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <HTML>
 	<HEAD>
 		<TITLE>Onsite Interviews</TITLE>
@@ -19,11 +20,11 @@
             </SVG>
             <DIV class="leaderboard-header non_selectable" style="cursor:default;">
                 <DIV style="float:left;padding-top:0px;" id="find-interviewer-div">
-                    <DIV class="selectable" style="position:absolute; cursor:pointer;" id="cancel-search">&#x00D7;</DIV>
+                    <DIV class="selectable" style="position:absolute;cursor:pointer;bottom:1px" id="cancel-search">&#x00D7;</DIV>
                     <DIV class="mag-glass grayscale"></DIV>
-                    <DIV style="position:absolute; padding-left:25px; z-index:-1;" id="find-interviewer-label">Find Interviewer</DIV>
-                    <INPUT class="interviewer-textfield selectable"></INPUT>
+                    <DIV style="width:135px;" id="find-interviewer-label">Find Interviewer</DIV>
                 </DIV>
+                <INPUT class="interviewer-textfield selectable"></INPUT>
                 <DIV style="float:right">Avg Response Time</DIV>
                 <DIV>Interviews Taken Part In</DIV>
             </DIV>
