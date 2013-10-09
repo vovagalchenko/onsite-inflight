@@ -16,7 +16,7 @@ import pdb
 import re
 
 target_weekday = 3 # Thursday
-target_timerange = [11, 15]
+target_timerange = [12, 14]
 target_calendar_id = "box.com_2av1o7sjlgckgjjmrd032gbtq4@group.calendar.google.com"
 
 def get_ts_from_event(event, ts_key):
@@ -38,10 +38,13 @@ def main(argv):
 
     print str(start_period) + " - " + str(end_period)
 
+
     try:
         cs_rep_list = db_session.query(CS_Rep).order_by(CS_Rep.email)
         source_events = {}
         for cs_rep in cs_rep_list:
+            current_period_start = start_period_naive
+            current_period_end = start_period_naive + timedelta(hours = 1)
             print "Checking calendar for " + cs_rep.name
             source_events_request = calendar.service.events().list(calendarId = cs_rep.email, timeZone = LOS_ANGELES_TZ, timeMin = start_period.isoformat(), timeMax = end_period.isoformat(), orderBy = 'startTime', singleEvents = True, maxAttendees = 1000)
             while (source_events_request != None):
@@ -50,11 +53,20 @@ def main(argv):
                     summary = event.get('summary', '')
                     start_time = get_ts_from_event(event, 'start')
                     end_time = get_ts_from_event(event, 'end')
-                    if start_time < start_period_naive or end_time > end_period_naive:
+                    if start_time < start_period_naive or end_time > end_period_naive or start_time < current_period_start or end_time - start_time > timedelta(hours=1):
                         continue
-                    match = re.search(".*$", summary)
+                    while current_period_end < end_time:
+                        current_period_start = current_period_start + timedelta(hours = 1)
+                        current_period_end = current_period_end + timedelta(hours = 1)
+                    match = re.search("\*$", summary)
                     if match:
                         source_events[event['id']] = event
+                        current_period_start = current_period_start + timedelta(hours = 1)
+                        current_period_end = current_period_end + timedelta(hours = 1)
+                    else:
+                        print "no match: " + summary
+                            
+
                 source_events_request = calendar.service.events().list_next(source_events_request, response)
 
         to_delete = []
@@ -91,6 +103,7 @@ def main(argv):
             source_event = source_events[event_id]
             print "Adding: " + source_event.get('summary', "")
             source_event['organizer'] = {'self' : True}
+            source_event['location'] = '4440-3-4 The Marina'
             while True:
                 try:
                     calendar.service.events().import_(calendarId = target_calendar_id, body = source_event).execute(calendar.http)
