@@ -27,6 +27,7 @@ class Interview(Base):
     technical_score_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
     cultural_score_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
     notes_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
+    hire = Column(mysql.TINYINT, nullable = False, default = -1)
 
     def __init__(self, email, start_time, end_time, candidate_name, room):
         self.interviewer_email = email
@@ -35,6 +36,7 @@ class Interview(Base):
         self.candidate_name = candidate_name
         self.room = room
         self.number_of_pings = 0
+        self.hire = -1
 
     def __repr__(self):
         return "<Interview<'%s'>" % self.candidate_name

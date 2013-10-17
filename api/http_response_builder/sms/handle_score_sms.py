@@ -33,6 +33,16 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
                 result = number + modifier
         return result
 
+    @staticmethod
+    def parse_hiring_recommendation(message):
+        message = strip(lower(message))
+        result = None
+        if message == "yes":
+            result = 1
+        elif message == "no":
+            result = 0
+        return result
+
     def process_sms(self):
         self.from_phone_number = self.from_phone_number[2:]
         self.to_phone_number = self.to_phone_number[2:]
@@ -62,6 +72,14 @@ class Handle_Score_SMS_HTTP_Response_Builder(Handle_SMS_HTTP_Response_Builder):
                 response_msg = "Invalid cultural score. Valid input is 1, 2, 3, 4 or '-' if you don't have a score to give. You can use +/- for scores. Please try again."
             else:
                 interview.cultural_score = score
+                response_msg = "Would you recommend hiring this person?"
+        elif interview is not None and interview.hire == -1:
+            # The user should be trying to send in the hiring recommendation
+            hiring_recommendation = Handle_Score_SMS_HTTP_Response_Builder.parse_hiring_recommendation(self.sms_body)
+            if hiring_recommendation is None:
+                response_msg = "Invalid hiring recommendation. Valid input is yes or no."
+            else:
+                interview.hire = hiring_recommendation
                 response_msg = "Thanks. Feel free to send in any notes you have about " + interview.candidate_name + " in subsequent texts."
         elif interview is not None:
             # The user should be trying to send in notes for the interview.

@@ -17,7 +17,7 @@ import re
 
 target_weekday = 3 # Thursday
 target_timerange = [12, 14]
-target_calendar_id = "box.com_2av1o7sjlgckgjjmrd032gbtq4@group.calendar.google.com"
+target_calendar_id = "box.com_gk9hfef9s7fulrq0t3mftrvevk@group.calendar.google.com"
 
 def get_ts_from_event(event, ts_key):
     return google_ts_to_datetime(event.get(ts_key, {}).get('dateTime', DEFAULT_DATE))
