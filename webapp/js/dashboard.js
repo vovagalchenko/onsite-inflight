@@ -361,6 +361,10 @@ function update_candidate_detail_ui(data)
                 interview['no_hire'] = true;
                 interview['hire'] = 'N';
             }
+            else if (interview['hire'] === -2)
+            {
+                interview['hire'] = '-';
+            }
             else
             {
                 interview['hire'] = '';
