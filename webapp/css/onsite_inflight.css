@@ -229,7 +229,7 @@ p
     top: 0;
     width: 60px;
     height: 100%;
-    font-size: 20px;
+    font-size: 16px;
     padding-left: 12px;
     -webkit-text-size-adjust:none;
     -ms-text-size-adjust:none;
@@ -245,9 +245,14 @@ p
     right: 0;
 }
 
-.left
+.middle
 {
     right: 62px;
+}
+
+.left
+{
+    right: 124px;
 }
 
 .minor_heading
@@ -261,7 +266,7 @@ p
 .interviewer_name
 {
     float: left;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .interviewer_avatar_frame

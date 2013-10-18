@@ -351,6 +351,20 @@ function update_candidate_detail_ui(data)
             {
                 interview['cult_failure'] = true;
             }
+            
+            if (interview['hire'] === 1)
+            {
+                interview['hire'] = 'Y';
+            }
+            else if (interview['hire'] === 0)
+            {
+                interview['no_hire'] = true;
+                interview['hire'] = 'N';
+            }
+            else
+            {
+                interview['hire'] = '';
+            }
 
             if (interview['is_coffee_break'])
             {

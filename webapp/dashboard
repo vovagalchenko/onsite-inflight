@@ -75,8 +75,9 @@
                     </SCRIPT>
                 </DIV>
                 <DIV style="width: 100%; height: 20px; position: absolute; bottom: 0; left: 0; right: 0; border-top: 1px solid #EEEEEE;">
-                    <DIV class="column right minor_heading">Cultural</DIV>
-                    <DIV class="column left minor_heading">Technical</DIV>
+                    <DIV class="column right minor_heading">Hire?</DIV>
+                    <DIV class="column middle minor_heading">C</DIV>
+                    <DIV class="column left minor_heading">T</DIV>
                 </DIV>
             </DIV>
             <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
@@ -94,7 +95,8 @@
                         </DIV>
                         <DIV class="above-progress interviewer_name" style="position:relative;">{{interviewer/name}}</DIV>
                         <DIV class="whiteout_bg" style="width:134px;float:right;right:0px"></DIV>
-                        <DIV class="above-progress column right {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
+                        <DIV class="above-progress column right {{#if no_hire}}failure{{/if}}">{{hire}}</DIV>
+                        <DIV class="above-progress column middle {{#if cult_failure}}failure{{/if}}">{{cultural_score}}</DIV>
                         <DIV class="above-progress column left {{#if tech_failure}}failure{{/if}}{{#if is_coffee_break}}non_applicable{{/if}}">{{technical_score}}</DIV>
                         </BR>
                         <DIV class="interview-detail">

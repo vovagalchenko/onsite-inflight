@@ -74,5 +74,6 @@ class Interview(Base):
         if show_scores is True:
             interview_dict['technical_score'] = self.technical_score
             interview_dict['cultural_score'] = self.cultural_score
+            interview_dict['hire'] = self.hire
             interview_dict['notes'] = self.notes
         return interview_dict
