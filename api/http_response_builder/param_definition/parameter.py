@@ -7,6 +7,11 @@ class Parameter_Type(object):
     def get_value_from_raw(cls, raw_value):
         raise NotImplementedError, 'Must override get_value_from_raw'
 
+class Integer_Parameter_Type(Parameter_Type):
+    @classmethod
+    def get_value_from_raw(cls, raw_value):
+        return int(raw_value)
+
 class String_Parameter_Type(Parameter_Type):
     @classmethod
     def get_value_from_raw(cls, raw_value):

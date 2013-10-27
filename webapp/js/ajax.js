@@ -4,7 +4,7 @@ function need_to_authenticate(data)
     {   
         var authn_form = document.getElementById("authn_form");
         document.getElementById('saml_response_input').value = data["authn_request"];
-        document.getElementById('saml_relay_state_input').value = (window.location.hash == null || window.location.hash.length == 0)? "dashboard" : window.location.hash;
+        document.getElementById('saml_relay_state_input').value = (window.location.hash == null || window.location.hash.length == 0)? document.getElementById('saml_relay_state_input').value : window.location.hash;
         authn_form.submit();
         return true;
     }   

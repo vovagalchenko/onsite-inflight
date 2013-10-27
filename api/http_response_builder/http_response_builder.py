@@ -12,6 +12,7 @@ import sys
 class HTTP_Response_Builder(object):
     content_type = 'application/json'
     params_dump = {}
+    user = None
 
     def __init__(self, params_storage):
         try:
@@ -37,7 +38,8 @@ class HTTP_Response_Builder(object):
         except (Cookie.CookieError, KeyError):
             session_cookie = None
         result = None
-        if session_cookie is None or User.session_is_active(session_cookie) is False:
+        self.user = User.user_for_session_cookie(session_cookie)
+        if self.user is None:
             result = {'error' : 'authn_needed'}
             authn_request = """\
 <?xml version="1.0" encoding="UTF-8"?>

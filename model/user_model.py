@@ -18,13 +18,13 @@ class User(Base):
         self.session_id = hashlib.sha1(email + session_expiration.isoformat()).hexdigest()
 
     @staticmethod
-    def session_is_active(session_id):
+    def user_for_session_cookie(session_id):
         db_session = DB_Session_Factory.get_db_session()
         user = db_session.query(User).filter(User.session_id == session_id).first()
         session_is_active = False
-        if user is not None and user.session_expiration > datetime.now():
-            session_is_active = True
-        return session_is_active
+        if user is None or user.session_expiration < datetime.now():
+            user = None
+        return user
 
     @staticmethod
     def refresh_user_session(email):

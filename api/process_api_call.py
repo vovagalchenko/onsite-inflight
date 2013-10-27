@@ -2,6 +2,7 @@
 
 from http_response_builder import *
 from http_response_builder.sms import *
+from http_response_builder.expense import *
 from os import environ
 from urlparse import parse_qs
 import re
@@ -19,7 +20,9 @@ end_points = {
     'opt_in_list' : opt_in_list.Opt_In_List_HTTP_Response_Builder,
     'time_to_respond_stats' : time_to_respond_stats.Time_To_Respond_Stats_HTTP_Response_Builder,
     'scores_by_time_stats' : scores_by_time_stats.Scores_By_Time_Stats_HTTP_Response_Builder,
-    'calendar_notification' : calendar_notification.Calendar_Notification_HTTP_Response_Builder
+    'calendar_notification' : calendar_notification.Calendar_Notification_HTTP_Response_Builder,
+    'reimbursements' : reimbursements.Reimbursements_HTTP_Response_Builder,
+    'update' : update.Update_Reimbursements_HTTP_Response_Builder
 }
 
 request_uri = environ.get('REQUEST_URI', '')
