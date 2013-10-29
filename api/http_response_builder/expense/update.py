@@ -14,7 +14,7 @@ class Update_Reimbursements_HTTP_Response_Builder(HTTP_Response_Builder):
     requested_gym_reimbursement = Parameter('gym', required = True, parameter_type = Integer_Parameter_Type)
     requested_mobile_reimbursement = Parameter('mobile', required = True, parameter_type = Integer_Parameter_Type)
     
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
         employee = db_session.query(Employee).get(self.user.email)
         if employee is None:

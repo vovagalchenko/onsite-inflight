@@ -9,14 +9,13 @@ class Candidate_Detail_HTTP_Response_Builder(HTTP_Response_Builder):
     candidate_name = Parameter('candidate_name', required = True)
     date = Parameter('date', required = False, parameter_type = Date_Time_Parameter_Type)
     show_scores = Parameter('show_scores', required = False, default = True, parameter_type = Boolean_Parameter_Type)
+    requires_authentication = False
 
-    def check_auth(self):
-        if self.show_scores is True:
-            return super(Candidate_Detail_HTTP_Response_Builder, self).check_auth()
-        else:
-            return None
+    def __init__(self, params_storage):
+        super(Candidate_Detail_HTTP_Response_Builder, self).__init__(params_storage)
+        self.requires_authentication = self.show_scores
 
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
         candidate = db_session.query(Candidate).get(self.candidate_name)
         if candidate is None:

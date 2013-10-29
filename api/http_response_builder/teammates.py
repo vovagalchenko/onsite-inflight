@@ -11,9 +11,7 @@ import sys
 class Teammates_HTTP_Response_Builder(HTTP_Response_Builder):
     candidate_name = Parameter('candidate_name', required = False)
     tag = Parameter('tag', required = False)
-
-    def check_auth(self):
-        return None
+    requires_authentication = False
 
     def get_teammates_from_tag(self, tag_string):
         ret_value = []
@@ -24,9 +22,8 @@ class Teammates_HTTP_Response_Builder(HTTP_Response_Builder):
                 ret_value.append(db_session.query(Interviewer).get(interviewer_email).dict_representation())
         return ret_value
 
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
-        
         if self.tag is not None:
             print json.dumps({'tag' : self.tag, 'teammates' : self.get_teammates_from_tag(self.tag)})
         else:

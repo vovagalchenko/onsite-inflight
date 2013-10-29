@@ -10,7 +10,7 @@ import json
 
 class Reimbursements_HTTP_Response_Builder(HTTP_Response_Builder):
     
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
         employee = db_session.query(Employee).get(self.user.email)
         if employee is None:

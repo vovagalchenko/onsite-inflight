@@ -8,10 +8,9 @@ import sys
 import os
 
 class Calendar_Notification_HTTP_Response_Builder(HTTP_Response_Builder):
-    def check_auth(self):
-        return None
+    requires_authentication = False
 
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         resource_state = os.environ.get('HTTP_X_GOOG_RESOURCE_STATE', None)
         resource_id = os.environ.get('HTTP_X_GOOG_RESOURCE_ID', None)
         channel_id = os.environ.get('HTTP_X_GOOG_CHANNEL_ID', None)

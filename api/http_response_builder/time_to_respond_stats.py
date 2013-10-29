@@ -12,11 +12,9 @@ class Time_To_Respond_Stats_HTTP_Response_Builder(HTTP_Response_Builder):
     earliest_ts = Parameter('earliest_ts', required = False, default = datetime.now() - timedelta(days=30), parameter_type = Date_Time_Parameter_Type)
     latest_ts = Parameter('earliest_ts', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)
     include_non_responders = Parameter('include_non_responders', required = False, default = False, parameter_type = Boolean_Parameter_Type)
+    requires_authentication = False
 
-    def check_auth(self):
-        return None
-
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
         self.earliest_ts = self.earliest_ts.date()
         interviewers = {}

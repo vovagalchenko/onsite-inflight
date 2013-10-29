@@ -24,7 +24,7 @@ class Candidate_List_HTTP_Response_Builder(HTTP_Response_Builder):
         return avg_score
     
 
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
         interviewees = []
         for interviewee_info in db_session.query(func.group_concat(Interview.technical_score), func.group_concat(Interview.cultural_score), Interview.candidate_name).group_by(Interview.candidate_name).filter(func.date(Interview.start_time) == func.date(self.date)).all():

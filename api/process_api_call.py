@@ -52,10 +52,4 @@ except ValueError as error:
     error_dict = {'error' : str(error)}
     print json.dumps(error_dict)
 else:
-    response_builder.print_headers()
-    print
-    auth_check_result = response_builder.check_auth()
-    if auth_check_result is not None:
-        print json.dumps(auth_check_result)
-    else:
-        response_builder.print_body()
+    response_builder.print_response()

@@ -8,11 +8,9 @@ import json
 
 class Opt_In_List_HTTP_Response_Builder(HTTP_Response_Builder):
     date = Parameter('date', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)
+    requires_authentication = False
 
-    def check_auth(self):
-        return None
-
-    def print_body(self):
+    def print_body_for_user(self, authenticated_user):
         opt_ins = []
         db_session = DB_Session_Factory.get_db_session()
         for interviewer in db_session.query(Interviewer).filter(Interviewer.created > self.date):
