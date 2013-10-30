@@ -12,9 +12,9 @@ class Reimbursements_HTTP_Response_Builder(HTTP_Response_Builder):
     
     def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
-        employee = db_session.query(Employee).get(self.user.email)
+        employee = db_session.query(Employee).get(authenticated_user.email)
         if employee is None:
-            employee = Employee(self.user.email)
+            employee = Employee(authenticated_user.email)
         reimbursements = []
         for reimbursement in db_session.query(Reimbursement).all():
             reimbursements.append(reimbursement.dict_representation())

@@ -16,9 +16,9 @@ class Update_Reimbursements_HTTP_Response_Builder(HTTP_Response_Builder):
     
     def print_body_for_user(self, authenticated_user):
         db_session = DB_Session_Factory.get_db_session()
-        employee = db_session.query(Employee).get(self.user.email)
+        employee = db_session.query(Employee).get(authenticated_user.email)
         if employee is None:
-            employee = Employee(self.user.email)
+            employee = Employee(authenticated_user.email)
             db_session.add(employee)
             sys.stderr.write(employee.email)
         max_amounts = {}

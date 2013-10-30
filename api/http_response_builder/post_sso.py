@@ -5,6 +5,7 @@ from model.user_model import User
 class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
     relay_state = Parameter('RelayState', required = False, default = 'dashboard')
     saml_response = Parameter('SAMLResponse', required = True, parameter_type = Base_64_Encoded_XML_Parameter_Type)
+    type = Parameter("type", required = False, default = "")
     requires_authentication = False
 
     def print_forbidden_headers(self):
@@ -32,4 +33,6 @@ class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
         user = User.refresh_user_session(email)
         print "Status: 303"
         print "Set-Cookie: session_id=" + user.session_id + "; Domain=onsite-inflight.com; Path=/"
+        if self.type == "expense":
+            self.relay_state = "expenses"
         print "Location: https://onsite-inflight.com/" + self.relay_state
