@@ -22,12 +22,12 @@ class Interview(Base):
     cultural_score = Column(mysql.FLOAT(), nullable = True)
     notes = Column(mysql.TEXT, nullable = True)
     number_of_pings = Column(mysql.TINYINT, nullable = False, default = 0)
+    hire = Column(mysql.TINYINT, nullable = False, default = -1)
     # The following timestamp columns are only updated by triggers. They are effectively readonly for the model code.
     # An update to these columns will be caught by a MySQL trigger and will not be performed.
     technical_score_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
     cultural_score_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
     notes_ts = Column(mysql.TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
-    hire = Column(mysql.TINYINT, nullable = False, default = -1)
 
     def __init__(self, email, start_time, end_time, candidate_name, room):
         self.interviewer_email = email

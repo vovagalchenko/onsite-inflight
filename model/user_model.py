@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import Column, String
 from sqlalchemy.dialects import mysql
 from db_session import DB_Session_Factory
+import sys
 import hashlib
 
 class User(Base):
@@ -11,6 +12,9 @@ class User(Base):
     email = Column(String(50), nullable = False, primary_key = True)
     session_expiration = Column(mysql.TIMESTAMP, nullable = False)
     session_id = Column(mysql.VARBINARY(20), nullable = True)
+    # admin_permissions is a bitmask representing permissions the user has to various resources.
+    # see the admin_permissions.py file for bit definitions
+    admin_permissions = Column(mysql.INTEGER, nullable = False, default = 0)
 
     def __init__(self, email, session_expiration = (datetime.now() + timedelta(hours = 2))):
         self.email = email

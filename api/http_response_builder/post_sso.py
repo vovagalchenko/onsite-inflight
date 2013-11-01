@@ -11,7 +11,7 @@ class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
     def print_forbidden_headers(self):
         print "Status: 403"
     
-    def print_headers(self):
+    def print_headers(self, authenticated_user):
         status_code = None
         for status_code_element in self.saml_response.iter("{urn:oasis:names:tc:SAML:2.0:protocol}StatusCode"):
             status_code = status_code_element.get('Value')

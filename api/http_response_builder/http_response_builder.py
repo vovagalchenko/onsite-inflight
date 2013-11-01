@@ -4,6 +4,7 @@ import Cookie
 import base64
 import os
 from model.user_model import User
+from model.db_session import DB_Session_Factory
 import uuid
 from datetime import datetime
 from lib.conf import CFG
@@ -14,6 +15,7 @@ class HTTP_Response_Builder(object):
     content_type = 'application/json'
     params_dump = {}
     requires_authentication = True
+    required_admin_permissions = 0x0
 
     def __init__(self, params_storage):
         try:
@@ -42,10 +44,18 @@ class HTTP_Response_Builder(object):
         result = None
         return User.user_for_session_cookie(session_cookie)
 
-    def print_headers(self):
-        print "Content-Type: " + self.content_type
+    def is_user_not_authorized(self, authenticated_user):
+        return authenticated_user is not None and (authenticated_user.admin_permissions & self.required_admin_permissions) != self.required_admin_permissions
+        
+    def print_headers(self, authenticated_user):
+        if (authenticated_user is None and self.requires_authentication) or self.is_user_not_authorized(authenticated_user):
+            print "Status: 403"
+            print "Content-Type: application/json"
+        else:
+            print "Status: 200"
+            print "Content-Type: " + self.content_type
 
-    def print_authentication_needed_response(self):
+    def get_authentication_needed_json(self):
         result = {'error' : 'authn_needed'}
         authn_request = """\
 <?xml version="1.0" encoding="UTF-8"?>
@@ -55,20 +65,28 @@ class HTTP_Response_Builder(object):
 </saml2p:AuthnRequest>
 """ % (uuid.uuid4().hex, datetime.now().isoformat())
         result['authn_request'] = base64.b64encode(authn_request)
-        print json.dumps(result)
+        return result;
+
+    def print_authentication_needed_response(self):
+        print json.dumps(self.get_authentication_needed_json())
         
 
     def print_body_for_user(self, authenticated_user):
         pass
 
-    def print_body(self):
+    def print_body(self, authenticated_user):
         authenticated_user = self.get_authenticated_user()
         if self.requires_authentication is True and authenticated_user is None:
             self.print_authentication_needed_response()
         else:
-            self.print_body_for_user(authenticated_user)
+            if self.is_user_not_authorized(authenticated_user):
+                result = {'error' : 'not_authorized', 'msg' : authenticated_user.email + " is not authorized to perform this action."}
+                print json.dumps(result)
+            else:
+                self.print_body_for_user(authenticated_user)
 
     def print_response(self):
-        self.print_headers()
+        authenticated_user = self.get_authenticated_user()
+        self.print_headers(authenticated_user)
         print
-        self.print_body()
+        self.print_body(authenticated_user)

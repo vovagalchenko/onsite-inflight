@@ -7,14 +7,12 @@ class Handle_SMS_HTTP_Response_Builder(HTTP_Response_Builder):
     from_phone_number = Parameter('From', required = True)
     sms_body = Parameter('Body', required = True)
     to_phone_number = Parameter('To', required = True)
+    content_type = "application/xml"
     requires_authentication = False
 
     def __init__(self, params_storage):
         super(Handle_SMS_HTTP_Response_Builder, self).__init__(params_storage)
         log_incoming_sms(self.from_phone_number, self.params_dump)
-
-    def print_headers(self):
-        print "Content-Type: application/xml"
 
     def print_response_message_body(self, response_msg):
         resp = twilio.twiml.Response()

@@ -3,9 +3,9 @@
 from http_response_builder import *
 from http_response_builder.sms import *
 from http_response_builder.expense import *
-from os import environ
+from http_response_builder.csv_dump import *
 from urlparse import parse_qs
-import re
+from http_utils import get_api_endpoint
 import cgi
 import json
 import sys
@@ -22,15 +22,11 @@ end_points = {
     'scores_by_time_stats' : scores_by_time_stats.Scores_By_Time_Stats_HTTP_Response_Builder,
     'calendar_notification' : calendar_notification.Calendar_Notification_HTTP_Response_Builder,
     'reimbursements' : reimbursements.Reimbursements_HTTP_Response_Builder,
-    'update' : update.Update_Reimbursements_HTTP_Response_Builder
+    'update' : update.Update_Reimbursements_HTTP_Response_Builder,
+    'interviews_dump' : interviews_dump.Interviews_Dump_HTTP_Response_Builder
 }
 
-request_uri = environ.get('REQUEST_URI', '')
-match = re.match('\/api\/(.*?)(\?|$)', request_uri);
-endpoint = None
-if match is not None:
-    endpoint = match.group(1)
-
+endpoint = get_api_endpoint()
 try:
     response_builder_class = end_points.get(endpoint, None)
     if response_builder_class is None:
