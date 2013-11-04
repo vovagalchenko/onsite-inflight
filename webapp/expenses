@@ -19,29 +19,15 @@
                 <HR noshade>
                 {{#list reimbursement_policy}}
                 <DIV class="field animated">
-                    <DIV class="field-name {{id}}-icon"></DIV>
-                    <H2 class="field-name animated">{{name}}<P class="detail animated fade-out">{{details}}</P></H2>
-                    <DIV class="field-value info-icon animated" onmouseover="field_mouseover(this);"></DIV>
-                    <INPUT class="field-value animated" size=4 id="{{id}}" value="{{value}}"></INPUT>
+                    <DIV style="display:inline-block;width:100%;">
+                        <DIV class="field-name {{id}}-icon"></DIV>
+                        <H2 class="field-name animated">{{name}}</H2>
+                        <INPUT class="field-value animated" size=4 id="{{id}}" value="{{value}}"></INPUT>
+                    </DIV>
+                    <DIV class="details">{{details}}</DIV>
                 </DIV>
                 <HR noshade>
                 {{/list}}
-                <DIV>
-                    <H2 style="text-align:center; padding-top: 10px;">Total Reimbursement</H2>
-                    <H2 class="total-amount" id="total-reimbursement">$0.00</H2>
-                    <DIV class="progress-indicator-frame" hidden>
-                        <DIV id='progress_indicator' style="display:inline-block;">
-                            <DIV class='progress_indicator_segment' id='rotateG_01'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_02'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_03'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_04'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_05'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_06'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_07'></DIV>
-                            <DIV class='progress_indicator_segment' id='rotateG_08'></DIV>
-                        </DIV>
-                    </DIV>
-                </DIV>
             </DIV>
             <DIV>
             <P>You are logged in as <STRONG>{{employee/email}}</STRONG><!-- | <A HREF="/api/logout">Log out</A></P> -->

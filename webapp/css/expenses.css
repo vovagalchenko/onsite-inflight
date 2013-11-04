@@ -3,7 +3,7 @@ body
     background-color: rgb(249, 249, 249);
     font-family: helvetica;
     font-size: 15px;
-    min-width: 600px;
+    min-width: 320px;
 }
 
 h1
@@ -40,6 +40,12 @@ h2
     text-align: center;
     padding-bottom: 0;
     margin-bottom: 0;
+}
+
+.details
+{
+    margin-left:80px;
+    font-size:14px;
 }
 
 hr
