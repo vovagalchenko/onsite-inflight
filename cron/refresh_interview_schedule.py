@@ -31,7 +31,7 @@ def main(argv):
         print "Checking schedule for " + interviewer.name
         calendar.refresh_interviews(interviewer, period_start, period_end)
         calendar.stop_push_notifications(interviewer)
-        calendar.register_for_push_notifications(interviewer)
+#        calendar.register_for_push_notifications(interviewer)
         
 if __name__ == '__main__':
   main(sys.argv)

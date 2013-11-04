@@ -21,6 +21,8 @@ from model.db_session import DB_Session_Factory
 from model.interviewer import Interviewer
 from model.interview import Interview
 
+import time
+
 LOS_ANGELES_TZ = "America/Los_Angeles"
 DEFAULT_DATE = '1970-01-01T07:00:00-07:00'
 
