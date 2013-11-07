@@ -28,6 +28,10 @@
                 </DIV>
                 <HR noshade>
                 {{/list}}
+                <DIV>
+                    <H2 style="text-align:center; padding-top: 10px;">Total Reimbursement</H2>
+                    <H2 class="total-amount" id="total-reimbursement">$0.00</H2>
+                </DIV>
             </DIV>
             <DIV>
             <P>You are logged in as <STRONG>{{employee/email}}</STRONG><!-- | <A HREF="/api/logout">Log out</A></P> -->
