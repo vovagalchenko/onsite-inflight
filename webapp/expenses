@@ -22,7 +22,7 @@
                     <DIV style="display:inline-block;width:100%;">
                         <DIV class="field-name {{id}}-icon"></DIV>
                         <H2 class="field-name animated">{{name}}</H2>
-                        <INPUT class="field-value animated" size=4 id="{{id}}" value="{{value}}"></INPUT>
+                        <INPUT class="field-value animated" size=4 id="{{id}}" value="{{value}}" type="text"></INPUT>
                     </DIV>
                     <DIV class="details">{{details}}</DIV>
                 </DIV>
