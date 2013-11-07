@@ -23,7 +23,8 @@ end_points = {
     'calendar_notification' : calendar_notification.Calendar_Notification_HTTP_Response_Builder,
     'reimbursements' : reimbursements.Reimbursements_HTTP_Response_Builder,
     'update' : update.Update_Reimbursements_HTTP_Response_Builder,
-    'interviews_dump' : interviews_dump.Interviews_Dump_HTTP_Response_Builder
+    'interviews_dump' : interviews_dump.Interviews_Dump_HTTP_Response_Builder,
+    'expenses_dump' : expenses_dump.Expenses_Dump_HTTP_Response_Builder
 }
 
 endpoint = get_api_endpoint()
