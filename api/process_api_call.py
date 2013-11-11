@@ -22,7 +22,7 @@ end_points = {
     'scores_by_time_stats' : scores_by_time_stats.Scores_By_Time_Stats_HTTP_Response_Builder,
     'calendar_notification' : calendar_notification.Calendar_Notification_HTTP_Response_Builder,
     'reimbursements' : reimbursements.Reimbursements_HTTP_Response_Builder,
-    'update' : update.Update_Reimbursements_HTTP_Response_Builder,
+    'update_reimbursement' : update.Update_Reimbursements_HTTP_Response_Builder,
     'interviews_dump' : interviews_dump.Interviews_Dump_HTTP_Response_Builder,
     'expenses_dump' : expenses_dump.Expenses_Dump_HTTP_Response_Builder
 }

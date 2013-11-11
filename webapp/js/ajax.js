@@ -11,8 +11,12 @@ function need_to_authenticate(data)
     return false;
 }
 
-function make_ajax_request(url, results_process_callback, error_handling_callback)
+function make_ajax_request(url, results_process_callback, error_handling_callback, method)
 {
+    if (typeof method === "undefined")
+    {
+        method = "GET";
+    }
     var request = ajax_request();
     request.onreadystatechange = function()
     {
@@ -32,7 +36,7 @@ function make_ajax_request(url, results_process_callback, error_handling_callbac
             }
         }
     }
-    request.open("GET", url, true);
+    request.open(method, url, true);
     request.send(null);
 }
 

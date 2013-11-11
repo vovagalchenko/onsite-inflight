@@ -88,7 +88,7 @@ function save(save_button)
             query_string += "&";
         }
     }
-    make_ajax_request("/api/update?" + query_string, save_finished, handle_ajax_error);
+    make_ajax_request("/api/update_reimbursement?" + query_string, save_finished, handle_ajax_error, "POST");
 }
 
 function redraw(node_to_redraw)
