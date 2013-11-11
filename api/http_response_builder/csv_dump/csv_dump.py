@@ -48,8 +48,11 @@ class CSV_Dump_HTTP_Response_Builder(HTTP_Response_Builder):
             print "Pragma: no-cache"
             print "Expires: 0"
 
+    def get_array_to_write_to_csv(self, record):
+        return [getattr(record, column.name) for column in self.table_to_dump.__mapper__.columns]
+
     def print_body_for_user(self, authenticated_user):
         csv_writer = csv.writer(sys.stdout)
         db_session = DB_Session_Factory.get_db_session()
         csv_writer.writerow([column.name for column in self.table_to_dump.__mapper__.columns])
-        [ csv_writer.writerow([getattr(curr, column.name) for column in self.table_to_dump.__mapper__.columns]) for curr in db_session.query(self.table_to_dump) ]
+        [ csv_writer.writerow(self.get_array_to_write_to_csv(curr)) for curr in db_session.query(self.table_to_dump) ]
