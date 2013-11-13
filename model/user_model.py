@@ -23,6 +23,8 @@ class User(Base):
 
     @staticmethod
     def user_for_session_cookie(session_id):
+        if session_id is None:
+            return None
         db_session = DB_Session_Factory.get_db_session()
         user = db_session.query(User).filter(User.session_id == session_id).first()
         session_is_active = False
@@ -38,6 +40,7 @@ class User(Base):
             user = User(email)
         else:
             user.session_expiration = datetime.now() + timedelta(hours = 2)
+            user.session_id = hashlib.sha1(email + user.session_expiration.isoformat()).hexdigest()
         db_session.add(user)
         db_session.commit()
         return user
