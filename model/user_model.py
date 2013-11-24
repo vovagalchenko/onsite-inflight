@@ -39,8 +39,9 @@ class User(Base):
         if user is None:
             user = User(email)
         else:
+            if user.session_expiration < datetime.now():
+                user.session_id = hashlib.sha1(email + user.session_expiration.isoformat()).hexdigest()
             user.session_expiration = datetime.now() + timedelta(hours = 2)
-            user.session_id = hashlib.sha1(email + user.session_expiration.isoformat()).hexdigest()
         db_session.add(user)
         db_session.commit()
         return user
