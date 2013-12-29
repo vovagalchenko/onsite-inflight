@@ -1,7 +1,7 @@
 body, body *
 {
     font-family: helvetica;
-    font-size: 15;
+    font-size: 15px;
     color: #333333;
     z-index: 0;
 }
@@ -102,9 +102,9 @@ body, body *
 {
     position: absolute;
     text-align: center;
-    left: 35;
-    right: 35;
-    font-size: 17;
+    left: 35px;
+    right: 35px;
+    font-size: 17px;
     font-weight: lighter;
     color: #FFFFFF;
 }
@@ -123,7 +123,7 @@ body, body *
     color: #FFFFFF;
     padding-left: 10px;
     padding-right: 10px;
-    font-size: 20;
+    font-size: 20px;
     box-shadow: 0px 0px 5px 0 #BBBBBB;
     -moz-box-shadow: 0px 0px 5px 0 #BBBBBB;
     -webkit-box-shadow: 0px 0px 5px 0 #BBBBBB;
@@ -198,7 +198,7 @@ body, body *
 .non_applicable
 {
     color: #CECECE;
-    font-size: 15;
+    font-size: 15px;
 }
 
 #candidate_detailed_info
@@ -234,7 +234,7 @@ p
     -webkit-text-size-adjust:none;
     -ms-text-size-adjust:none;
     -moz-text-size-adjust:none;
-    text-size-adjust:none;
+    font-size-adjust:none;
     text-align: center;
     font-weight: lighter;
     border-top: 0;

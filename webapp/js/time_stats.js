@@ -278,13 +278,18 @@ function on_interviewer_data_receipt(interviewers_data)
         return result;
     });
     full_interviewer_array = interviewer_array;
+    var rank = 0;
+    for (var i = 0; i < full_interviewer_array.length; i++)
+    {
+        full_interviewer_array[i].rank = rank++;
+    }
 
     d3.select("#progress-indicator-container").remove();
     d3.select("#total-interviews-div").attr("hidden", null);
 
-    update_interviewer_list(interviewer_array);
+    update_interviewer_list(full_interviewer_array);
     set_up_interviewer_search();
-    update_piechart(interviewer_array);
+    update_piechart(full_interviewer_array);
 
     var total_interviews_label = d3.select('#total-interviews-label');
     var total_interviews_div = total_interviews_label.select("#total-interviews-div");
@@ -297,6 +302,8 @@ function set_up_interviewer_search()
     var find_interviewer_mouseout_func = function()
     {
         var tf = d3.select(".interviewer-textfield");
+        if (event == null)
+            return;
         var currently_moused_over_node = event.relatedTarget || event.toElement;
         if (currently_moused_over_node == d3.select(".mag-glass").node() || currently_moused_over_node == tf.node())
             return;
@@ -602,34 +609,39 @@ function update_interviewer_list(interviewer_array)
             style("color", "rgb(255, 255, 255)").
             style("text-align", "center").
             style("line-height", "35px");
-    tableview.selectAll(".interviewer_avatar_frame").data(interviewer_array).select("div").
-            style("background-image", function(data)
+    var interviewer_avatar_frame = tableview.selectAll(".interviewer_avatar_frame").data(interviewer_array);
+    interviewer_avatar_frame.select("div").
+        style("position", "absolute").
+        style("background-image", function(data)
+        {
+            var background_image = "";
+            if (data.avatar_url)
             {
-                var background_image = "";
-                if (data.avatar_url)
-                {
-                    background_image = "url('" + data.avatar_url + "')";
-                }
-                return background_image;
-            }).
-            style("background-color", function(data)
+                background_image = "url('" + data.avatar_url + "')";
+            }
+            return background_image;
+        }).
+        style("background-color", function(data)
+        {
+            var background_color = "";
+            if (!data.avatar_url)
             {
-                var background_color = "";
-                if (!data.avatar_url)
-                {
-                    background_color = "rgb(72, 195, 252)";
-                }
-                return background_color;
-            }).
-            text(function(data)
-            {
-                var initials = "";
-                if (!data.avatar_url)
-                {
-                    initials = (data.name.charAt(0) + data.name.split(/\s/).pop().charAt(0)).toUpperCase();
-                }
-                return initials;
-            });
+                background_color = "rgb(72, 195, 252)";
+            }
+            return background_color;
+        }).
+        style("opacity", ".35");
+    var rank_div = interviewer_avatar_frame.selectAll(".rank").data(function(data)
+    {
+        return [data];
+    });
+    rank_div.enter().
+        append("div").
+        classed("rank", true);
+    rank_div.html(function(data)
+    {
+        return data.rank + 1;
+    });
     inner_tableviewcell_div.append("div").
         classed("interviewer_name", true).
         style("position", "relative");
