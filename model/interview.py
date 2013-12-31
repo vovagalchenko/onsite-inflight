@@ -6,6 +6,7 @@ from sqlalchemy.schema import FetchedValue
 from base import Base
 import json
 import datetime
+from datetime import timedelta
 import calendar
 
 class Interview(Base):
@@ -77,3 +78,11 @@ class Interview(Base):
             interview_dict['hire'] = self.hire
             interview_dict['notes'] = self.notes
         return interview_dict
+
+    def time_to_feedback(self):
+        time_to_feedback = timedelta.max
+        if self.cultural_score_ts is not None:
+            time_to_feedback = self.cultural_score_ts - (self.end_time + timedelta(minutes = 5))
+            if time_to_feedback < timedelta(seconds = 0):
+                time_to_feedback = 0
+        return time_to_feedback
