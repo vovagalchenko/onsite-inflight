@@ -302,9 +302,7 @@ function set_up_interviewer_search()
     var find_interviewer_mouseout_func = function()
     {
         var tf = d3.select(".interviewer-textfield");
-        if (event == null)
-            return;
-        var currently_moused_over_node = event.relatedTarget || event.toElement;
+        var currently_moused_over_node = d3.event.relatedTarget || d3.event.toElement;
         if (currently_moused_over_node == d3.select(".mag-glass").node() || currently_moused_over_node == tf.node())
             return;
         var find_interviewer_div = d3.select("#find-interviewer-div");
