@@ -28,6 +28,12 @@ var num_interview_dots_per_row;
 var num_interview_dot_rows;
 var full_interviewer_array = null;
 
+if (running_on_touch_screen())
+{
+    alert("This page doesn't support mobile devices... but here's a random meme.");
+    window.location = "http://www.quickmeme.com/random";
+}
+
 window.onhashchange = function()
 {   
     var hash = window.location.hash;
@@ -773,3 +779,15 @@ function update_interviewer_list(interviewer_array)
     }
 }
 
+function running_on_touch_screen()
+{  
+    try
+    {  
+        document.createEvent("TouchEvent");  
+        return true;  
+    }
+    catch (e)
+    {  
+        return false;  
+    }  
+}
