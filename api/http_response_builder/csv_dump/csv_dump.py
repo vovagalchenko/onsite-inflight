@@ -12,6 +12,8 @@ class CSV_Dump_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def print_authentication_needed_response(self):
         authn_needed_json = self.get_authentication_needed_json()
+        # This is hacky, but we expect the CSV dump api calls to be made directly from the browser.
+        # We will send back an authentication form as HTML
         response = """
 <!DOCTYPE html>
 <HTML>
@@ -37,8 +39,6 @@ class CSV_Dump_HTTP_Response_Builder(HTTP_Response_Builder):
 
     def print_headers(self, authenticated_user):
         if authenticated_user is None or self.is_user_not_authorized(authenticated_user):
-        # This is hacky, but we expect the CSV dump api calls to be made directly from the browser.
-        # We will send back an authentication form as HTML
             print "Status: 403"
             print "Content-Type: text/html"
         else:
