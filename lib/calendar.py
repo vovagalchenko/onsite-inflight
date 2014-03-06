@@ -171,7 +171,7 @@ This cronjob expects Google Calendar client secrets at
                 response = events_request.execute(self.http)
                 for event in response.get('items', []):
                     summary = event.get('summary', '')
-                    match = re.search("On-site Interview - ([\w '.)(-]+)(?:, | - )(.*?)$", summary)
+                    match = re.search("On-site Interview - ([\w '.)(]+)(?:, | - )(.*?)$", summary)
                     if match:
                         if (re.match("^.*?[Ss][Hh][Aa][Dd][Oo][Ww].*?Interview", summary)):
                             continue
