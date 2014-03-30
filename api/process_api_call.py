@@ -24,7 +24,8 @@ end_points = {
     'reimbursements' : reimbursements.Reimbursements_HTTP_Response_Builder,
     'update_reimbursement' : update.Update_Reimbursements_HTTP_Response_Builder,
     'interviews_dump' : interviews_dump.Interviews_Dump_HTTP_Response_Builder,
-    'expenses_dump' : expenses_dump.Expenses_Dump_HTTP_Response_Builder
+    'expenses_dump' : expenses_dump.Expenses_Dump_HTTP_Response_Builder,
+    'schedule_roundup' : schedule_roundup.Schedule_Roundup_HTTP_Response_Builder
 }
 
 endpoint = get_api_endpoint()

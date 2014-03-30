@@ -78,6 +78,12 @@ def google_ts_to_datetime(google_ts):
     localized_datetime = utc_datetime.astimezone(timezone(LOS_ANGELES_TZ))
     return localized_datetime.replace(tzinfo = None)
 
+def datetime_to_google_ts(datetime_obj):
+    return {
+        'timeZone' : LOS_ANGELES_TZ,
+        'dateTime' : datetime_obj.isoformat()
+    }
+
 def get_phone_number(interviews_list, index):
     return interviews_list[index].phone_number_to_use if index < len(interviews_list) else None
 

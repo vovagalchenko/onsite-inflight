@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<HTML>
+	<HEAD>
+		<TITLE>Schedule Roundups</TITLE>
+        <META name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+        <META name="apple-mobile-web-app-capable" content="yes">
+		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
+        <SCRIPT type="text/javascript" src="js/compiled/handlebars.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/ajax.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/roundup.js"></SCRIPT>
+	</HEAD>
+	<BODY>
+        <DIV class="page current" id="candidate_list_page">
+			<DIV class="header-bar non_selectable" id="candidate_list_header">
+                <P class="non_selectable" style="cursor:default;" id="date"></P>
+            </DIV>
+			<DIV class="tableview non_selectable" id="candidate_list_tableview" style="top:44px;">
+		        <SCRIPT id="candidates_handlebars" type="text/x-handlebars">
+		            {{#list candidates}}
+		            <DIV class="tableview-cell non_selectable transition" id="{{candidate_index}}" onclick="toggle_checkmark();" onmousedown="start_dragging();" ontouchstart="javascript:start_dragging();">
+		                <DIV style="float:left;">
+                            <DIV style="line-height:17px;margin-top:8px;">
+                                {{candidate_name}}
+                            </DIV>
+                            <DIV class="detail-text" style="line-height:15px;">
+                                {{position}}
+                            </DIV>
+                        </DIV>
+		                <DIV class="checkbox transition" style="float:right;z-index:1;">&#x2713;</DIV>
+                        <DIV class="whiteout_bg" style="position:absolute;right:0;width:150px;z-index:0;"></DIV>
+		            </DIV>
+		            {{/list}}
+		        </SCRIPT>
+			</DIV>
+            <DIV class="major-button" onclick="handle_major_button_clicked();">Select Candidates</DIV>
+        </DIV>
+        <FORM id="authn_form" method="POST" action="https://box.okta.com/app/template_saml_2_0/k5jimobgREMCSHKGRLVB/sso/saml">
+            <INPUT type="hidden" id="saml_response_input" name="SAMLResponse" value=""/>
+            <INPUT type="hidden" id="saml_relay_state_input" name="RelayState" value="dashboard"/>
+            <INPUT type="submit" value="Submit"/>
+        </FORM>
+	</BODY>
+</HTML>

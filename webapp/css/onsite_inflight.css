@@ -6,6 +6,81 @@ body, body *
     z-index: 0;
 }
 
+div.major-button
+{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    background-color: rgb(18, 93, 174);
+    z-index: 1;
+    text-align: center;
+    color: rgb(255, 255, 255);
+    line-height: 44px;
+    font-weight: bold;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+div.major-button:hover
+{
+    background-color: rgb(0, 75, 156);
+}
+
+div.checkbox
+{
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    font-size: 25px;
+    border: 1px solid #CECECE;
+    border-radius: 3px;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 15px;
+    color: rgb(18, 93, 174);
+}
+
+div.timebox
+{
+    width: 75px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    font-size: 20px;
+    border: 1px solid #CECECE;
+    border-radius: 3px;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 15px;
+    color: rgb(18, 93, 174);
+}
+
+.tableview-cell:hover div.checkbox
+{
+   -moz- box-shadow: inset 0 0 10px #CECECE;
+    -webkit-box-shadow: inset 0 0 10px #CECECE;
+    box-shadow: inset 0 0 10px #CECECE;
+}
+
+div.collapsed
+{
+    height: 0;
+    min-height: 0;
+    border: 0;
+}
+
 #app-container
 {
     top: 0;
