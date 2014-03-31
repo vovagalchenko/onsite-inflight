@@ -41,9 +41,10 @@
                                 {{position}}
                             </DIV>
                         </DIV>
-		                <DIV class="{{status}} status" style="float:right;">
+		                <DIV class="{{status}} status" style="float:right;z-index:1;">
 		                    {{status_symbol}}
 		                </DIV>
+                        <DIV class="whiteout_bg" style="position:absolute;right:0;width:100px;z-index:0;"></DIV>
 		            </DIV>
 		            {{/list}}
 		        </SCRIPT>

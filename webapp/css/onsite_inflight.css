@@ -253,6 +253,10 @@ div.collapsed
     /* For whatever reason the smiley face I'm using has padding on both sides of it on mobile safari */
     text-align: center;
     text-align: -webkit-center;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 15px;
 }
 
 .success
