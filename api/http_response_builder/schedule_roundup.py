@@ -41,16 +41,12 @@ class Schedule_Roundup_HTTP_Response_Builder(HTTP_Response_Builder):
             now_date = date.today()
             event['description'] = "https://onsite-inflight.com/#" + str(now_date.year) + "-" + ("%02d"%now_date.month) + "-" + ("%02d"%now_date.day) + "/" + urllib.quote_plus(self.candidate_name)
             calendar = Google_Calendar.get_calendar()
-            while True:
-                try:
-                    calendar.service.events().insert(calendarId = authenticated_user.email, body = event, sendNotifications=True).execute(calendar.http)
-                    print json.dumps({'status' : 'success'})
-                    break
-                except HttpError as e:
-                    error_response = json.dumps({"error" : "Google calendar http error: " + e.content})
-                    sys.stderr.write(error_response)
-                    print error_response
-                    break
-                except AccessTokenRefreshError:
-                    print json.dumps({"error" : "The Google calendar credentials have been revoked or expired"})
-                    break
+            try:
+                calendar.service.events().insert(calendarId = "box.com_k7897kemv3a14qldj8s546jfig@group.calendar.google.com", body = event, sendNotifications=True).execute(calendar.http)
+                print json.dumps({'status' : 'success'})
+            except HttpError as e:
+                error_response = json.dumps({"error" : "Google calendar http error: " + e.content})
+                sys.stderr.write(error_response)
+                print error_response
+            except AccessTokenRefreshError:
+                print json.dumps({"error" : "The Google calendar credentials have been revoked or expired"})

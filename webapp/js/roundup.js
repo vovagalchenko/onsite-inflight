@@ -265,7 +265,7 @@ function get_roundup_date()
         roundup_date = now;
         roundup_date.setDate(now.getDate() + num_days_to_add);
     }
-    roundup_date.setHours(11);
+    roundup_date.setHours(10);
     roundup_date.setMinutes(30);
     return roundup_date;
 }
@@ -354,7 +354,7 @@ function calculate_and_refresh_roundup_times()
     var num_visible = 0;
     for (var i = 0; i < tableviewcells.length; i++)
     {
-        if (has_class(tableviewcells[i], "collapsed") && tableviewcells[i].id != "placeholder")
+        if (!has_class(tableviewcells[i], "collapsed") && tableviewcells[i].id != "placeholder")
         {
             num_visible++;
         }
@@ -371,7 +371,7 @@ function calculate_and_refresh_roundup_times()
             roundups.push({
                 'candidate_name' : candidates[tableviewcells[i].id].candidate_name,
                 'start_date' : Math.floor(roundup_start.getTime()/1000),
-                'length' : roundup_length
+                'length' : Math.floor(roundup_length)
             });
             roundup_start.setMinutes(roundup_start.getMinutes() + roundup_length);
         }

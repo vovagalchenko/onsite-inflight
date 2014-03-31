@@ -14,7 +14,7 @@
 			<DIV class="header-bar non_selectable" id="candidate_list_header">
                 <P class="non_selectable" style="cursor:default;" id="date"></P>
             </DIV>
-			<DIV class="tableview non_selectable" id="candidate_list_tableview" style="top:44px;">
+			<DIV class="tableview non_selectable" id="candidate_list_tableview" style="top:44px;bottom:44px;">
 		        <SCRIPT id="candidates_handlebars" type="text/x-handlebars">
 		            {{#list candidates}}
 		            <DIV class="tableview-cell non_selectable transition" id="{{candidate_index}}" onclick="toggle_checkmark();" onmousedown="start_dragging();" ontouchstart="javascript:start_dragging();">
