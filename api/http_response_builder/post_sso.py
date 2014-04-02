@@ -35,4 +35,4 @@ class Post_SSO_HTTP_Response_Builder(HTTP_Response_Builder):
         print "Set-Cookie: session_id=" + user.session_id + "; Domain=onsite-inflight.com; Path=/"
         if self.type == "expense":
             self.relay_state = "expenses"
-        print "Location: https://onsite-inflight.com/" + self.relay_state
+        print "Location: https://onsite-inflight.com" + self.relay_state

@@ -118,7 +118,7 @@
         </DIV>
         <FORM id="authn_form" method="POST" action="https://box.okta.com/app/template_saml_2_0/k5jimobgREMCSHKGRLVB/sso/saml">
             <INPUT type="hidden" id="saml_response_input" name="SAMLResponse" value=""/>
-            <INPUT type="hidden" id="saml_relay_state_input" name="RelayState" value="dashboard"/>
+            <INPUT type="hidden" id="saml_relay_state_input" name="RelayState" value="/dashboard"/>
             <INPUT type="submit" value="Submit"/>
         </FORM>
 	</BODY>
