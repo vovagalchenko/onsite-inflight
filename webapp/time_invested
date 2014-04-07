@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <HTML>
 	<HEAD>
-		<TITLE>Onsite Interviews</TITLE>
+		<TITLE>Time Invested</TITLE>
         <META name="viewport" content="width=device-width, initial-scale = 1.0, maximum-scale = 1, user-scalable = no">
         <META name="apple-mobile-web-app-capable" content="yes">
+        <SCRIPT type="text/javascript" src="js/color.js"></SCRIPT>
         <SCRIPT type="text/javascript" src="js/stats.js"></SCRIPT>
-        <SCRIPT type="text/javascript" src="js/time_stats.js"></SCRIPT>
+        <SCRIPT type="text/javascript" src="js/time_invested.js"></SCRIPT>
 		<LINK href="css/onsite_inflight.css" type="text/css" rel="stylesheet">
 		<LINK href="css/stats.css" type="text/css" rel="stylesheet">
 		<LINK href="css/progress_indication.css" type="text/css" rel="stylesheet">
@@ -13,11 +14,9 @@
         <SCRIPT type="text/javascript" src="js/compiled/d3.v3.min.js" charset="utf-8"></SCRIPT>
 	</HEAD>
 	<BODY>
-        <DIV class="header-bar" style="height:380px;padding-top:20px;min-width:inherit;">
-            <SVG id="pie-chart" width="800px" height="340px" viewBox="0 0 800 340">
-                <G id="slices"></G>
-                <CIRCLE id="pie-center"></CIRCLE>
-                <foreignObject id="total-interviews-label" style="display:table"><DIV id="total-interviews-div"><STRONG id="num-interviews-label" style="font-size:55px;font-weight:600px;line-height:55px"></STRONG></BR><P style="font-size:15px;font-weight:300px;line-height:20px;">interviews</P></DIV></foreignObject>
+        <DIV class="header-bar" style="height:580px;padding-top:20px;min-width:inherit;">
+            <SVG id="graph" width="800px" height="540px" viewBox="0 0 800 540">
+                <G id="paths"></G>
             </SVG>
             <DIV class="leaderboard-header non_selectable" style="cursor:default;">
                 <DIV style="float:left;padding-top:0px;" id="find-interviewer-div">
@@ -26,11 +25,10 @@
                     <DIV style="width:135px;" id="find-interviewer-label">Find Interviewer</DIV>
                 </DIV>
                 <INPUT class="interviewer-textfield selectable"></INPUT>
-                <DIV style="float:right">Avg Response Time</DIV>
-                <DIV>Interviews Taken Part In</DIV>
+                <DIV style="float:right">Total Time Invested</DIV>
             </DIV>
         </DIV>
-        <DIV class="tableview" id="interviewer-list-tableview" style="top:400px;min-width:inherit;"></DIV>
+        <DIV class="tableview" id="interviewer-list-tableview" style="top:600px;min-width:inherit;"></DIV>
         <DIV id='progress_indicator' hidden>
             <DIV class='progress_indicator_segment' id='rotateG_01'></DIV>
             <DIV class='progress_indicator_segment' id='rotateG_02'></DIV>
