@@ -27,6 +27,7 @@ var max_num_interview_dots_per_row = 15;
 var num_interview_dots_per_row;
 var num_interview_dot_rows;
 var full_interviewer_array = null;
+var should_draw_bars = false;
 
 window.onhashchange = function()
 {   

@@ -217,3 +217,24 @@ input.interviewer-textfield:focus
     margin-right: 10px;
     width: 20px;
 }
+
+.range-select-bar
+{
+    height: 37px;
+}
+
+.range-grip
+{
+    height: 100%;
+    cursor: ew-resize;
+}
+
+.bar
+{
+    background-color: #00AACA;
+    opacity: 0.75;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+    margin-left: -10px;
+}

@@ -10,35 +10,27 @@ from sqlalchemy import func
 import json
 
 class Time_Invested_HTTP_Response_Builder(HTTP_Response_Builder):
-    latest_ts = Parameter('earliest_ts', required = False, default = datetime.now(), parameter_type = Date_Time_Parameter_Type)
-    num_weeks = Parameter('num_weeks', required = False, default = 10, parameter_type = Integer_Parameter_Type)
+    num_days = Parameter('num_weeks', required = False, default = 15*7, parameter_type = Integer_Parameter_Type)
     requires_authentication = False
 
     def print_body_for_user(self, authenticated_user):
-        days_to_subtract = self.latest_ts.weekday() + 2
-        if self.latest_ts.weekday() >= 5:
-            days_to_subtract = self.latest_ts.weekday()%5
-        end_of_week = self.latest_ts - timedelta(days=days_to_subtract, hours=self.latest_ts.hour, minutes=self.latest_ts.minute, seconds=self.latest_ts.second)
+        now = datetime.now()
+        end_date = now - timedelta(hours=now.hour, minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
+        start_date = end_date - timedelta(days=self.num_days)
         db_session = DB_Session_Factory.get_db_session()
-        all_time_spent_info = []
-        interviewer_emails_set = Set()
-        for i in range(0, self.num_weeks):
-            beginning_of_week = end_of_week - timedelta(days=7)
-            beginning_of_week_string = beginning_of_week.isoformat()
-            time_spent_dict = {}
-            for time_spent_info in db_session.query(Interview.interviewer_email, func.sum(func.time_to_sec(func.timediff(Interview.end_time, Interview.start_time)))).group_by(Interview.interviewer_email).filter(Interview.start_time > beginning_of_week, Interview.end_time < end_of_week).all():
-                [email, secs_spent] = time_spent_info
-                time_spent_dict[email] = int(secs_spent)
-                interviewer_emails_set.add(email)
-            all_time_spent_info.append({
-                'week' : beginning_of_week_string,
-                'investment' : time_spent_dict
-            });
-            end_of_week = beginning_of_week
+        time_spent = {}
+        interviewer_emails = []
+        for time_spent_info in db_session.query(func.date(Interview.start_time), Interview.interviewer_email, func.sum(func.time_to_sec(func.timediff(Interview.end_time, Interview.start_time)))).group_by(func.date(Interview.start_time), Interview.interviewer_email).filter(Interview.start_time > start_date, Interview.end_time < end_date).all():
+            [date, email, secs_spent] = time_spent_info
+            date_str = date.isoformat()
+            if time_spent.get(date_str) is None:
+                time_spent[date_str] = {}
+            time_spent[date_str][email] = int(secs_spent)
+            interviewer_emails.append(email)
         interviewers = {}
-        for interviewer in db_session.query(Interviewer).filter(Interviewer.email.in_(interviewer_emails_set)).all():
+        for interviewer in db_session.query(Interviewer).filter(Interviewer.email.in_(interviewer_emails)).all():
             interviewers[interviewer.email] = interviewer.dict_representation()
         print json.dumps({
-            'time_invested' : all_time_spent_info,
-            'interviewers' : interviewers,
+            'time_spent' : time_spent,
+            'interviewers' : interviewers
         })

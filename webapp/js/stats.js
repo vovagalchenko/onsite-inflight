@@ -14,35 +14,60 @@ function clone(obj)
     return JSON.parse(JSON.stringify(obj));
 } 
 
+function find_interviewer_mouseout_func()
+{
+    var tf = d3.select(".interviewer-textfield");
+    var this_event = event || d3.event;
+    var currently_moused_over_node = (this_event === null)? null : (this_event.relatedTarget || this_event.toElement);
+    if (currently_moused_over_node == d3.select(".mag-glass").node() || currently_moused_over_node == tf.node())
+        return;
+    var find_interviewer_div = d3.select("#find-interviewer-div");
+    if (tf.node().value == "")
+    {
+        find_interviewer_div.select(".mag-glass").
+            classed("transition", true).
+            classed("grayscale", true).
+            style("left", 0);
+        find_interviewer_div.select("#find-interviewer-label").
+            attr("hidden", null).
+            classed("transition", true).
+            style("opacity", 1);
+        tf.
+            classed("transition", true).
+            style("opacity", 0);
+        find_interviewer_div.select("#cancel-search").
+            classed("transition", true).
+            style("opacity", 0);
+        tf.node().blur();
+    }
+}
+
+function filter_interviewers()
+{
+    var filter_term = d3.select(".interviewer-textfield").node().value;
+    var filtered_interviewer_array = [];
+    if (filter_term == "")
+    {
+        filtered_interviewer_array = clone(full_interviewer_array);
+        setTimeout(find_interviewer_mouseout_func, 3000);
+    }
+    else
+    {
+
+        for (var i = 0; i < full_interviewer_array.length; i++)
+        {
+            if (full_interviewer_array[i].name.match(new RegExp(filter_term, "gi")))
+            {
+                filtered_interviewer_array.push(full_interviewer_array[i]);
+            }
+        }
+    }
+    update_interviewer_list(filtered_interviewer_array);
+};
+
 function set_up_interviewer_search()
 {
     var find_interviewer_animation_duration = 200;
-    var find_interviewer_mouseout_func = function()
-    {
-        var tf = d3.select(".interviewer-textfield");
-        var currently_moused_over_node = d3.event.relatedTarget || d3.event.toElement;
-        if (currently_moused_over_node == d3.select(".mag-glass").node() || currently_moused_over_node == tf.node())
-            return;
-        var find_interviewer_div = d3.select("#find-interviewer-div");
-        if (tf.node().value == "")
-        {
-            find_interviewer_div.select(".mag-glass").
-                classed("transition", true).
-                classed("grayscale", true).
-                style("left", 0);
-            find_interviewer_div.select("#find-interviewer-label").
-                attr("hidden", null).
-                classed("transition", true).
-                style("opacity", 1);
-            tf.
-                classed("transition", true).
-                style("opacity", 0);
-            find_interviewer_div.select("#cancel-search").
-                classed("transition", true).
-                style("opacity", 0);
-            tf.node().blur();
-        }
-    };
     var mag_glass_right_padding = 5;
     d3.select(".interviewer-textfield").
         on("mouseover", function()
@@ -66,32 +91,9 @@ function set_up_interviewer_search()
 
         }).
         on("mouseout", find_interviewer_mouseout_func);
-    var filter_interviewers = function()
-    {
-        var filter_term = d3.select(".interviewer-textfield").node().value;
-        var filtered_interviewer_array = [];
-        if (filter_term == "")
-        {
-            filtered_interviewer_array = clone(full_interviewer_array);
-            setTimeout(find_interviewer_mouseout_func, 3000);
-        }
-        else
-        {
-
-            for (var i = 0; i < full_interviewer_array.length; i++)
-            {
-                if (full_interviewer_array[i].name.match(new RegExp(filter_term, "gi")))
-                {
-                    filtered_interviewer_array.push(full_interviewer_array[i]);
-                }
-            }
-        }
-        update_interviewer_list(filtered_interviewer_array);
-    };
     d3.select("#cancel-search").
         on("click", function()
         {
-            d3.select(".interviewer-textfield").node().value = "";
             find_interviewer_mouseout_func();
             filter_interviewers();
         });
@@ -146,8 +148,29 @@ function update_interviewer_list(interviewer_array)
         {
             d3.select(this).classed("highlighted", false);
             handle_cell_mouse_event(null);
-        }).
-        append("div");
+        });
+    if (should_draw_bars)
+    {
+        max_value_of_interest = -1;
+        for (var i = 0; i < interviewer_array.length; i++)
+        {
+            if (interviewer_array[i].value_of_interest > max_value_of_interest)
+            {
+                max_value_of_interest = interviewer_array[i].value_of_interest;
+            }
+        }
+        inner_tableviewcell_div.append("div").
+            classed("bar", true).
+            style("width", "0%");
+        tableview_width= tableview[0][0].getBoundingClientRect().width;
+        bars = tableview.selectAll(".bar").data(interviewer_array);
+        bars.transition().duration(1000).
+            styleTween("width", function(interviewer, i, a)
+            {
+                var starting_pt_in_percents = (parseInt(a)/tableview_width)*100 + "%";
+                return d3.interpolate(starting_pt_in_percents, (interviewer.value_of_interest/max_value_of_interest)*100 + "%");
+            });
+    }
     inner_tableviewcell_div.append("div").
         classed("interviewer_rank", true);
     tableview.selectAll(".interviewer_rank").data(interviewer_array).

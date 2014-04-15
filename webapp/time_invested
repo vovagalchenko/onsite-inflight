@@ -14,10 +14,32 @@
         <SCRIPT type="text/javascript" src="js/compiled/d3.v3.min.js" charset="utf-8"></SCRIPT>
 	</HEAD>
 	<BODY>
-        <DIV class="header-bar" style="height:580px;padding-top:20px;min-width:inherit;">
-            <SVG id="graph" width="800px" height="540px" viewBox="0 0 800 540">
-                <G id="paths"></G>
-            </SVG>
+        <DIV class="header-bar non_selectable" style="height:280px;padding-top:20px;min-width:inherit;font-size:0;">
+            <DIV style="padding-left:20px;padding-right:20px">
+                <SVG id="graph" height="220px" viewBox="0 0 800 220" preserveAspectRatio="none" shape-rendering="geometricPrecision" style="display:block;">
+                    <defs>
+                        <linearGradient id="focus-graph-gradient" x1="50%" y1="0%" x2="50%" y2="100%">
+                            <stop offset="50%" stop-color="#CACACA" stop-opacity="0"/>
+                            <stop offset="100%" stop-color="#00AACA" stop-opacity="1"/>
+                        </linearGradient>
+                        <clipPath id="focus-clip">
+                            <rect x="0" y="0" width="100%" height="100%"/>
+                        </clipPath>
+                    </defs>
+                    
+                    <G id="major_line_graph"></G>
+                    <G id="minor_line_graph">
+                        <POLYGON fill="url(#focus-graph-gradient)" clip-path="url(#focus-clip)"/>
+                        <LINE id="left-border" stroke-dasharray="5,5" style="stroke:rgba(0,0,0,.8);stroke-width:0.5;"/>
+                        <LINE id="right-border" stroke-dasharray="5,5" style="stroke:rgba(0,0,0,.8);stroke-width:0.5;"/>
+                    </G>
+                </SVG>
+            </DIV>
+            <DIV class="range-select-bar non_selectable" style="width:100%">
+                <DIV class="range-grip" style="float:left;width:20px;" onmousedown="handle_grip_mouse_down('left')">&#60;</DIV>
+                <DIV class="range-grip" style="float:right;width:20px;" onmousedown="handle_grip_mouse_down('right')">&#62;</DIV>
+                <DIV class="range-grip" style="background-color:#00AACA;margin-left:20px;margin-right:20px;cursor:default;" id="center-grip" onmousedown="handle_grip_mouse_down('center')"></DIV>
+            </DIV>
             <DIV class="leaderboard-header non_selectable" style="cursor:default;">
                 <DIV style="float:left;padding-top:0px;" id="find-interviewer-div">
                     <DIV class="selectable" style="position:absolute;cursor:pointer;bottom:1px" id="cancel-search">&#x00D7;</DIV>
@@ -28,7 +50,7 @@
                 <DIV style="float:right">Total Time Invested</DIV>
             </DIV>
         </DIV>
-        <DIV class="tableview" id="interviewer-list-tableview" style="top:600px;min-width:inherit;"></DIV>
+        <DIV class="tableview" id="interviewer-list-tableview" style="top:300px;min-width:inherit;"></DIV>
         <DIV id='progress_indicator' hidden>
             <DIV class='progress_indicator_segment' id='rotateG_01'></DIV>
             <DIV class='progress_indicator_segment' id='rotateG_02'></DIV>
