@@ -20,7 +20,10 @@ class Time_Invested_HTTP_Response_Builder(HTTP_Response_Builder):
         db_session = DB_Session_Factory.get_db_session()
         time_spent = {}
         interviewer_emails = []
-        for time_spent_info in db_session.query(func.date(Interview.start_time), Interview.interviewer_email, func.sum(func.time_to_sec(func.timediff(Interview.end_time, Interview.start_time)))).group_by(func.date(Interview.start_time), Interview.interviewer_email).filter(Interview.start_time > start_date, Interview.end_time < end_date).all():
+        coding_interview_documented_time = 7200
+        coding_interview_actual_time = 1800
+        interview_documented_length = func.time_to_sec(func.timediff(Interview.end_time, Interview.start_time))
+        for time_spent_info in db_session.query(func.date(Interview.start_time), Interview.interviewer_email, func.sum(func.IF(interview_documented_length == coding_interview_documented_time, coding_interview_actual_time, interview_documented_length))).group_by(func.date(Interview.start_time), Interview.interviewer_email).filter(Interview.start_time > start_date, Interview.end_time < end_date).all():
             [date, email, secs_spent] = time_spent_info
             date_str = date.isoformat()
             if time_spent.get(date_str) is None:
