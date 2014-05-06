@@ -15,7 +15,7 @@ for interview in db_session.query(Interview).from_statement('select i.* from int
             send_initial_request_for_scores(interview)
         except:
             e = sys.exc_info()[0]
-            sys.stderr.write("Exception caught while trying to send SMS for interview <%d>: %s" % (interview.id, e.strerror))
+            sys.stderr.write("Exception caught while trying to send SMS for interview <%d>" % (interview.id))
         else:
             interview.number_of_pings += 1
             db_session.commit()
