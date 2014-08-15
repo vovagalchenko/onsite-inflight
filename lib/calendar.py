@@ -157,7 +157,7 @@ This cronjob expects Google Calendar client secrets at
             except HttpError, e:
                 if e.resp.status in [404]:
                     print "Nothing to stop"
-                else if e.resp.status in [500]:
+                elif e.resp.status in [500]:
                     print "Received a 500 in response to trying to stop notifications"
                 else:
                     raise e
