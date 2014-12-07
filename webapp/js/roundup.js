@@ -258,9 +258,14 @@ function get_roundup_date()
     {
         var now = new Date();
         var num_days_to_add = 1;
-        if (now.getDay() >= 5)
-        {
-            num_days_to_add = (7 - now.getDay())%7 + 1;
+        switch (now.getDay()) {
+            case 5: // Friday - shoot for Monday
+                num_days_to_add = 3;
+                break;
+            case 6: // Saturday - shoot for Monday
+            case 1: // Monday - shoot for Wednesday
+                num_days_to_add = 2;
+                break;
         }
         roundup_date = now;
         roundup_date.setDate(now.getDate() + num_days_to_add);
