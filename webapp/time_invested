@@ -18,7 +18,7 @@
             <DIV id="point-highlight-text"></DIV>
             <DIV id="y-scale"></DIV>
             <DIV id="graph-container" style="padding-left:20px;padding-right:20px" onmousemove="on_graph_mouse_move();" onmouseout="on_graph_mouse_out();">
-                <SVG id="graph" height="220px" viewBox="0 0 800 200" preserveAspectRatio="none" shape-rendering="geometricPrecision" style="display:block;">
+                <SVG id="graph" height="220px" width="100%" viewBox="0 0 800 200" preserveAspectRatio="none" shape-rendering="geometricPrecision" style="display:block;">
                     <defs>
                         <linearGradient id="focus-graph-gradient" x1="50%" y1="0%" x2="50%" y2="100%">
                             <stop offset="50%" stop-color="#00AACA" stop-opacity="1"/>
