@@ -53,7 +53,7 @@ class Interviewer(Base):
         return session.query(Interviewer).filter(Interviewer.phone_number == phone_number).first()
 
     def dict_representation(self):
-        return {'name' : self.name, 'avatar_url' : self.avatar_url, 'email' : self.email, 'bio' : self.bio, 'position' : self.position, 'created' : self.created.strftime("%s")}
+        return {'name' : self.name, 'avatar_url' : self.avatar_url, 'email' : self.email, 'bio' : self.bio, 'position' : self.position, 'created' : self.created.strftime("%s"), 'does_interviews' : self.does_interviews}
 
     def get_most_recently_completed_interview(self, phone_number, for_update = False):
         last_interview = None
