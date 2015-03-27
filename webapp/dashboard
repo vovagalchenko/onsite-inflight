@@ -84,7 +84,7 @@
             <DIV class="tableview" id="interviews_list_tableview" style="top: 152px;">
                 <SCRIPT id="interviews_handlebars" type="text/x-handlebars">
                     {{#list interviews}}
-                    <DIV class="tableview-cell non_selectable transition{{#if notes}} has-notes{{/if}}" {{#if notes}}style="cursor:default;"{{else}}onclick="handle_interview_click(this, {{id}})"{{/if}} {{#if cell_height}}style="height:{{cell_height}}"{{/if}}>
+                    <DIV class="tableview-cell non_selectable transition{{#if notes}} has-notes{{/if}}{{#unless interviewer/does_interviews}} disabled{{/unless}}" {{#if notes}}style="cursor:default;"{{else}}onclick="handle_interview_click(this, {{id}})"{{/if}} {{#if cell_height}}style="height:{{cell_height}}"{{/if}}>
                         <DIV>
                         <DIV class="progress-indicator" {{#if progress}}style="width:{{progress}};"{{else}}hidden=true{{/if}}></DIV>
                         <DIV class="above-progress interviewer_avatar_frame" style="position:relative;">

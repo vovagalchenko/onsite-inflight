@@ -459,6 +459,11 @@ p
     height:auto;
 }
 
+.disabled
+{
+    text-color: #AAAAAA;
+}
+
 .detail-text
 {
     font-size: 12px;
