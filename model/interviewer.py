@@ -21,6 +21,7 @@ class Interviewer(Base):
     needs_calendar_sync = Column(BIT, nullable = False, default = 0)
     push_notification_id = Column(VARBINARY(50), nullable = True, default = "")
     does_interviews = Column(BIT, nullable = False, default = 1)
+    employed = Column(BIT, nullable = False, default = 1)
     created = Column(TIMESTAMP, server_default = FetchedValue(), server_onupdate = FetchedValue(for_update=True))
 
     # The delete-orphan cascade option makes the framework remove the row associated with the interview

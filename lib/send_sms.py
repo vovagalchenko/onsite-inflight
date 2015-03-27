@@ -9,14 +9,14 @@ auth_token = cfg.get('twilio', 'auth_token')
 
 def send_initial_request_for_scores(interview):
     interviewer = interview.interviewer
-
-    basePhoneNumber = interviewer.phone_number
-    targetNumber = "+1" + basePhoneNumber
+    if interviewer.does_interviews == 1:
+        basePhoneNumber = interviewer.phone_number
+        targetNumber = "+1" + basePhoneNumber
 #    if targetNumber != '+18185194891' and targetNumber != '+14089126890' and targetNumber != '+16504250156' and targetNumber != '6506468732':
 #        targetNumber = '+18185194891'
-    initialScoreType = 'cultural' if interview.is_coffee_break() else 'technical'
-    message = ''.join(["Hi ", interviewer.nickname(), "! What's the ", initialScoreType, " score for ", interview.candidate_name, "?"])
-    send_sms("+1" + interview.phone_number_to_use, targetNumber, message)
+        initialScoreType = 'cultural' if interview.is_coffee_break() else 'technical'
+        message = ''.join(["Hi ", interviewer.nickname(), "! What's the ", initialScoreType, " score for ", interview.candidate_name, "?"])
+        send_sms("+1" + interview.phone_number_to_use, targetNumber, message)
 
 def send_sms(from_number, to_number, message):
     log_outgoing_sms(to_number, message)
