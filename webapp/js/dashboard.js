@@ -305,6 +305,7 @@ function update_candidate_detail_ui(data)
         {
             data['interviews'][i]['interviewer']['avatar_url'] += '?ts=' + last_avatar_refresh_ts;
         }
+        interview['interviewer']['does_interviews']= interview['interviewer']['does_interviews'] == 1;
     }
     var now = new Date();
     var interviews_array = data['interviews'];
