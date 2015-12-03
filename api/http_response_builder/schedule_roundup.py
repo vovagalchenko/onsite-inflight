@@ -32,7 +32,7 @@ class Schedule_Roundup_HTTP_Response_Builder(HTTP_Response_Builder):
         else:
             event = {}
             event['organizer'] = {'self' : True}
-            event['location'] = '4440-2-6 Nuthouse'
+            event['location'] = 'RWC-A-423-Lambda-5-AV2.1'
             event['start'] = datetime_to_google_ts(self.roundup_start_date)
             event['end'] = datetime_to_google_ts(self.roundup_start_date + timedelta(minutes = self.roundup_length))
             event['summary'] = "Roundup for " + self.candidate_name
